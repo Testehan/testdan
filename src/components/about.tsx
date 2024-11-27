@@ -28,7 +28,7 @@ const About = () => {
                         continually growing as a developer.
                     </p>
                     <p className="text-sm sm:text-base md:text-lg text-gray-700">
-                        <i>"In my whole life, I have known no wise people who didn’t read all the time — none, zero." Charlie Munger</i>
+                        <i>"In my whole life, I have known no wise people who didn’t read all the time — none, zero..." Charlie Munger</i>
                     </p>
                 </div>
             </div>
