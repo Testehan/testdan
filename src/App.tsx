@@ -1,9 +1,8 @@
-import { BrowserRouter as Router, Routes, Route, useNavigate } from 'react-router-dom';
+import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
 import HomePage from './pages/homePage';
 import QuotesPage from './pages/quotesPage';
 import MentalModelsPage from './pages/mentalModelsPage.tsx';
 import MentalModelsList from "./components/mentalModelsList.tsx";
-import React from "react";
 
 function App() {
 
