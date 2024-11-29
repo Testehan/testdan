@@ -1,6 +1,9 @@
-import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
+import { BrowserRouter as Router, Routes, Route, useNavigate } from 'react-router-dom';
 import HomePage from './pages/homePage';
 import QuotesPage from './pages/quotesPage';
+import MentalModelsPage from './pages/mentalModelsPage.tsx';
+import MentalModelsList from "./components/mentalModelsList.tsx";
+import React from "react";
 
 function App() {
 
@@ -24,8 +27,10 @@ function App() {
 
         {/* Routes */}
         <Routes>
-          <Route path="/" element={<HomePage />} />
-          <Route path="/quotes" element={<QuotesPage />} />
+            <Route path="/" element={<HomePage />} />
+            <Route path="/quotes" element={<QuotesPage />} />
+            <Route path="/mental" element={<MentalModelsPage />} />
+            <Route path="/mental/:category" element={<MentalModelsList />} />
         </Routes>
       </Router>
     </>
