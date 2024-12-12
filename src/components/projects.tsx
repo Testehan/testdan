@@ -1,7 +1,7 @@
 
 
 const projects = [
-    { title: 'Project I', description: 'Coming soon :)' },
+    { title: 'Project AI', description: 'Coming soon :)' },
     { title: 'City Audio Guide 2019', description: 'Android app with audio guides for the important attractions of a city. Used Firebase, Google Text-to-Speech' },
     { title: 'Source Code Translation in Eclipse 2016', description: 'Plugin in Eclipse IDE tries to help developers working on a codebase written in a foreign language.' },
     { title: 'City\'s Menu 2013', description: 'Android app for ordering food. Backend written in Python and hosted in GAE.' },
