@@ -54,6 +54,39 @@ const mentalModels = {
     ],
 
     "Cognitive Biases": [
+        { name: "Reward and Punishment Super-response Tendency", details: "TODO" },
+        { name: "Liking/Loving Tendency", details: "<b>What It Is</b>: Refers to the disproportionate influence that positive feelings (liking or loving) have on our thoughts, judgments, and actions. Once we like or love someone or something, we tend to:" +
+                "<ol class=\"list-decimal pl-4\">" +
+                "<li>" + "Overlook flaws in the object of our affection." + "</li>" +
+                "<li>" + "Overemphasize positives and assume the person or thing is better than it truly is." + "</li>" +
+                "<li>" + "Feel loyalty and defend the object of our liking, even when doing so is irrational or harmful." + "</li>" +
+                "</ol>"+
+"<b>Why Did It Evolve</b>:" +
+                "<ol class=\"list-decimal pl-4\">" +
+                "<li>" + "Social Cohesion: Humans evolved in groups, and forming strong bonds with others was essential for survival. Liking and loving help us build trust and cooperation, fostering alliances and mutual support." + "</li>" +
+                "<li>" + "Simplified Decision-Making: Favoring things or people we like reduces cognitive load and speeds up decisions. It’s cognitively simpler to take one attribute you like about someone (e.g. looks) and extend that to other qualities about the person" + "</li>" +
+                "</ol>"+
+"<b>How Can It Be Harmful</b>:" +
+                "<ol class=\"list-decimal pl-4\">" +
+                "<li>" + "Blindness to Flaws: Overlooking negative traits in people or ideas we like can lead to poor decisions" + "</li>" +
+                "<li>" + "Confirmation Bias Amplification: Liking someone or something makes us seek out and emphasize information that confirms our positive feelings, ignoring contrary evidence." + "</li>" +
+                "<li>" + "Exploitation: Manipulators (e.g., marketers, con artists) exploit this tendency by making themselves or their products likable, bypassing rational scrutiny." + "</li>" +
+                "<li>" + "Overcommitment: Loving an idea or project can lead to sunk cost fallacy, where we continue investing time, money, or energy even when it’s not rational." + "</li>" +
+                "</ol>"+
+"<b>Examples in Real Life</b>:" +
+                "<ol class=\"list-decimal pl-4\">" +
+                "<li>" + "Personal Relationships: Overlooking red flags in a romantic partner because of infatuation." + "</li>" +
+                "<li>" + "Business: CEOs may favor ideas or colleagues they personally like, leading to suboptimal decisions. Customers may choose products from brands they \"love\" despite better alternatives." + "</li>" +
+                "<li>" + "Marketing: Advertisers create likable brand personalities or use celebrities to trigger this tendency." + "</li>" +
+                "</ol>"+
+"<b>Antidotes</b>:" +
+                "<ol class=\"list-decimal pl-4\">" +
+                "<li>" + "Awareness and Reflection: Recognize when emotions are clouding judgment. Ask yourself: \"Would I make the same decision if I didn’t like this person/product?\"" + "</li>" +
+                "<li>" + "Focus on Evidence: Base decisions on facts and objective criteria rather than feelings." + "</li>" +
+                "<li>" + "Maintain Emotional Distance: When evaluating people or ideas, try to separate personal affection from professional or logical considerations." + "</li>" +
+                "</ol>"
+        },
+
         { name: "Anchoring Bias", details: "The tendency to rely too heavily on the first piece of information." },
         { name: "Confirmation Bias", details: "The tendency to search for information that confirms pre-existing beliefs." },
     ],
