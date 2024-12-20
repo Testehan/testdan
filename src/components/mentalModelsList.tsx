@@ -132,6 +132,47 @@ const mentalModels = {
                 "</ol>"
         },
 
+        { name: "Doubt-Avoidance Tendency", details:
+                "<b>What It Is</b>: Describes the human propensity to avoid uncertainty and doubt by rushing to make decisions or adopting definitive beliefs, even when there is incomplete information. This tendency can lead to hasty, poorly thought-out actions and an inability to handle ambiguity effectively." +
+                "<ol class=\"list-decimal pl-4\">" +
+                "<li>" + "Humans dislike uncertainty and often experience discomfort when they are unsure about something." + "</li>" +
+                "<li>" + "To reduce this discomfort, people tend to make decisions quickly, even if they lack sufficient evidence." + "</li>" +
+                "<li>" + "It leads to an overconfidence in conclusions, beliefs, or decisions that may not be accurate or optimal." + "</li>" +
+                "</ol>"+
+
+                "<b>Why Did It Evolve</b>:" +
+                "<ol class=\"list-decimal pl-4\">" +
+                "<li>" + "Survival in Threatening Environments: In ancestral environments, quick decisions were often necessary for survival (e.g., deciding whether a shadow is a predator or not)." + "</li>" +
+                "<li>" + "Cognitive Efficiency: Avoiding doubt conserves mental energy. Processing uncertainty and weighing probabilities require effort, and this tendency reduces cognitive load." + "</li>" +
+                "<li>" + "Social Cohesion: Being decisive or conforming to group decisions fosters harmony within social groups, even at the cost of accuracy.." + "</li>" +
+                "<li>" + "Emotional Comfort: Resolving doubt provides psychological relief, reducing stress and anxiety associated with ambiguity." + "</li>" +
+                "</ol>"+
+
+                "<b>How Can It Be Harmful</b>:" +
+                "<ol class=\"list-decimal pl-4\">" +
+                "<li>" + "Premature Decisions: People may make decisions before gathering all relevant information (investing in a stock based on a short article)." + "</li>" +
+                "<li>" + "Resistance to Change: Once a decision is made, individuals may avoid revisiting it, even when new evidence suggests they should." + "</li>" +
+                "<li>" + "Oversimplification of Complex Issues: Ambiguous or complex problems are often reduced to simple, black-and-white answers." + "</li>" +
+                "<li>" + " Manipulation by Others: Marketers, politicians, and other persuaders exploit this tendency by offering seemingly simple solutions to complex problems (ex: This product guarantees weight loss with no effort.)." + "</li>" +
+                "</ol>"+
+
+                "<b>Examples in Real Life</b>:" +
+                "<ol class=\"list-decimal pl-4\">" +
+                "<li>" + "Personal Decisions: Marrying someone or moving to a new city quickly without fully considering all factors because uncertainty feels uncomfortable." + "</li>" +
+                "<li>" + "Politics and Society: People rallying around charismatic leaders who offer simple, decisive answers to complex societal problems." + "</li>" +
+                "</ol>"+
+
+                "<b>Antidotes</b>:" +
+                "<ol class=\"list-decimal pl-4\">" +
+                "<li>" + "Acknowledge Ambiguity: Accept that doubt is a natural part of life and that not all questions have immediate answers. Embrace the phrase: \"I don’t know yet.\"" + "</li>" +
+                "<li>" + "Delay Judgment: Avoid rushing to conclusions. Allow time to gather evidence and reflect on different possibilities. Judges and jurors are forced to delay decisions exactly for this reason…this can also be applied to stock buying/selling" + "</li>" +
+                "<li>" + "Seek Diverse Perspectives: Consult multiple viewpoints to reduce the risk of oversimplified decisions." + "</li>" +
+                "<li>" + "Develop Comfort with Uncertainty: Practice mindfulness or other techniques to become more at ease with ambiguous situations." + "</li>" +
+                "<li>" + "Iterative Decision-Making: Make small, reversible decisions instead of committing to a single, all-encompassing choice." + "</li>" +
+                "<li>" + "Learn Critical Thinking Skills: Question assumptions, analyze evidence, and evaluate arguments objectively" + "</li>" +
+                "</ol>"
+        },
+
         { name: "Anchoring Bias", details: "The tendency to rely too heavily on the first piece of information." },
         { name: "Confirmation Bias", details: "The tendency to search for information that confirms pre-existing beliefs." },
     ],
