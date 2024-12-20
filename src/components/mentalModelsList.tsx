@@ -55,35 +55,80 @@ const mentalModels = {
 
     "Cognitive Biases": [
         { name: "Reward and Punishment Super-response Tendency", details: "TODO" },
-        { name: "Liking/Loving Tendency", details: "<b>What It Is</b>: Refers to the disproportionate influence that positive feelings (liking or loving) have on our thoughts, judgments, and actions. Once we like or love someone or something, we tend to:" +
+        { name: "Liking/Loving Tendency", details:
+                "<b>What It Is</b>: Refers to the disproportionate influence that positive feelings (liking or loving) have on our thoughts, judgments, and actions. Once we like or love someone or something, we tend to:" +
                 "<ol class=\"list-decimal pl-4\">" +
-                "<li>" + "Overlook flaws in the object of our affection." + "</li>" +
-                "<li>" + "Overemphasize positives and assume the person or thing is better than it truly is." + "</li>" +
+                    "<li>" + "Overlook flaws in the object of our affection." + "</li>" +
+                    "<li>" + "Overemphasize positives and assume the person or thing is better than it truly is." + "</li>" +
+                    "<li>" + "Feel loyalty and defend the object of our liking, even when doing so is irrational or harmful." + "</li>" +
+                "</ol>"+
+
+                "<b>Why Did It Evolve</b>:" +
+                "<ol class=\"list-decimal pl-4\">" +
+                    "<li>" + "Social Cohesion: Humans evolved in groups, and forming strong bonds with others was essential for survival. Liking and loving help us build trust and cooperation, fostering alliances and mutual support." + "</li>" +
+                    "<li>" + "Simplified Decision-Making: Favoring things or people we like reduces cognitive load and speeds up decisions. It’s cognitively simpler to take one attribute you like about someone (e.g. looks) and extend that to other qualities about the person" + "</li>" +
+                "</ol>"+
+
+                "<b>How Can It Be Harmful</b>:" +
+                "<ol class=\"list-decimal pl-4\">" +
+                    "<li>" + "Blindness to Flaws: Overlooking negative traits in people or ideas we like can lead to poor decisions" + "</li>" +
+                    "<li>" + "Confirmation Bias Amplification: Liking someone or something makes us seek out and emphasize information that confirms our positive feelings, ignoring contrary evidence." + "</li>" +
+                    "<li>" + "Exploitation: Manipulators (e.g., marketers, con artists) exploit this tendency by making themselves or their products likable, bypassing rational scrutiny." + "</li>" +
+                    "<li>" + "Overcommitment: Loving an idea or project can lead to sunk cost fallacy, where we continue investing time, money, or energy even when it’s not rational." + "</li>" +
+                "</ol>"+
+
+                "<b>Examples in Real Life</b>:" +
+                "<ol class=\"list-decimal pl-4\">" +
+                    "<li>" + "Personal Relationships: Overlooking red flags in a romantic partner because of infatuation." + "</li>" +
+                    "<li>" + "Business: CEOs may favor ideas or colleagues they personally like, leading to suboptimal decisions. Customers may choose products from brands they \"love\" despite better alternatives." + "</li>" +
+                    "<li>" + "Marketing: Advertisers create likable brand personalities or use celebrities to trigger this tendency." + "</li>" +
+                "</ol>"+
+
+                "<b>Antidotes</b>:" +
+                "<ol class=\"list-decimal pl-4\">" +
+                    "<li>" + "Awareness and Reflection: Recognize when emotions are clouding judgment. Ask yourself: \"Would I make the same decision if I didn’t like this person/product?\"" + "</li>" +
+                    "<li>" + "Focus on Evidence: Base decisions on facts and objective criteria rather than feelings." + "</li>" +
+                    "<li>" + "Maintain Emotional Distance: When evaluating people or ideas, try to separate personal affection from professional or logical considerations." + "</li>" +
+                "</ol>"
+        },
+
+        { name: "Disliking/Hating Tendency", details:
+                "<b>What It Is</b>: Once we dislike or hate someone or something, our thoughts, behaviors, and actions often become colored by these feelings, leading to irrational or destructive outcomes." +
+                "<ol class=\"list-decimal pl-4\">" +
+                "<li>" + "Exaggerate the negative aspects of someone or something we dislike" + "</li>" +
+                "<li>" + "Dismiss or overlook positive qualities or evidence that contradicts our negative feelings." + "</li>" +
                 "<li>" + "Feel loyalty and defend the object of our liking, even when doing so is irrational or harmful." + "</li>" +
                 "</ol>"+
-"<b>Why Did It Evolve</b>:" +
+
+                "<b>Why Did It Evolve</b>:" +
                 "<ol class=\"list-decimal pl-4\">" +
-                "<li>" + "Social Cohesion: Humans evolved in groups, and forming strong bonds with others was essential for survival. Liking and loving help us build trust and cooperation, fostering alliances and mutual support." + "</li>" +
-                "<li>" + "Simplified Decision-Making: Favoring things or people we like reduces cognitive load and speeds up decisions. It’s cognitively simpler to take one attribute you like about someone (e.g. looks) and extend that to other qualities about the person" + "</li>" +
+                "<li>" + "Survival Instincts: Early humans needed to identify and respond quickly to threats, often forming aversions to things or individuals perceived as dangerous or harmful." + "</li>" +
+                "<li>" + "Tribalism: Disliking or hating outsiders fostered group cohesion and loyalty, which was crucial for survival in small, competitive groups." + "</li>" +
+                "<li>" + "Simplified Decision-Making: Negative feelings allow for quick decision-making by avoiding things or people associated with harm or risk." + "</li>" +
                 "</ol>"+
-"<b>How Can It Be Harmful</b>:" +
+
+                "<b>How Can It Be Harmful</b>:" +
                 "<ol class=\"list-decimal pl-4\">" +
-                "<li>" + "Blindness to Flaws: Overlooking negative traits in people or ideas we like can lead to poor decisions" + "</li>" +
-                "<li>" + "Confirmation Bias Amplification: Liking someone or something makes us seek out and emphasize information that confirms our positive feelings, ignoring contrary evidence." + "</li>" +
-                "<li>" + "Exploitation: Manipulators (e.g., marketers, con artists) exploit this tendency by making themselves or their products likable, bypassing rational scrutiny." + "</li>" +
-                "<li>" + "Overcommitment: Loving an idea or project can lead to sunk cost fallacy, where we continue investing time, money, or energy even when it’s not rational." + "</li>" +
+                "<li>" + "Cognitive Distortion: Hatred or dislike can lead to confirmation bias, where we only seek evidence that reinforces our negative feelings. Ignoring virtues can further intensify dislike, causing feedback loops" + "</li>" +
+                "<li>" + "Unjust Treatment: Disliking someone can cause unfair treatment or exclusion, even when they deserve fair consideration." + "</li>" +
+                "<li>" + "Escalation of Conflict: Strong negative emotions can escalate minor disagreements into significant conflicts" + "</li>" +
+                "<li>" + "Missed Opportunities: Disliking someone or something might lead to rejecting valuable relationships, ideas, or opportunities." + "</li>" +
                 "</ol>"+
-"<b>Examples in Real Life</b>:" +
+
+                "<b>Examples in Real Life</b>:" +
                 "<ol class=\"list-decimal pl-4\">" +
-                "<li>" + "Personal Relationships: Overlooking red flags in a romantic partner because of infatuation." + "</li>" +
-                "<li>" + "Business: CEOs may favor ideas or colleagues they personally like, leading to suboptimal decisions. Customers may choose products from brands they \"love\" despite better alternatives." + "</li>" +
-                "<li>" + "Marketing: Advertisers create likable brand personalities or use celebrities to trigger this tendency." + "</li>" +
+                "<li>" + "Personal Relationships: Avoiding a family member because of a past argument, even when reconciliation is possible." + "</li>" +
+                "<li>" + "Politics: People voting against policies or leaders solely based on party affiliation or personal dislike." + "</li>" +
+                "<li>" + "Marketing: Avoiding products or services from a disliked company, even if they are superior or more affordable." + "</li>" +
                 "</ol>"+
-"<b>Antidotes</b>:" +
+
+                "<b>Antidotes</b>:" +
                 "<ol class=\"list-decimal pl-4\">" +
-                "<li>" + "Awareness and Reflection: Recognize when emotions are clouding judgment. Ask yourself: \"Would I make the same decision if I didn’t like this person/product?\"" + "</li>" +
+                "<li>" + "Awareness and Reflection: Acknowledge when emotions of dislike or hatred are influencing your decisions. Ask yourself: \"Am I being fair and objective?\"" + "</li>" +
                 "<li>" + "Focus on Evidence: Base decisions on facts and objective criteria rather than feelings." + "</li>" +
                 "<li>" + "Maintain Emotional Distance: When evaluating people or ideas, try to separate personal affection from professional or logical considerations." + "</li>" +
+                "<li>" + "Pause and Reflect: Avoid making decisions when angry or upset. Give yourself time to cool down." + "</li>" +
+                "<li>" + "Invert, always invert: what can you find to like about an object/person of your hatred/dislike? How can you come to accept this object? What does the best case scenario look like?  How many good things you can say about it?" + "</li>" +
                 "</ol>"
         },
 
