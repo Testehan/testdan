@@ -173,7 +173,50 @@ const mentalModels = {
                 "</ol>"
         },
 
-        { name: "Inconsistency-Avoidance Tendency", details: "TODO" },
+        { name: "Inconsistency-Avoidance Tendency", details:
+                "<b>What It Is</b>: Refers to the human inclination to resist changes that would create inconsistencies in beliefs, actions, or commitments.." +
+                "<ol class=\"list-decimal pl-4\">" +
+                "<li>" + "Cognitive Alignment: Humans strive for harmony between their beliefs, values, and actions (a concept also known as cognitive consistency. When confronted with information or situations that challenge their current stance, they may ignore or rationalize away the contradiction" + "</li>" +
+                "<li>" + "Avoidance of Change: People are reluctant to change. This applies to personal behaviour, beliefs, relationships, commitments." + "</li>" +
+                "<li>" + "Habit changing is hard, despite people knowing their habits are bad." + "</li>" +
+                "<li>" + "Commitment Bias: Once a commitment is made, individuals often continue down the same path to avoid admitting they were wrong “The human mind works a lot like a human egg. When one sperm gets into a human egg, there’s an automatic shut-off device that bars any other sperm from getting in.”" + "</li>" +
+                "<li>" + "Confirmation bias: is the tendency to search for, interpret, favour, and recall information in a way that confirms one's preexisting beliefs or hypotheses. People display this bias when they gather or remember information selectively, or when they interpret it in a biased way. The effect is stronger for emotionally charged issues and for deeply entrenched beliefs" + "</li>" +
+                "</ol>"+
+
+                "<b>Why Did It Evolve</b>:" +
+                "<ol class=\"list-decimal pl-4\">" +
+                "<li>" + "Efficient Decision-Making: Maintaining consistency reduces cognitive load. It’s easier to stick with past decisions than to constantly reevaluate them." + "</li>" +
+                "<li>" + "Social Stability: Consistent individuals are seen as reliable, predictable, and trustworthy within groups, fostering better social cohesion." + "</li>" +
+                "<li>" + "Emotional Comfort: Consistency reduces the discomfort of cognitive dissonance (the tension that arises from holding conflicting beliefs or behaving contrary to one’s values)." + "</li>" +
+
+                "</ol>"+
+
+                "<b>How Can It Be Harmful</b>:" +
+                "<ol class=\"list-decimal pl-4\">" +
+                "<li>" + "Resistance to Change: Early-formed habits may be destiny, since they are so hard to change" + "</li>" +
+                "<li>" + "Perpetuation of Errors: Persisting with incorrect beliefs or harmful behaviors to maintain consistency." + "</li>" +
+                "<li>" + "Rationalization of Poor Decisions: Justifying bad choices rather than admitting a mistake (ex smokers)." + "</li>" +
+                "<li>" + "Groupthink: In groups, the desire for consistency can lead to conformity, suppressing dissent and critical thinking." + "</li>" +
+
+                "</ol>"+
+
+                "<b>Examples in Real Life</b>:" +
+                "<ol class=\"list-decimal pl-4\">" +
+                "<li>" + "Social: Hazing rituals as initiations into groups strengthen the tie (through cognitive dissonance – “there’s no way I would go through that if I weren’t really into the group.”)" + "</li>" +
+                "<li>" + "Science: many times in the history of science, scientists have resisted new discoveries by selectively interpreting or ignoring unfavourable data" + "</li>" +
+                "<li>" + "Health Choices: Refusing to adopt healthier habits because they contradict long-standing routines" + "</li>" +
+
+                "</ol>"+
+
+                "<b>Antidotes</b>:" +
+                "<ol class=\"list-decimal pl-4\">" +
+                "<li>" + "Seek Contradictory Evidence: Consider counterarguments to your position before making decisions. In fact, you should actively seek out opposition to your favourite ideas...Jury trials force listening of both sides before a verdict." + "</li>" +
+                "<li>" + "Focus on Outcomes: An ounce of prevention is a pound of cure. Don’t start smoking or gambling, particularly in response to doubt or a problem (like unhappiness)." + "</li>" +
+                "<li>" + "Practice Cognitive Flexibility: If you hate a political opponent, force yourself to know and like someone who follows the opponent. This will help you see the virtue in the other side and correct your hating tendency." + "</li>" +
+                "<li>" + "Fake it til you make it: picture the kind of person you want to be and act in accordance with that. For example, “I’m the type of person who likes waking up and exercising.” Your behaviour will rectify your prior self-belief (“I’m a lazy no good nothing”) so that you eventually believe you become the type of person you want to be." + "</li>" +
+
+                "</ol>"
+        },
         { name: "Curiosity Tendency", details: "" },
         { name: "Kantian Fairness Tendency", details: "" },
         { name: "Envy/Jealousy Tendency", details: "" },
