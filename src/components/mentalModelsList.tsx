@@ -214,10 +214,45 @@ const mentalModels = {
                 "<li>" + "Focus on Outcomes: An ounce of prevention is a pound of cure. Don’t start smoking or gambling, particularly in response to doubt or a problem (like unhappiness)." + "</li>" +
                 "<li>" + "Practice Cognitive Flexibility: If you hate a political opponent, force yourself to know and like someone who follows the opponent. This will help you see the virtue in the other side and correct your hating tendency." + "</li>" +
                 "<li>" + "Fake it til you make it: picture the kind of person you want to be and act in accordance with that. For example, “I’m the type of person who likes waking up and exercising.” Your behaviour will rectify your prior self-belief (“I’m a lazy no good nothing”) so that you eventually believe you become the type of person you want to be." + "</li>" +
+                "</ol>"
+        },
+        { name: "Curiosity Tendency", details:
+                "<b>What It Is</b>: Refers to the innate human drive to seek knowledge, explore, and understand the unknown. This tendency has been instrumental in our development as a species, driving innovation, learning, and discovery." +
+                "<ol class=\"list-decimal pl-4\">" +
+                "<li>" + "I have no special talents. I am only passionately curious. ~Albert Einstein" + "</li>" +
+
+                "</ol>"+
+
+                "<b>Why Did It Evolve</b>:" +
+                "<ol class=\"list-decimal pl-4\">" +
+                "<li>" + "Survival Advantage: Early humans needed to explore their environments to find food, avoid predators, and discover useful resources." + "</li>" +
+                "<li>" + "Learning and Adaptation: Curiosity drove the acquisition of knowledge about tools, social dynamics, and natural phenomena, enabling better problem-solving" + "</li>" +
+
+                "</ol>"+
+
+                "<b>How Can It Be Harmful</b>:" +
+                "<ol class=\"list-decimal pl-4\">" +
+                "<li>" + "Distraction: Excessive curiosity can lead to wasted time on trivial or irrelevant matters, detracting from more critical tasks (rabbit hole of internet searches..never ending internet pages)" + "</li>" +
+                "<li>" + "Information Overload: In the modern age, endless streams of information can overwhelm the curious mind, leading to decision fatigue or paralysis" + "</li>" +
+
+                "</ol>"+
+
+                "<b>Examples in Real Life</b>:" +
+                "<ol class=\"list-decimal pl-4\">" +
+                "<li>" + "Positive Examples: Scientific breakthroughs, like the discovery of penicillin, driven by curiosity about mold contamination" + "</li>" +
+                "<li>" + "Negative Examples: gossip and curiosity about others' private lives" + "</li>" +
+
+                "</ol>"+
+
+                "<b>Antidotes</b>:" +
+                "<ol class=\"list-decimal pl-4\">" +
+                "<li>" + "Channel Curiosity Productively: Focus your curiosity on meaningful, beneficial pursuits that align with your goals.." + "</li>" +
+                "<li>" + "Set Boundaries: Recognize when curiosity becomes a distraction or an invasion of privacy, and consciously redirect it" + "</li>" +
+                "<li>" + "Learn to Prioritize: Not all questions need answers immediately. Prioritize what’s worth exploring based on relevance and importance" + "</li>" +
+                "<li>" + "Balance Exploration with Focus: While curiosity encourages exploration, balance it with sustained attention on key areas of interest." + "</li>" +
 
                 "</ol>"
         },
-        { name: "Curiosity Tendency", details: "" },
         { name: "Kantian Fairness Tendency", details: "" },
         { name: "Envy/Jealousy Tendency", details: "" },
         { name: "Reciprocation Tendency", details: "" },
