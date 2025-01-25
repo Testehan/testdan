@@ -395,6 +395,74 @@ const mentalModels = {
                 "<br/> <b>Example</b>: The 2000 dot-com bubble, where internet stocks were massively overvalued before crashing."
         }
     ],
+    "Systems": [
+        {
+            name: "Feedback Loops",
+            details: "<b>What It Is</b>: A system where outputs are fed back into the system as inputs, either amplifying (positive feedback) or stabilizing (negative feedback) it." +
+                "<br/> <b>Use Case</b>: Helps understand self-reinforcing cycles and control mechanisms in systems." +
+                "<br/> <b>Example</b>: Social media algorithms reinforce engagement by showing more of what users interact with (positive feedback)."
+        },
+        {
+            name: "Equilibrium",
+            details: "<b>What It Is</b>: A stable state in a system where opposing forces are balanced." +
+                "<br/> <b>Use Case</b>: Helps in understanding markets, ecosystems, and other systems that adjust to stabilize over time." +
+                "<br/> <b>Example</b>: In economics, supply and demand reach equilibrium where the quantity supplied equals the quantity demanded."
+        },
+        {
+            name: "Bottlenecks",
+            details: "<b>What It Is</b>: A constraint that slows down a process or system." +
+                "<br/> <b>Use Case</b>: Identifying and addressing bottlenecks can significantly improve efficiency." +
+                "<br/> <b>Example</b>: A slow checkout process in a supermarket reduces the overall speed of customer service."
+        },
+        {
+            name: "Scale",
+            details: "<b>What It Is</b>: The ability of a system or business to grow while maintaining efficiency and performance." +
+                "<br/> <b>Use Case</b>: Helps in designing systems and businesses that can expand without losing quality or control." +
+                "<br/> <b>Example</b>: Cloud computing allows businesses to scale their storage and processing power as needed."
+        },
+        {
+            name: "Margin of Safety",
+            details: "<b>What It Is</b>: The buffer between a system’s limits and potential risks to prevent failure." +
+                "<br/> <b>Use Case</b>: Helps in risk management by ensuring there is a cushion to absorb unexpected shocks." +
+                "<br/> <b>Example</b>: Investors buy stocks at a price below their intrinsic value to reduce risk."
+        },
+        {
+            name: "Churn",
+            details: "<b>What It Is</b>: The rate at which customers, users, or employees leave a business or system over time." +
+                "<br/> <b>Use Case</b>: Helps in understanding customer retention and business sustainability." +
+                "<br/> <b>Example</b>: A subscription service tracks churn rate to measure how many users cancel each month."
+        },
+        {
+            name: "Algorithms",
+            details: "<b>What It Is</b>: A step-by-step set of rules or calculations designed to solve problems or process data." +
+                "<br/> <b>Use Case</b>: Used in computing, decision-making, and automation to optimize efficiency." +
+                "<br/> <b>Example</b>: Google Search ranks pages using complex algorithms based on relevance and authority."
+        },
+        {
+            name: "Critical Mass",
+            details: "<b>What It Is</b>: The minimum size or amount of something required to start and sustain a process or system." +
+                "<br/> <b>Use Case</b>: Helps explain network effects and tipping points in business, technology, and social systems." +
+                "<br/> <b>Example</b>: A new social media platform needs a critical mass of users before it becomes widely adopted."
+        },
+        {
+            name: "Emergence",
+            details: "<b>What It Is</b>: When complex patterns, behaviors, or properties arise from simple interactions of smaller components." +
+                "<br/> <b>Use Case</b>: Helps explain how decentralized systems function without central control." +
+                "<br/> <b>Example</b>: A school of fish moves as a single unit without any leader directing them."
+        },
+        {
+            name: "Irreducibility",
+            details: "<b>What It Is</b>: The idea that some systems cannot be fully understood by breaking them down into smaller parts." +
+                "<br/> <b>Use Case</b>: Helps in fields like complexity science and holistic problem-solving." +
+                "<br/> <b>Example</b>: Consciousness cannot be fully explained by studying individual neurons in the brain."
+        },
+        {
+            name: "The Law of Diminishing Returns",
+            details: "<b>What It Is</b>: A principle stating that adding more of one input while keeping others constant eventually leads to smaller gains in output." +
+                "<br/> <b>Use Case</b>: Helps in optimizing resource allocation and efficiency." +
+                "<br/> <b>Example</b>: Increasing the number of workers on an assembly line eventually leads to inefficiencies."
+        }
+    ],
     "Problem Solving": [
         { name: "First Principles Thinking", details: "Breaking down problems to their basic components." },
         { name: "Lateral Thinking", details: "Solving problems through an indirect and creative approach." },
