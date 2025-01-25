@@ -4,7 +4,7 @@ import { useNavigate } from 'react-router-dom';
 
 const MentalModelsPage: React.FC = () => {
     const navigate = useNavigate();
-    const categories = ["General thinking tools","Cognitive Biases", "Problem Solving", "Decision Making"];
+    const categories = ["General thinking tools","Cognitive Biases","Economics","Systems", "Problem Solving"];
 
     return (
         <>
