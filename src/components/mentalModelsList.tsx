@@ -253,7 +253,47 @@ const mentalModels = {
 
                 "</ol>"
         },
-        { name: "Kantian Fairness Tendency", details: "" },
+        { name: "Kantian Fairness Tendency", details:
+                "<b>What It Is</b>: reflects the human inclination to seek and uphold fairness in interpersonal and societal interactions. It is based on the principle that individuals should act according to rules they would want universally applied, fostering justice and equity" +
+                "<ol class=\"list-decimal pl-4\">" +
+                "<li>" + "Problem: The pursuit of perfect fairness which causes a lot of terrible problems. Stop expecting the world to be fair and adjust your behaviour accordingly" + "</li>" +
+                "<li>" + "Equality and Reciprocity: People naturally expect a balance in social exchanges and recoil at perceived injustices, whether they are victims or observers" + "</li>" +
+
+                "</ol>"+
+
+                "<b>Why Did It Evolve</b>:" +
+                "<ol class=\"list-decimal pl-4\">" +
+                "<li>" + "Group Cohesion: Early humans lived in small, cooperative groups where fairness was essential for trust, collaboration, and survival " + "</li>" +
+                "<li>" + "Learning and Adaptation: Curiosity drove the acquisition of knowledge about tools, social dynamics, and natural phenomena, enabling better problem-solving" + "</li>" +
+                "<li>" + "Conflict Reduction: Fair treatment reduced tensions and disputes, fostering harmonious social environments" + "</li>" +
+
+                "</ol>"+
+
+                "<b>How Can It Be Harmful</b>:" +
+                "<ol class=\"list-decimal pl-4\">" +
+                "<li>" + "Rigid Application: Overemphasis on fairness can lead to inefficiency or harm in situations requiring flexibility. Example: Insisting on equal rewards despite unequal contributions in a group. Charlie Munger also likes the Navy rule of being dismissed as an officer if you run your ship aground – not fair in all circumstances, but certainly prevents ships from being run aground" + "</li>" +
+                "<li>" + "Perception of Injustice: What is 'fair' is subjective, leading to disagreements and conflicts when different parties have conflicting views." + "</li>" +
+                "<li>" + "Paralysis by Fairness: Excessive concern for fairness may cause indecision or inaction, especially in complex situations with competing interests" + "</li>" +
+                "<li>" + "Impediment to Meritocracy: Pursuing strict equality over equity (fairness based on merit) can discourage excellence and innovation." + "</li>" +
+
+                "</ol>"+
+
+                "<b>Examples in Real Life</b>:" +
+                "<ol class=\"list-decimal pl-4\">" +
+                "<li>" + "Positive Examples: Scientific breakthroughs, like the discovery of penicillin, driven by curiosity about mold contamination" + "</li>" +
+                "<li>" + "Negative Examples: gossip and curiosity about others' private lives" + "</li>" +
+
+                "</ol>"+
+
+                "<b>Antidotes</b>:" +
+                "<ol class=\"list-decimal pl-4\">" +
+                "<li>" + "Channel Curiosity Productively: Focus your curiosity on meaningful, beneficial pursuits that align with your goals.." + "</li>" +
+                "<li>" + "Set Boundaries: Recognize when curiosity becomes a distraction or an invasion of privacy, and consciously redirect it" + "</li>" +
+                "<li>" + "Learn to Prioritize: Not all questions need answers immediately. Prioritize what’s worth exploring based on relevance and importance" + "</li>" +
+                "<li>" + "Balance Exploration with Focus: While curiosity encourages exploration, balance it with sustained attention on key areas of interest." + "</li>" +
+
+                "</ol>"
+        },
         { name: "Envy/Jealousy Tendency", details: "" },
         { name: "Reciprocation Tendency", details: "" },
         { name: "Influence-from-Mere-Association Tendency", details: "" },
@@ -275,10 +315,90 @@ const mentalModels = {
         { name: "Anchoring Bias", details: "The tendency to rely too heavily on the first piece of information." },
         { name: "Confirmation Bias", details: "The tendency to search for information that confirms pre-existing beliefs." },
     ],
+    "Economics": [
+        {
+            name: "Scarcity",
+            details: "<b>What It Is</b>: The principle that limited availability increases perceived value and demand." +
+                "<br/> <b>Use Case</b>: Used in marketing, decision-making, and behavioral economics to influence choices." +
+                "<br/> <b>Example</b>: Limited-time offers or exclusive products create urgency and drive purchases."
+        },
+        {
+            name: "Supply and Demand",
+            details: "<b>What It Is</b>: A fundamental economic concept where price is determined by the relationship between availability (supply) and desire (demand)." +
+                "<br/> <b>Use Case</b>: Helps businesses set prices, predict market trends, and optimize inventory." +
+                "<br/> <b>Example</b>: When a product is in high demand but low supply, prices increase (e.g., concert tickets, real estate in prime locations)."
+        },
+        {
+            name: "Optimization",
+            details: "<b>What It Is</b>: The process of making something as effective or efficient as possible." +
+                "<br/> <b>Use Case</b>: Applied in engineering, business, and decision-making to maximize performance or minimize waste." +
+                "<br/> <b>Example</b>: A/B testing in marketing to find the best-performing ad copy or website design."
+        },
+        {
+            name: "Trade-offs",
+            details: "<b>What It Is</b>: The concept that choosing one option often means giving up another due to limited resources." +
+                "<br/> <b>Use Case</b>: Helps in decision-making by weighing the costs and benefits of different choices." +
+                "<br/> <b>Example</b>: Spending more on quality materials increases product durability but raises costs."
+        },
+        {
+            name: "Specialization",
+            details: "<b>What It Is</b>: Focusing on a specific skill, task, or industry to improve efficiency and expertise." +
+                "<br/> <b>Use Case</b>: Increases productivity and innovation by allowing individuals or businesses to become experts in their fields." +
+                "<br/> <b>Example</b>: A heart surgeon is more skilled at cardiac procedures than a general doctor due to specialized training."
+        },
+        {
+            name: "Interdependence",
+            details: "<b>What It Is</b>: The idea that individuals, businesses, or nations rely on each other for goods, services, or knowledge." +
+                "<br/> <b>Use Case</b>: Encourages collaboration and efficiency in global trade and economies." +
+                "<br/> <b>Example</b>: Tech companies depend on chip manufacturers to produce smartphones and computers."
+        },
+        {
+            name: "Efficiency",
+            details: "<b>What It Is</b>: The ability to achieve maximum productivity with minimal wasted resources." +
+                "<br/> <b>Use Case</b>: Helps businesses reduce costs, improve output, and optimize performance." +
+                "<br/> <b>Example</b>: Assembly lines in manufacturing increase production speed while reducing labor costs."
+        },
+        {
+            name: "Debt",
+            details: "<b>What It Is</b>: Borrowing resources (usually money) with a promise of repayment, often with interest." +
+                "<br/> <b>Use Case</b>: Used by individuals, businesses, and governments to finance growth or investments." +
+                "<br/> <b>Example</b>: A startup takes out a loan to scale its operations, expecting future profits to cover repayments."
+        },
+        {
+            name: "Monopoly",
+            details: "<b>What It Is</b>: A market structure where a single entity dominates, limiting competition." +
+                "<br/> <b>Use Case</b>: Can lead to higher prices and reduced innovation due to lack of competition." +
+                "<br/> <b>Example</b>: A utility company being the sole provider of electricity in a region, leaving consumers with no alternatives."
+        },
+        {
+            name: "Competition",
+            details: "<b>What It Is</b>: The rivalry between individuals or businesses striving for a common goal, often market dominance." +
+                "<br/> <b>Use Case</b>: Drives innovation, better products, and lower prices for consumers." +
+                "<br/> <b>Example</b>: Apple and Samsung constantly innovating to outperform each other in the smartphone market."
+        },
+        {
+            name: "Creative Destruction",
+            details: "<b>What It Is</b>: The process by which innovation disrupts and replaces outdated industries or businesses." +
+                "<br/> <b>Use Case</b>: Explains how progress leads to the rise of new technologies while making old ones obsolete." +
+                "<br/> <b>Example</b>: Streaming services like Netflix replacing DVD rental businesses like Blockbuster."
+        },
+        {
+            name: "Gresham's Law",
+            details: "<b>What It Is</b>: The economic principle that 'bad money drives out good money' when both are in circulation." +
+                "<br/> <b>Use Case</b>: Helps explain why people hoard valuable currency and use devalued or lower-quality money in transactions." +
+                "<br/> <b>Example</b>: When a country issues both gold coins and paper money, people tend to hoard gold and spend paper currency."
+        },
+        {
+            name: "Bubbles",
+            details: "<b>What It Is</b>: Economic cycles where asset prices rise rapidly due to speculation, often followed by a sharp crash." +
+                "<br/> <b>Use Case</b>: Helps investors and policymakers recognize unsustainable market trends before they collapse." +
+                "<br/> <b>Example</b>: The 2000 dot-com bubble, where internet stocks were massively overvalued before crashing."
+        }
+    ],
     "Problem Solving": [
         { name: "First Principles Thinking", details: "Breaking down problems to their basic components." },
         { name: "Lateral Thinking", details: "Solving problems through an indirect and creative approach." },
-    ],
+    ]
 };
 
 const MentalModelsList = () => {
