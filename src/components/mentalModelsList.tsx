@@ -58,37 +58,37 @@ const mentalModels = {
         { name: "Liking/Loving Tendency", details:
                 "<b>What It Is</b>: Refers to the disproportionate influence that positive feelings (liking or loving) have on our thoughts, judgments, and actions. Once we like or love someone or something, we tend to:" +
                 "<ol class=\"list-decimal pl-4\">" +
-                    "<li>" + "Overlook flaws in the object of our affection." + "</li>" +
-                    "<li>" + "Overemphasize positives and assume the person or thing is better than it truly is." + "</li>" +
-                    "<li>" + "Feel loyalty and defend the object of our liking, even when doing so is irrational or harmful." + "</li>" +
+                "<li>" + "Overlook flaws in the object of our affection." + "</li>" +
+                "<li>" + "Overemphasize positives and assume the person or thing is better than it truly is." + "</li>" +
+                "<li>" + "Feel loyalty and defend the object of our liking, even when doing so is irrational or harmful." + "</li>" +
                 "</ol>"+
 
                 "<b>Why Did It Evolve</b>:" +
                 "<ol class=\"list-decimal pl-4\">" +
-                    "<li>" + "Social Cohesion: Humans evolved in groups, and forming strong bonds with others was essential for survival. Liking and loving help us build trust and cooperation, fostering alliances and mutual support." + "</li>" +
-                    "<li>" + "Simplified Decision-Making: Favoring things or people we like reduces cognitive load and speeds up decisions. It’s cognitively simpler to take one attribute you like about someone (e.g. looks) and extend that to other qualities about the person" + "</li>" +
+                "<li>" + "Social Cohesion: Humans evolved in groups, and forming strong bonds with others was essential for survival. Liking and loving help us build trust and cooperation, fostering alliances and mutual support." + "</li>" +
+                "<li>" + "Simplified Decision-Making: Favoring things or people we like reduces cognitive load and speeds up decisions. It’s cognitively simpler to take one attribute you like about someone (e.g. looks) and extend that to other qualities about the person" + "</li>" +
                 "</ol>"+
 
                 "<b>How Can It Be Harmful</b>:" +
                 "<ol class=\"list-decimal pl-4\">" +
-                    "<li>" + "Blindness to Flaws: Overlooking negative traits in people or ideas we like can lead to poor decisions" + "</li>" +
-                    "<li>" + "Confirmation Bias Amplification: Liking someone or something makes us seek out and emphasize information that confirms our positive feelings, ignoring contrary evidence." + "</li>" +
-                    "<li>" + "Exploitation: Manipulators (e.g., marketers, con artists) exploit this tendency by making themselves or their products likable, bypassing rational scrutiny." + "</li>" +
-                    "<li>" + "Overcommitment: Loving an idea or project can lead to sunk cost fallacy, where we continue investing time, money, or energy even when it’s not rational." + "</li>" +
+                "<li>" + "Blindness to Flaws: Overlooking negative traits in people or ideas we like can lead to poor decisions" + "</li>" +
+                "<li>" + "Confirmation Bias Amplification: Liking someone or something makes us seek out and emphasize information that confirms our positive feelings, ignoring contrary evidence." + "</li>" +
+                "<li>" + "Exploitation: Manipulators (e.g., marketers, con artists) exploit this tendency by making themselves or their products likable, bypassing rational scrutiny." + "</li>" +
+                "<li>" + "Overcommitment: Loving an idea or project can lead to sunk cost fallacy, where we continue investing time, money, or energy even when it’s not rational." + "</li>" +
                 "</ol>"+
 
                 "<b>Examples in Real Life</b>:" +
                 "<ol class=\"list-decimal pl-4\">" +
-                    "<li>" + "Personal Relationships: Overlooking red flags in a romantic partner because of infatuation." + "</li>" +
-                    "<li>" + "Business: CEOs may favor ideas or colleagues they personally like, leading to suboptimal decisions. Customers may choose products from brands they \"love\" despite better alternatives." + "</li>" +
-                    "<li>" + "Marketing: Advertisers create likable brand personalities or use celebrities to trigger this tendency." + "</li>" +
+                "<li>" + "Personal Relationships: Overlooking red flags in a romantic partner because of infatuation." + "</li>" +
+                "<li>" + "Business: CEOs may favor ideas or colleagues they personally like, leading to suboptimal decisions. Customers may choose products from brands they \"love\" despite better alternatives." + "</li>" +
+                "<li>" + "Marketing: Advertisers create likable brand personalities or use celebrities to trigger this tendency." + "</li>" +
                 "</ol>"+
 
                 "<b>Antidotes</b>:" +
                 "<ol class=\"list-decimal pl-4\">" +
-                    "<li>" + "Awareness and Reflection: Recognize when emotions are clouding judgment. Ask yourself: \"Would I make the same decision if I didn’t like this person/product?\"" + "</li>" +
-                    "<li>" + "Focus on Evidence: Base decisions on facts and objective criteria rather than feelings." + "</li>" +
-                    "<li>" + "Maintain Emotional Distance: When evaluating people or ideas, try to separate personal affection from professional or logical considerations." + "</li>" +
+                "<li>" + "Awareness and Reflection: Recognize when emotions are clouding judgment. Ask yourself: \"Would I make the same decision if I didn’t like this person/product?\"" + "</li>" +
+                "<li>" + "Focus on Evidence: Base decisions on facts and objective criteria rather than feelings." + "</li>" +
+                "<li>" + "Maintain Emotional Distance: When evaluating people or ideas, try to separate personal affection from professional or logical considerations." + "</li>" +
                 "</ol>"
         },
 
@@ -294,9 +294,145 @@ const mentalModels = {
 
                 "</ol>"
         },
-        { name: "Envy/Jealousy Tendency", details: "" },
-        { name: "Reciprocation Tendency", details: "" },
-        { name: "Influence-from-Mere-Association Tendency", details: "" },
+        { name: "Envy/Jealousy Tendency", details:
+                "<div>" +
+                "<p><b>What It Is</b>: Refers to the distress experienced due to the perception that another person or group has an advantage, such as status, possessions, or achievements, which one desires and either does not possess or wants more of. It is often accompanied by feelings of resentment, bitterness, inferiority, or ill will toward the envied person or group.</p>" +
+                "<p><b>Why Did It Evolve</b>:</p>" +
+                "<ol class=\"list-decimal pl-4\">" +
+                "<li>" + "Social Comparison: Humans evolved in social groups where relative status and resources often determined survival and reproductive success. Envy may have evolved as a mechanism to monitor social hierarchies, assess one’s position, and motivate actions to improve one’s standing." + "</li>" +
+                "<li>" + "Resource Acquisition: Envy could drive individuals to compete for scarce resources, improving their access to essentials like food, mates, and territory." + "</li>" +
+                "<li>" + "Social Learning: Observing the success of others and envying their accomplishments could prompt individuals to learn and adopt successful strategies, improving their own outcomes." + "</li>" +
+                "</ol>" +
+                "<p><b>How Can It Be Harmful</b>:</p>" +
+                "<ol class=\"list-decimal pl-4\">" +
+                "<li>" + "Emotional Distress: Envy causes feelings of unhappiness, frustration, and resentment, eroding mental well-being." + "</li>" +
+                "<li>" + "Damaged Relationships: Envy can lead to spiteful behavior, undermining trust and cooperation with others, even among friends and family." + "</li>" +
+                "<li>" + "Focus on External Validation: Envy directs attention outward, making personal satisfaction dependent on external factors (such as others’ achievements) rather than intrinsic goals and efforts." + "</li>" +
+                "<li>" + "Malicious Behavior: Envy may cause negative and harmful actions towards others, such as sabotage, gossip, or theft." + "</li>" +
+                "<li>" + "Lost Opportunities: Focus on what others have can distract from pursuing personal goals, leading to wasted time and resources." + "</li>" +
+                "</ol>" +
+                "<p><b>Examples in Real Life</b>:</p>" +
+                "<ol class=\"list-decimal pl-4\">" +
+                "<li>" + "Workplace: An employee envies a colleague's promotion and spreads rumors to discredit their achievements." + "</li>" +
+                "<li>" + "Social Media: Users experience envy seeing others' glamorous lives and start questioning their own life choices and happiness." + "</li>" +
+                "<li>" + "Personal Relationships: One partner envies the other’s career success, leading to arguments and strained dynamics." + "</li>" +
+                "<li>" + "Financial Contexts: Individuals might make risky investments to mimic the perceived success of others, leading to financial losses." + "</li>" +
+                "</ol>" +
+                "<p><b>Antidotes</b>:</p>" +
+                "<ol class=\"list-decimal pl-4\">" +
+                "<li>" + "Self-Awareness and Reflection: Recognize when you're experiencing envy and understand its roots. Asking yourself why someone else's success bothers you can help clarify your own goals and values." + "</li>" +
+                "<li>" + "Practice Gratitude and Appreciation: Focus on what you have rather than what you lack. Regular gratitude exercises or journaling can shift your perspective towards appreciation." + "</li>" +
+                "<li>" + "Cultivate Self-Compassion: Treat yourself with the same kindness and understanding you would offer a friend who is struggling. This helps counteract negative self-evaluations and build self-worth." + "</li>" +
+                "<li>" + "Focus on Personal Growth and Goals: Redirect your energy towards achieving your own aspirations rather than fixating on others’ achievements. Set clear, measurable goals and celebrate your progress." + "</li>" +
+                "<li>" + "Limit Social Comparison: Reduce exposure to triggers, such as social media, that fuel envy. Instead, engage in activities and environments that affirm your sense of self and well-being." + "</li>" +
+                "<li>" + "Reframe Envy as Inspiration: Use others’ successes as motivation rather than a source of bitterness. Learn from their strategies and apply those insights to your own pursuits." + "</li>" +
+                "</ol>" +
+                "</div>"
+        },
+        { name: "Reciprocation Tendency", details:
+                "<div>" +
+                "<p><b>What It Is</b>: This is the innate human inclination to respond to a positive action with another positive action (reciprocal altruism), or a negative action with another negative one (reciprocal aggression). It is based on the social norm of returning favors, gifts, or concessions.</p>" +
+                "<p><b>Why Did It Evolve</b>:</p>" +
+                "<ol class=\"list-decimal pl-4\">" +
+                "<li>" + "Social Cohesion: It helps build trust and maintain cooperative relationships within groups. By reciprocating, individuals show reliability and willingness to participate in social exchanges." + "</li>" +
+                "<li>" + "Mutual Support: In early human societies, reciprocating favors or assistance helped ensure mutual support, resource sharing, and group survival." + "</li>" +
+                "<li>" + "Fairness and Equity: It establishes a sense of fairness and balance in interactions, encouraging a system of exchanges where help is returned and harms are addressed." + "</li>" +
+                "</ol>" +
+                "<p><b>How Can It Be Harmful</b>:</p>" +
+                "<ol class=\"list-decimal pl-4\">" +
+                "<li>" + "Exploitation: Manipulators can use reciprocity to influence decisions or actions by offering small favors or gifts, expecting disproportionate returns." + "</li>" +
+                "<li>" + "Cycle of Retaliation: In conflicts, the tendency to reciprocate negative actions can escalate tensions, leading to prolonged disputes and cycles of violence." + "</li>" +
+                "<li>" + "Poor Decision-Making: The desire to reciprocate can override rational thinking, leading to unfavorable exchanges or commitments made under pressure or influence." + "</li>" +
+                "<li>" + "Unwanted Obligations: Reciprocation can create a sense of indebtedness that leads to unwanted or unnecessary exchanges, especially when the initial favor was not asked for." + "</li>" +
+                "</ol>" +
+                "<p><b>Examples in Real Life</b>:</p>" +
+                "<ol class=\"list-decimal pl-4\">" +
+                "<li>" + "Gifts and Favors: Sending a thank-you note or a small gift after receiving hospitality from someone, reflecting the desire to show gratitude and reciprocate." + "</li>" +
+                "<li>" + "Sales and Marketing: Providing free samples or trials to induce potential customers to feel obligated to purchase a product or service." + "</li>" +
+                "<li>" + "Negotiations: Making a concession during business negotiations with the expectation that the other party will reciprocate with a similar concession." + "</li>" +
+                "<li>" + "Conflict Resolution: Seeking reconciliation after a conflict by offering apologies or amends, hoping the other party will reciprocate and de-escalate the situation." + "</li>" +
+                "</ol>" +
+                "<p><b>Antidotes</b>:</p>" +
+                "<ol class=\"list-decimal pl-4\">" +
+                "<li>" + "Awareness of Influence: Recognize when offers or favors might be used to influence your decisions. Reflect on your genuine motivations for reciprocating rather than feeling obligated." + "</li>" +
+                "<li>" + "Evaluate the Value: Assess the true value of the exchange. Is the reciprocal action proportionate to the initial action, or is there an attempt to create an imbalance?" + "</li>" +
+                "<li>" + "Maintain Boundaries: Set clear personal or professional boundaries on reciprocity to prevent exploitation. It's acceptable to decline offers that might lead to undesirable obligations." + "</li>" +
+                "<li>" + "Focus on Long-Term Benefits: When considering reciprocation, prioritize long-term goals and relationships over immediate pressures or perceived obligations." + "</li>" +
+                "<li>" + "Balance Actions and Motivations: Reciprocate when it aligns with your values and objectives, not merely out of a sense of forced obligation. Ensure actions are genuine and not driven by external manipulations." + "</li>" +
+                "</ol>" +
+                "</div>"
+        },
+        { name: "Social-Proof Tendency", details:
+                "<div>" +
+                "<p><b>What It Is</b>: The inclination to adopt beliefs or behaviors that are prevalent or endorsed by a group, assuming they are appropriate or correct, especially in ambiguous situations.</p>" +
+                "<p><b>Why Did It Evolve</b>:</p>" +
+                "<ol class=\"list-decimal pl-4\">" +
+                "<li>" + "Group Survival: In ancestral times, aligning with group behaviors increased survival chances, as collective knowledge and actions were often more effective than individual ones." + "</li>" +
+                "<li>" + "Efficient Learning: Copying others' behavior is an efficient way to learn and adapt to new situations, avoiding the need to personally test every possibility." + "</li>" +
+                "<li>" + "Social Cohesion: Conforming to group norms and practices fosters social harmony and acceptance within the community." + "</li>" +
+                "</ol>" +
+                "<p><b>How Can It Be Harmful</b>:</p>" +
+                "<ol class=\"list-decimal pl-4\">" +
+                "<li>" + "Irrational Decisions: Following the crowd can lead to poor choices if the majority is misinformed or acting irrationally." + "</li>" +
+                "<li>" + "Groupthink: In groups, social proof can suppress dissenting opinions and critical thinking, leading to suboptimal decisions." + "</li>" +
+                "<li>" + "Manipulation: Marketers or influencers can exploit this tendency by creating the perception of widespread popularity or approval, regardless of actual merit." + "</li>" +
+                "<li>" + "Bystander Effect: The tendency for individuals to not offer help in an emergency when others are present, assuming that if others are not reacting, the situation is not serious." + "</li>" +
+                "<li>" + "Loss of Individuality: Overreliance on social proof may discourage independent thinking and personal initiative, leading to conformity and homogenized behavior." + "</li>" +
+                "</ol>" +
+                "<p><b>Examples in Real Life</b>:</p>" +
+                "<ol class=\"list-decimal pl-4\">" +
+                "<li>" + "Consumer Behavior: Purchasing products with many positive reviews or endorsements, assuming their popularity reflects quality." + "</li>" +
+                "<li>" + "Social Media: Liking or sharing content that is already popular, driven by the perception that it's valuable or interesting." + "</li>" +
+                "<li>" + "Investing: Following investment trends based on widespread hype or media coverage, such as investing in a particular stock because \"everyone else is.\"" + "</li>" +
+                "<li>" + "Cultural Norms: Adopting local customs or beliefs simply because they are widely practiced, without critical evaluation." + "</li>" +
+                "<li>" + "Political Opinions: Endorsing political candidates or viewpoints that seem to have widespread support, possibly overlooking personal beliefs or values." + "</li>" +
+                "</ol>" +
+                "<p><b>Antidotes</b>:</p>" +
+                "<ol class=\"list-decimal pl-4\">" +
+                "<li>" + "Independent Research: Conduct your own research and gather information from various sources before making decisions, avoiding reliance solely on popular opinion." + "</li>" +
+                "<li>" + "Critical Thinking: Question assumptions and evaluate the evidence behind beliefs or behaviors, assessing their validity objectively." + "</li>" +
+                "<li>" + "Diversity of Perspectives: Seek out diverse viewpoints and opinions, especially those that challenge conventional wisdom or popular trends." + "</li>" +
+                "<li>" + "Self-Reflection: Understand your personal values and goals, and make decisions aligned with them rather than conforming to external pressures." + "</li>" +
+                "<li>" + "Skepticism: Approach claims or trends with a healthy dose of skepticism, especially when there are strong social pressures to conform." + "</li>" +
+                "<li>" + "Mindful Action: Be conscious of your actions and decisions, ensuring they are based on informed reasoning rather than a desire to fit in or follow the crowd." + "</li>" +
+                "</ol>" +
+                "</div>"
+        },
+        { name: "Influence-from-Mere-Association Tendency", details:
+                "<div>" +
+                "<p><b>What It Is</b>: The cognitive bias where people evaluate something based on its association with something else, rather than on its intrinsic merits. This means positive associations lead to favorable evaluations, and negative associations lead to unfavorable ones, often irrationally.</p>" +
+                "<p><b>Why Did It Evolve</b>:</p>" +
+                "<ol class=\"list-decimal pl-4\">" +
+                "<li>" + "Quick Assessment: In ancestral environments, quick assessments based on associations (e.g., associating a certain sound with danger) were often crucial for survival." + "</li>" +
+                "<li>" + "Efficient Decision-Making: Relying on associations reduces cognitive load by simplifying decision-making, using existing mental shortcuts rather than analyzing every detail." + "</li>" +
+                "<li>" + "Social Learning: Humans learn from observing others, adopting behaviors or preferences associated with successful or respected individuals within their group." + "</li>" +
+                "</ol>" +
+                "<p><b>How Can It Be Harmful</b>:</p>" +
+                "<ol class=\"list-decimal pl-4\">" +
+                "<li>" + "Irrational Preferences: Forming preferences for products, brands, or individuals based on superficial associations rather than actual qualities (e.g., liking a product because a celebrity endorses it)." + "</li>" +
+                "<li>" + "Stereotyping: Making generalizations about individuals or groups based on associations (e.g., judging someone's competence based on their clothing or accent)." + "</li>" +
+                "<li>" + "Halo and Horns Effect: Allowing an overall impression of a person or thing to influence judgments about specific traits or aspects (e.g., if someone is attractive, they are also perceived as intelligent and trustworthy)." + "</li>" +
+                "<li>" + "Guilt or Credit by Association: Unfairly attributing responsibility or praise to someone based on their connections to others or events, rather than their direct involvement." + "</li>" +
+                "<li>" + "Misleading Marketing: Being influenced by advertising that associates products with desirable outcomes or emotions (e.g., associating a car with excitement and freedom, rather than its fuel efficiency or safety). (See advertising & politics)" + "</li>" +
+                "</ol>" +
+                "<p><b>Examples in Real Life</b>:</p>" +
+                "<ol class=\"list-decimal pl-4\">" +
+                "<li>" + "Brand Loyalty: Consistently choosing a particular brand of coffee or clothing because of positive experiences associated with the brand's image or values." + "</li>" +
+                "<li>" + "Political Affiliation: Supporting a political party because a respected family member or community figure aligns with that party." + "</li>" +
+                "<li>" + "Product Endorsements: Believing that a product must be good because a well-known expert or celebrity recommends it, even without personal experience or evidence." + "</li>" +
+                "<li>" + "Social Judgments: Forming opinions about someone based on their friendships or affiliations (e.g., assuming someone is intelligent because they are friends with high-achievers)." + "</li>" +
+                "<li>" + "Investment Decisions: Investing in a company or asset simply because it is associated with a successful investor or a booming market trend." + "</li>" +
+                "</ol>" +
+                "<p><b>Antidotes</b>:</p>" +
+                "<ol class=\"list-decimal pl-4\">" +
+                "<li>" + "Critical Evaluation: Question assumptions and examine the actual merits of a product, idea, or person rather than relying on superficial associations." + "</li>" +
+                "<li>" + "Diverse Perspectives: Seek input from various sources to avoid bias from a single point of view or association, broadening the range of information and viewpoints considered." + "</li>" +
+                "<li>" + "Independent Thinking: Make decisions based on reasoned analysis and personal experience rather than conforming to external influences or associations." + "</li>" +
+                "<li>" + "Fact-Checking: Verify information and claims rather than accepting them based on their association with a trusted source or appealing narrative, ensuring accuracy." + "</li>" +
+                "<li>" + "Self-Awareness: Recognize when associations may be influencing judgments and actively work to separate objective evaluation from subjective perceptions and biases." + "</li>" +
+                "</ol>" +
+                "</div>"
+        },
         { name: "Simple, Pain-Avoiding Psychological Denial", details: "" },
         { name: "Excessive Self-Regard Tendency", details: "" },
         { name: "Overoptimism Tendency", details: "" },
@@ -484,19 +620,19 @@ const MentalModelsList = () => {
         return <div>Category not found</div>;
     } else {
         return (
-                <div className="min-h-screen flex flex-col justify-center items-center space-y-4">
-                    <h2 className="text-lg font-bold text-gray-800">{category}</h2>
-                    <div className="flex items-center">
-                        <button
-                            className="bg-gray-300 text-gray-800 px-4 py-2 rounded hover:bg-gray-400"
-                            onClick={() => navigate(-1)} // Goes back in browser history
-                        >
-                            Back
-                        </button>
-                    </div>
-                    <div className="w-full max-w-md space-y-4">
-                        {// @ts-ignore
-                            models.map((model) => (
+            <div className="min-h-screen flex flex-col justify-center items-center space-y-4">
+                <h2 className="text-lg font-bold text-gray-800">{category}</h2>
+                <div className="flex items-center">
+                    <button
+                        className="bg-gray-300 text-gray-800 px-4 py-2 rounded hover:bg-gray-400"
+                        onClick={() => navigate(-1)} // Goes back in browser history
+                    >
+                        Back
+                    </button>
+                </div>
+                <div className="w-full max-w-md space-y-4">
+                    {// @ts-ignore
+                        models.map((model) => (
                             <div key={model.name} className="bg-gray-100 p-4 rounded shadow">
                                 <button
                                     className="w-full text-center text-blue-500 font-bold hover:underline"
@@ -517,9 +653,9 @@ const MentalModelsList = () => {
                                 )}
                             </div>
                         ))}
-                    </div>
                 </div>
-            );
+            </div>
+        );
     }
 };
 
