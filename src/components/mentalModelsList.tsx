@@ -434,7 +434,26 @@ const mentalModels = {
                 "</div>"
         },
         { name: "Simple, Pain-Avoiding Psychological Denial", details: "" },
-        { name: "Excessive Self-Regard Tendency", details: "" },
+        { name: "Excessive Self-Regard Tendency", details:
+                "<div>" +
+                "<p><b>What It Is</b>: The tendency to overestimate one's own abilities, knowledge, importance, and judgment. This is a powerful bias that makes individuals think more highly of themselves than is objectively warranted.</p>" +
+                "<p><b>Why Did It Evolve</b>:</p>" +
+                "<ol class=\"list-decimal pl-4\">" +
+                "<li>" + "Confidence and Initiative: A certain level of self-regard can be beneficial for taking action, pursuing ambitious goals, and overcoming challenges. Believing in oneself can be a self-fulfilling prophecy." + "</li>" +
+                "<li>" + "Resilience: Excessive self-regard can act as a buffer against failure and criticism, helping individuals maintain morale and persist despite setbacks." + "</li>" +
+                "</ol>" +
+                "<p><b>How Can It Be Harmful</b>:</p>" +
+                "<ol class=\"list-decimal pl-4\">" +
+                "<li>" + "Ignoring Feedback: Overconfidence can lead individuals to dismiss valuable criticism or advice from others, hindering learning and improvement." + "</li>" +
+                "<li>" + "Excessive Risk-Taking: An inflated sense of ability can result in taking on risks that are too large or poorly calculated, leading to significant losses or failures." + "</li>" +
+                "<li>" + "Damaging Relationships: Arrogance and a lack of humility stemming from excessive self-regard can strain interpersonal relationships, making collaboration and effective communication difficult." + "</li>" +
+                "<li>" + "Poor Decision-Making: Overestimating one's knowledge can lead to decisions based on incomplete or flawed understanding." + "</li>" +
+                "</ol>" +
+                "<p><b>Examples in Real Life</b>:</p>" +
+                "<ol class=\"list-decimal pl-4\">" +
+                "<li>" + "Entrepreneurship: An entrepreneur overestimates their ability to succeed in a highly competitive market, leading them to take on excessive debt and ultimately fail." + "</li>" +
+                "</ol>" +
+                "</div>" },
         { name: "Overoptimism Tendency", details: "" },
         { name: "Deprival-Superreaction Tendency", details: "" },
         { name: "Social-Proof Tendency", details: "" },
