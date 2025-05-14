@@ -454,9 +454,60 @@ const mentalModels = {
                 "<li>" + "Entrepreneurship: An entrepreneur overestimates their ability to succeed in a highly competitive market, leading them to take on excessive debt and ultimately fail." + "</li>" +
                 "</ol>" +
                 "</div>" },
-        { name: "Overoptimism Tendency", details: "" },
-        { name: "Deprival-Superreaction Tendency", details: "" },
-        { name: "Social-Proof Tendency", details: "" },
+        { name: "Overoptimism Tendency", details:
+                "<div>" +
+                "<p><b>What It Is</b>: The tendency to be overly optimistic about outcomes, often underestimating potential negative results and risks.</p>" +
+                "<p><b>Why Did It Evolve</b>:</p>" +
+                "<ol class=\"list-decimal pl-4\">" +
+                "<li>" + "Motivation and Persistence: Optimism can be a powerful motivator, encouraging individuals to pursue challenging goals and persist in the face of difficulties. Believing in success can be a self-fulfilling prophecy." + "</li>" +
+                "<li>" + "Stress Reduction: Focusing on positive possibilities can reduce anxiety and stress associated with uncertainty or potential negative outcomes." + "</li>" +
+                "<li>" + "Social Acceptance: Optimism can be socially appealing, fostering positive interactions and connections with others." + "</li>" +
+                "</ol>" +
+                "<p><b>How Can It Be Harmful</b>:</p>" +
+                "<ol class=\"list-decimal pl-4\">" +
+                "<li>" + "Underestimation of Risks: Overoptimism can lead individuals to ignore or downplay potential problems and risks, resulting in inadequate preparation or reckless decisions." + "</li>" +
+                "<li>" + "Poor Planning: An overly positive outlook can hinder realistic planning and resource allocation, as challenges are not adequately anticipated." + "</li>" +
+                "<li>" + "Disappointment and Demoralization: When overly optimistic expectations are not met, it can lead to significant disappointment, frustration, and even giving up." + "</li>" +
+                "<li>" + "Financial Losses: In areas like investing or business, overoptimism can lead to excessive speculation or investment in ventures with low probability of success." + "</li>" +
+                "</ol>" +
+                "<p><b>Examples in Real Life</b>:</p>" +
+                "<ol class=\"list-decimal pl-4\">" +
+                "<li>" + "Entrepreneurship: An entrepreneur believes their new venture will be an overnight success, neglecting market research and realistic financial projections." + "</li>" +
+                "<li>" + "Project Management: A project manager overestimates the speed of tasks and underestimates potential delays, leading to missed deadlines and budget overruns." + "</li>" +
+                "<li>" + "Investing: An investor believes a stock will continue to rise indefinitely, ignoring warning signs and failing to diversify their portfolio." + "</li>" +
+                "<li>" + "Personal Health: Someone may be overly optimistic about their health, delaying check-ups or ignoring symptoms, leading to worse outcomes." + "</li>" +
+                "</ol>" +
+                "</div>" },
+        { name: "Deprival-Superreaction Tendency", details:
+                "<div>" +
+                "<p><b>What It Is</b>: Refers to the intense negative reaction experienced when something one possesses or is about to possess is taken away or lost. The pain of losing something is often felt more strongly than the pleasure of gaining something equivalent.</p>" +
+                "<p><b>Why Did It Evolve</b>:</p>" +
+                "<ol class=\"list-decimal pl-4\">" +
+                "<li>" + "Loss Aversion: In ancestral environments, losing resources like food, shelter, or social status could have severe consequences for survival. A strong reaction to deprival may have motivated individuals to protect their existing resources fiercely." + "</li>" +
+                "<li>" + "Status Maintenance: Maintaining one's position in social hierarchies was crucial. Losing status or possessions could lead to reduced access to resources and mates. The superreaction might have pushed individuals to defend their standing." + "</li>" +
+                "</ol>" +
+                "<p><b>How Can It Be Harmful</b>:</p>" +
+                "<ol class=\"list-decimal pl-4\">" +
+                "<li>" + "Irrational Decisions: Fear of loss can lead to irrational risk-taking to avoid deprival or recover losses. This is a core element of prospect theory." + "</li>" +
+                "<li>" + "Resistance to Change: People may resist beneficial changes or opportunities if they perceive them as involving the loss of something familiar, even if the new option is objectively better." + "</li>" +
+                "<li>" + "Escalation of Commitment: Individuals may throw good money after bad in an attempt to recover previous investments or avoid the feeling of loss." + "</li>" +
+                "<li>" + "Manipulation: Marketers, negotiators, and others can exploit this tendency by framing options in terms of potential losses rather than gains." + "</li>" +
+                "</ol>" +
+                "<p><b>Examples in Real Life</b>:</p>" +
+                "<ol class=\"list-decimal pl-4\">" +
+                "<li>" + "Investing: Holding onto losing stocks for too long, hoping to recoup losses, even when selling is the more rational financial decision." + "</li>" +
+                "<li>" + "Sales Tactics: Salespeople using phrases like, \"If you don't act now, you'll miss out on this limited-time offer,\" to trigger the fear of deprival." + "</li>" +
+                "<li>" + "Negotiations: Refusing a reasonable compromise because it feels like losing something one initially demanded." + "</li>" +
+                "<li>" + "Gambling: Chasing losses in an attempt to win back money that has been lost." + "</li>" +
+                "</ol>" +
+                "<p><b>Antidotes</b>:</p>" +
+                "<ol class=\"list-decimal pl-4\">" +
+                "<li>" + "Acknowledge Loss Aversion: Be aware that the pain of loss can cloud your judgment and lead to irrational behavior." + "</li>" +
+                "<li>" + "Focus on Opportunity Cost: Instead of dwelling on what you might lose, consider what you gain or miss out on by not taking action or making a change." + "</li>" +
+                "<li>" + "Evaluate Objectively: When facing potential losses, try to assess the situation based on facts and rational analysis rather than emotional reactions." + "</li>" +
+                "<li>" + "Pre-mortem Analysis: Before making a decision, imagine that the outcome is a failure and work backward to identify what might have gone wrong. This can help anticipate potential losses and plan accordingly." + "</li>" +
+                "</ol>" +
+                "</div>" },
         { name: "Contrast-Misreaction Tendency", details: "" },
         { name: "Stress-Influence Tendency", details: "" },
         { name: "Availability-Misweighing Tendency", details: "" },
