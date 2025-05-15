@@ -433,7 +433,33 @@ const mentalModels = {
                 "</ol>" +
                 "</div>"
         },
-        { name: "Simple, Pain-Avoiding Psychological Denial", details: "" },
+        { name: "Simple, Pain-Avoiding Psychological Denial", details:
+                "<div>" +
+                "<p><b>What It Is</b>: The unconscious process of rejecting or distorting reality to avoid psychological discomfort. It's a defense mechanism the mind employs to protect itself from truths that are too painful or overwhelming to accept at the moment. This can manifest as a refusal to acknowledge facts, minimizing the significance of a situation, or blaming external factors.</p>" +
+                "<p><b>Why Did It Evolve</b>:</p>" +
+                "<ol class=\"list-decimal pl-4\">" +
+                "<li>" + "<b>Coping Mechanism</b>: Denial can act as a temporary shield, giving an individual time to adjust to a traumatic event or shocking news." + "</li>" +
+                "<li>" + "<b>Emotional Regulation</b>: It allows a person to continue functioning without being emotionally overwhelmed by painful realities." + "</li>" +
+                "</ol>" +
+                "<p><b>How Can It Be Harmful</b>:</p>" +
+                "<ol class=\"list-decimal pl-4\">" +
+                "<li>" + "<b>Prevents Problem-Solving</b>: Prolonged denial prevents individuals from addressing critical issues, whether in their health, relationships, or finances." + "</li>" +
+                "<li>" + "<b>Distorts Reality</b>: It can lead to irrational decisions based on a distorted view of the world." + "</li>" +
+                "</ol>" +
+                "<p><b>Examples in Real Life</b>:</p>" +
+                "<ol class=\"list-decimal pl-4\">" +
+                "<li>" + "<b>Health</b>: Someone might ignore the symptoms of a serious illness to avoid the fear and anxiety associated with a potential diagnosis." + "</li>" +
+                "<li>" + "<b>Addiction</b>: A person with a substance abuse problem might insist they are a 'social' user, thereby avoiding the need to seek help." + "</li>" +
+                "<li>" + "<b>Financial Problems</b>: An individual might continue to spend lavishly despite mounting debt, denying the severity of their financial situation." + "</li>" +
+                "</ol>" +
+                "<p><b>Antidotes</b>:</p>" +
+                "<ol class=\"list-decimal pl-4\">" +
+                "<li>" + "<b>Self-Awareness</b>: Recognizing the tendency to avoid painful truths is the first step." + "</li>" +
+                "<li>" + "<b>Objective Feedback</b>: Seeking input from trusted friends, family, or professionals can provide a more accurate view of reality." + "</li>" +
+                "<li>" + "<b>Confronting Reality in Small Steps</b>: Gradually facing the issue can make it less overwhelming." + "</li>" +
+                "</ol>" +
+                "</div>"
+        },
         { name: "Excessive Self-Regard Tendency", details:
                 "<div>" +
                 "<p><b>What It Is</b>: The tendency to overestimate one's own abilities, knowledge, importance, and judgment. This is a powerful bias that makes individuals think more highly of themselves than is objectively warranted.</p>" +
