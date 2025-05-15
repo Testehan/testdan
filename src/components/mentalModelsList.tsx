@@ -534,7 +534,35 @@ const mentalModels = {
                 "<li>" + "Pre-mortem Analysis: Before making a decision, imagine that the outcome is a failure and work backward to identify what might have gone wrong. This can help anticipate potential losses and plan accordingly." + "</li>" +
                 "</ol>" +
                 "</div>" },
-        { name: "Contrast-Misreaction Tendency", details: "" },
+        { name: "Contrast-Misreaction Tendency", details:
+                "<div>" +
+                "<p><b>What It Is</b>: The tendency to judge things not on their absolute scale but based on their contrast to something else. Our perception is easily manipulated by the context and comparisons presented to us.</p>" +
+                "<p><b>Why Did It Evolve</b>:</p>" +
+                "<ol class=\"list-decimal pl-4\">" +
+                "<li>" + "<b>Energy Conservation</b>: It's cognitively easier to compare two things than to evaluate one in isolation. The brain uses this shortcut to make quicker decisions." + "</li>" +
+                "<li>" + "<b>Sensory Perception</b>: Our senses don't perceive absolute values well. For example, a room feels colder or warmer depending on the temperature outside. This extends to more complex judgments." + "</li>" +
+                "</ol>" +
+                "<p><b>How Can It Be Harmful</b>:</p>" +
+                "<ol class=\"list-decimal pl-4\">" +
+                "<li>" + "<b>Poor Financial Decisions</b>: Spending a little extra on an accessory after a large purchase (e.g., a $100 case for a $1,000 phone) seems insignificant by contrast, but may be an objectively poor value." + "</li>" +
+                "<li>" + "<b>Manipulation by Salespeople</b>: A salesperson might show you a very expensive, undesirable option first to make the next, more reasonable option seem like a great deal (the decoy effect)." + "</li>" +
+                "<li>" + "<b>The 'Boiling Frog' Effect</b>: Gradual, slow changes are hard to perceive because they lack contrast with the immediate past. This can lead to accepting a gradually worsening situation until it becomes a disaster." + "</li>" +
+                "</ol>" +
+                "<p><b>Examples in Real Life</b>:</p>" +
+                "<ol class=\"list-decimal pl-4\">" +
+                "<li>" + "<b>Real Estate</b>: An agent shows you several overpriced, rundown houses before showing you a mediocre one at a slightly high price, making it look attractive by comparison." + "</li>" +
+                "<li>" + "<b>Luxury Goods</b>: A $5,000 handbag seems reasonable when placed next to a $20,000 one." + "</li>" +
+                "<li>" + "<b>Negotiations</b>: Starting with an unreasonably high anchor makes the subsequent, more reasonable offer seem like a major concession." + "</li>" +
+                "</ol>" +
+                "<p><b>Antidotes</b>:</p>" +
+                "<ol class=\"list-decimal pl-4\">" +
+                "<li>" + "<b>Evaluate Independently</b>: Judge each option on its own merits, irrespective of what it's being compared to. Ask: 'Is this a good value in and of itself?'" + "</li>" +
+                "<li>" + "<b>Be Aware of the Context</b>: Recognize when a comparison is being used to influence your perception." + "</li>" +
+                "<li>" + "<b>Consider the Absolute Value</b>: Whenever possible, use absolute metrics and benchmarks rather than relative comparisons." + "</li>" +
+                "<li>" + "<b>Evaluate Small Changes Over Time</b>: Don't just look at the contrast from one day to the next. Step back and evaluate the overall trend." + "</li>" +
+                "</ol>" +
+                "</div>"
+        },
         { name: "Stress-Influence Tendency", details: "" },
         { name: "Availability-Misweighing Tendency", details: "" },
         { name: "Use-It-or-Lose-It Tendency", details: "" },
