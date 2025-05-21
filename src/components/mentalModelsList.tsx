@@ -563,7 +563,36 @@ const mentalModels = {
                 "</ol>" +
                 "</div>"
         },
-        { name: "Stress-Influence Tendency", details: "" },
+        { name: "Stress-Influence Tendency", details:
+                "<div>" +
+                "<p><b>What It Is</b>: The tendency for stress, especially when it's intense, to cloud judgment and lead to poor, often irrational, decisions. Under stress, the body's physiological and psychological responses can hijack rational thinking.</p>" +
+                "<p><b>Why Did It Evolve</b>:</p>" +
+                "<ol class=\"list-decimal pl-4\">" +
+                "<li>" + "<b>Survival Instinct (Fight-or-Flight)</b>: In dangerous situations, stress triggers a rapid response mechanism that prioritizes immediate action over careful analysis. This was essential for escaping predators or fighting threats." + "</li>" +
+                "<li>" + "<b>Performance Enhancement</b>: Mild stress can sometimes improve focus and performance on simple, well-rehearsed tasks." + "</li>" +
+                "</ol>" +
+                "<p><b>How Can It Be Harmful</b>:</p>" +
+                "<ol class=\"list-decimal pl-4\">" +
+                "<li>" + "<b>Impulsive and Short-Sighted Decisions</b>: Heavy stress narrows focus to immediate relief, leading to decisions that are not well thought out and have negative long-term consequences." + "</li>" +
+                "<li>" + "<b>Amplification of Other Biases</b>: Stress can make other cognitive biases, like Social Proof (following the herd) and Doubt-Avoidance (rushing to a conclusion), much stronger." + "</li>" +
+                "<li>" + "<b>Emotional Hijacking</b>: Intense stress can lead to emotional responses like panic, anger, or fear dominating the decision-making process." + "</li>" +
+                "<li>" + "<b>Physical and Mental Health</b>: Chronic stress can lead to serious health issues, including depression and fatigue, which further impair judgment." + "</li>" +
+                "</ol>" +
+                "<p><b>Examples in Real Life</b>:</p>" +
+                "<ol class=\"list-decimal pl-4\">" +
+                "<li>" + "<b>Financial Markets</b>: Investors panic-selling their stocks during a market crash, driven by the stress of seeing their portfolio value drop." + "</li>" +
+                "<li>" + "<b>Emergency Situations</b>: People making poor decisions during a crisis, such as hoarding supplies during a pandemic." + "</li>" +
+                "<li>" + "<b>Workplace Pressure</b>: An employee under a tight deadline might make a critical error by rushing through their work." + "</li>" +
+                "</ol>" +
+                "<p><b>Antidotes</b>:</p>" +
+                "<ol class=\"list-decimal pl-4\">" +
+                "<li>" + "<b>Avoid High-Stakes Decisions Under Stress</b>: If possible, postpone important decisions until you are in a calmer state of mind." + "</li>" +
+                "<li>" + "<b>Use Checklists and Pre-defined Procedures</b>: For predictable, high-stress situations, having a checklist can offload cognitive strain and ensure critical steps aren't missed." + "</li>" +
+                "<li>" + "<b>Seek Outside Counsel</b>: Talk to a trusted, less-stressed individual to get a more objective perspective." + "</li>" +
+                "<li>" + "<b>Practice Relaxation Techniques</b>: Methods like deep breathing, meditation, or taking a walk can help reduce the physiological effects of stress." + "</li>" +
+                "</ol>" +
+                "</div>"
+        },
         { name: "Availability-Misweighing Tendency", details: "" },
         { name: "Use-It-or-Lose-It Tendency", details: "" },
         { name: "Drug-Misinfluence Tendency", details: "" },
