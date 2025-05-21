@@ -656,8 +656,35 @@ const mentalModels = {
         { name: "Twaddle Tendency", details: "" },
         { name: "Reason-Respective Tendency", details: "" },
         { name: "Lollapalooza Tendency", details: "" },
-        { name: "Anchoring Bias", details: "The tendency to rely too heavily on the first piece of information." },
-        { name: "Confirmation Bias", details: "The tendency to search for information that confirms pre-existing beliefs." },
+        { name: "Anchoring Bias", details:
+                "<div>" +
+                "<p><b>What It Is</b>: The tendency to rely too heavily on the first piece of information offered (the \"anchor\") when making decisions. Initial information, even if arbitrary, serves as a reference point that influences subsequent judgments.</p>" +
+                "<p><b>Why Did It Evolve</b>:</p>" +
+                "<ol class=\"list-decimal pl-4\">" +
+                "<li>" + "<b>Cognitive Shortcut</b>: It's a mental shortcut to simplify complex decisions. Starting from an initial value and adjusting from there is easier than starting from scratch." + "</li>" +
+                "</ol>" +
+                "<p><b>How Can It Be Harmful</b>:</p>" +
+                "<ol class=\"list-decimal pl-4\">" +
+                "<li>" + "<b>Poor Negotiations</b>: The first offer in a negotiation often acts as an anchor, setting the tone for the entire discussion. If the initial anchor is unreasonably high or low, it can skew the final outcome." + "</li>" +
+                "<li>" + "<b>Inaccurate Valuations</b>: In investing, people often anchor to the purchase price of a stock, which can lead to holding on to losing investments too long (or selling winners too early)." + "</li>" +
+                "<li>" + "<b>Manipulative Pricing</b>: Retailers show a high \"original\" price to make a sale price seem like a bargain, even if the original price was never realistic." + "</li>" +
+                "</ol>" +
+                "<p><b>Examples in Real Life</b>:</p>" +
+                "<ol class=\"list-decimal pl-4\">" +
+                "<li>" + "<b>Salary Negotiations</b>: The first salary figure mentioned, whether by the candidate or the employer, heavily influences the final agreed-upon salary." + "</li>" +
+                "<li>" + "<b>Real Estate</b>: The listing price of a house anchors a buyer's perception of its value, regardless of its true market worth." + "</li>" +
+                "<li>" + "<b>Legal Sentences</b>: A prosecutor's initial sentencing recommendation can anchor a judge's final decision." + "</li>" +
+                "</ol>" +
+                "<p><b>Antidotes</b>:</p>" +
+                "<ol class=\"list-decimal pl-4\">" +
+                "<li>" + "<b>Be Aware of the Anchor</b>: The first step is to recognize that an anchor has been set." + "</li>" +
+                "<li>" + "<b>Create Your Own Anchor</b>: Before entering a negotiation, do your own research and form your own independent valuation. If possible, make the first offer." + "</li>" +
+                "<li>" + "<b>Question the Anchor</b>: Actively question the validity of the initial anchor. Is it based on solid data or is it arbitrary?" + "</li>" +
+                "<li>" + "<b>Think About the Problem from Different Perspectives</b>: Try to reframe the problem to see it from different angles, which can help you move away from the initial anchor." + "</li>" +
+                "</ol>" +
+                "</div>"
+        },
+        { name: "Confirmation Bias", details: "" },
     ],
     "Economics": [
         {
