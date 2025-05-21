@@ -655,7 +655,34 @@ const mentalModels = {
         { name: "Authority-Misinfluence Tendency", details: "" },
         { name: "Twaddle Tendency", details: "" },
         { name: "Reason-Respective Tendency", details: "" },
-        { name: "Lollapalooza Tendency", details: "" },
+        { name: "Lollapalooza Tendency", details:
+                "<div>" +
+                "<p><b>What It Is</b>: The tendency for multiple cognitive biases and psychological tendencies to act in concert, reinforcing each other to produce an extreme outcome. The combined effect is not additive, but multiplicative or exponential.</p>" +
+                "<p><b>Why Did It Evolve</b>:</p>" +
+                "<ol class=\"list-decimal pl-4\">" +
+                "<li>" + "<b>Complex Social Environments</b>: The interaction of various social and psychological cues helped navigate complex social hierarchies and group dynamics." + "</li>" +
+                "</ol>" +
+                "<p><b>How Can It Be Harmful</b>:</p>" +
+                "<ol class=\"list-decimal pl-4\">" +
+                "<li>" + "<b>Irrational Herd Behavior</b>: It can lead to market bubbles and crashes, where a combination of social proof, authority bias, and greed creates a feedback loop of irrational exuberance." + "</li>" +
+                "<li>" + "<b>Extreme Manias and Panics</b>: The confluence of biases can create powerful social manias, from witch hunts to mob violence." + "</li>" +
+                "<li>" + "<b>Systemic Failures</b>: When multiple small biases align in an organization, it can lead to catastrophic failures, as seen in major corporate scandals." + "</li>" +
+                "</ol>" +
+                "<p><b>Examples in Real Life</b>:</p>" +
+                "<ol class=\"list-decimal pl-4\">" +
+                "<li>" + "<b>Tupperware Parties</b>: Charlie Munger's classic example. They combine Reciprocity (the host gives you food), Liking (you like the host), Social Proof (others are buying), and Commitment & Consistency (you said you'd come)." + "</li>" +
+                "<li>" + "<b>Open-Outcry Auctions</b>: Social Proof (others are bidding), Deprival-Superreaction (fear of losing the item), and Commitment (you've already started bidding) combine to drive prices up." + "</li>" +
+                "<li>" + "<b>The Milgram Experiment</b>: Authority Bias (obeying the scientist), Commitment & Consistency (continuing the shocks), and the power of the situation created a Lollapalooza effect of obedience." + "</li>" +
+                "</ol>" +
+                "<p><b>Antidotes</b>:</p>" +
+                "<ol class=\"list-decimal pl-4\">" +
+                "<li>" + "<b>Recognize the Individual Biases</b>: The first step is to understand the individual psychological tendencies at play." + "</li>" +
+                "<li>" + "<b>Use a Checklist Approach</b>: Having a checklist of potential biases can help you identify when multiple forces are acting on you." + "</li>" +
+                "<li>" + "<b>Think for Yourself</b>: Be wary of herd behavior and social proof. Step back and evaluate the situation independently." + "</li>" +
+                "<li>" + "<b>Invert, Always Invert</b>: Consider how a combination of biases could lead to a disastrous outcome, and then take steps to avoid it." + "</li>" +
+                "</ol>" +
+                "</div>"
+        },
         { name: "Anchoring Bias", details:
                 "<div>" +
                 "<p><b>What It Is</b>: The tendency to rely too heavily on the first piece of information offered (the \"anchor\") when making decisions. Initial information, even if arbitrary, serves as a reference point that influences subsequent judgments.</p>" +
