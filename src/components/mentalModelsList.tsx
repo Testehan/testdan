@@ -622,7 +622,34 @@ const mentalModels = {
                 "</ol>" +
                 "</div>"
         },
-        { name: "Use-It-or-Lose-It Tendency", details: "" },
+        { name: "Use-It-or-Lose-It Tendency", details:
+                "<div>" +
+                "<p><b>What It Is</b>: The tendency for skills, knowledge, and abilities to degrade over time from lack of use. The brain is efficient and prunes neural connections that are not regularly activated.</p>" +
+                "<p><b>Why Did It Evolve</b>:</p>" +
+                "<ol class=\"list-decimal pl-4\">" +
+                "<li>" + "<b>Brain Plasticity and Efficiency</b>: The brain is constantly adapting. To conserve energy and resources, it weakens or eliminates pathways that are not being used, freeing up capacity for new learning." + "</li>" +
+                "</ol>" +
+                "<p><b>How Can It Be Harmful</b>:</p>" +
+                "<ol class=\"list-decimal pl-4\">" +
+                "<li>" + "<b>Skill Atrophy</b>: A highly proficient skill can become rusty or even completely lost if not practiced. This is true for everything from playing a musical instrument to speaking a foreign language." + "</li>" +
+                "<li>" + "<b>Forgetting Critical Knowledge</b>: Important information learned in the past can be forgotten if not revisited, leading to repeated mistakes." + "</li>" +
+                "<li>" + "<b>Career Stagnation</b>: Professionals who don't actively maintain and update their skills can become obsolete in a rapidly changing field." + "</li>" +
+                "</ol>" +
+                "<p><b>Examples in Real Life</b>:</p>" +
+                "<ol class=\"list-decimal pl-4\">" +
+                "<li>" + "<b>Foreign Languages</b>: Someone who was fluent in a language in college may struggle to hold a simple conversation a decade later if they haven't used it." + "</li>" +
+                "<li>" + "<b>Mathematics</b>: Complex math skills learned in school, like calculus, are quickly forgotten by most adults who don't use them in their daily lives." + "</li>" +
+                "<li>" + "<b>Pilots and Surgeons</b>: Professionals in high-stakes fields are required to undergo continuous training and recertification to ensure their skills remain sharp." + "</li>" +
+                "</ol>" +
+                "<p><b>Antidotes</b>:</p>" +
+                "<ol class=\"list-decimal pl-4\">" +
+                "<li>" + "<b>Deliberate Practice</b>: Regularly and consciously practice the skills you want to maintain. As Charlie Munger advises, create a checklist of your important skills and practice them." + "</li>" +
+                "<li>" + "<b>Lifelong Learning</b>: Continuously seek out new knowledge and refresh what you already know." + "</li>" +
+                "<li>" + "<b>Teach Others</b>: Explaining a concept to someone else is a powerful way to reinforce your own understanding." + "</li>" +
+                "<li>" + "<b>Spaced Repetition</b>: Use techniques like spaced repetition to review information at increasing intervals, which is highly effective for long-term retention." + "</li>" +
+                "</ol>" +
+                "</div>"
+        },
         { name: "Drug-Misinfluence Tendency", details: "" },
         { name: "Senescence-Misinfluence Tendency", details: "" },
         { name: "Authority-Misinfluence Tendency", details: "" },
