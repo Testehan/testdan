@@ -593,7 +593,35 @@ const mentalModels = {
                 "</ol>" +
                 "</div>"
         },
-        { name: "Availability-Misweighing Tendency", details: "" },
+        { name: "Availability-Misweighing Tendency", details:
+                "<div>" +
+                "<p><b>What It Is</b>: The tendency to over-rely on information that is most easily recalled, vivid, or recent when making judgments. We misjudge the frequency and magnitude of events because some things are more memorable than others.</p>" +
+                "<p><b>Why Did It Evolve</b>:</p>" +
+                "<ol class=\"list-decimal pl-4\">" +
+                "<li>" + "<b>Cognitive Shortcut</b>: It's an efficient mental shortcut (heuristic) to assess the likelihood of an event. If something is easy to recall, it must be important or common." + "</li>" +
+                "<li>" + "<b>Threat Detection</b>: Vivid, dramatic events (like a predator attack) were crucial for survival, so our brains are wired to give them more weight." + "</li>" +
+                "</ol>" +
+                "<p><b>How Can It Be Harmful</b>:</p>" +
+                "<ol class=\"list-decimal pl-4\">" +
+                "<li>" + "<b>Distorted Risk Perception</b>: Leading to irrational fears, such as being more afraid of flying (vividly covered in media) than driving (statistically more dangerous)." + "</li>" +
+                "<li>" + "<b>Poor Decision-Making</b>: Decisions are based on anecdotal evidence rather than data. A manager might hire someone from their alma mater just because they recently had a good experience with another graduate." + "</li>" +
+                "<li>" + "<b>Manipulation by Media</b>: The media's focus on sensational stories (crime, terrorism) can make these events seem much more common than they are." + "</li>" +
+                "</ol>" +
+                "<p><b>Examples in Real Life</b>:</p>" +
+                "<ol class=\"list-decimal pl-4\">" +
+                "<li>" + "<b>Lottery Tickets</b>: People overestimate their chances of winning the lottery because the winners get widespread media coverage, making the event highly available." + "</li>" +
+                "<li>" + "<b>Medical Diagnosis</b>: A doctor who has just seen a patient with a rare disease might be more likely to see it in the next patient, even if the symptoms are common." + "</li>" +
+                "<li>" + "<b>Performance Reviews</b>: Managers often give more weight to recent performance (the recency effect) than performance over the entire year." + "</li>" +
+                "</ol>" +
+                "<p><b>Antidotes</b>:</p>" +
+                "<ol class=\"list-decimal pl-4\">" +
+                "<li>" + "<b>Use Data and Statistics</b>: Actively seek out and rely on objective data rather than memorable anecdotes." + "</li>" +
+                "<li>" + "<b>Seek Disconfirming Evidence</b>: Look for information that challenges your easily-recalled examples." + "</li>" +
+                "<li>" + "<b>Use Checklists and Formal Processes</b>: For important decisions, use a structured process to ensure all factors are considered, not just the most available ones." + "</li>" +
+                "<li>" + "<b>Consider the Base Rate</b>: Pay attention to the statistical probability of an event (the base rate) rather than just vivid examples." + "</li>" +
+                "</ol>" +
+                "</div>"
+        },
         { name: "Use-It-or-Lose-It Tendency", details: "" },
         { name: "Drug-Misinfluence Tendency", details: "" },
         { name: "Senescence-Misinfluence Tendency", details: "" },
