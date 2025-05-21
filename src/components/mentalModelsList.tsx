@@ -684,7 +684,35 @@ const mentalModels = {
                 "</ol>" +
                 "</div>"
         },
-        { name: "Confirmation Bias", details: "" },
+        { name: "Confirmation Bias", details:
+                "<div>" +
+                "<p><b>What It Is</b>: The tendency to search for, interpret, favor, and recall information in a way that confirms or supports one's prior beliefs or values. We are more likely to accept information that agrees with us and dismiss information that doesn't.</p>" +
+                "<p><b>Why Did It Evolve</b>:</p>" +
+                "<ol class=\"list-decimal pl-4\">" +
+                "<li>" + "<b>Mental Shortcut</b>: It is more efficient to process information that aligns with our existing beliefs than to re-evaluate them every time we get new information." + "</li>" +
+                "<li>" + "<b>Protecting Self-Esteem</b>: It feels good to be right. Confirmation bias protects us from the cognitive dissonance of being wrong." + "</li>" +
+                "</ol>" +
+                "<p><b>How Can It Be Harmful</b>:</p>" +
+                "<ol class=\"list-decimal pl-4\">" +
+                "<li>" + "<b>Poor Decision-Making</b>: By ignoring or downplaying disconfirming evidence, we can make flawed decisions in all areas of life, from personal finance to business strategy." + "</li>" +
+                "<li>" + "<b>Polarization</b>: It creates echo chambers where our existing beliefs are constantly reinforced, leading to more extreme and polarized views." + "</li>" +
+                "<li>" + "<b>Entrenching False Beliefs</b>: It can make it very difficult to change our minds, even when presented with overwhelming evidence to the contrary." + "</li>" +
+                "</ol>" +
+                "<p><b>Examples in Real Life</b>:</p>" +
+                "<ol class=\"list-decimal pl-4\">" +
+                "<li>" + "<b>Investing</b>: An investor who is bullish on a stock will primarily seek out news and reports that support their positive outlook, while ignoring negative news." + "</li>" +
+                "<li>" + "<b>Social Media Feeds</b>: Algorithms show us content that we are likely to agree with, creating a filter bubble that constantly confirms our existing biases." + "</li>" +
+                "<li>" + "<b>Political Debates</b>: People often listen to political debates not to be informed, but to find arguments that support their preferred candidate." + "</li>" +
+                "</ol>" +
+                "<p><b>Antidotes</b>:</p>" +
+                "<ol class=\"list-decimal pl-4\">" +
+                "<li>" + "<b>Actively Seek Disconfirming Evidence</b>: Make a conscious effort to find and consider information that challenges your beliefs. As Charles Darwin did, pay special attention to contradictory facts." + "</li>" +
+                "<li>" + "<b>Argue the Other Side</b>: Try to build a strong case for the opposing viewpoint. This is known as 'steel-manning' the argument." + "</li>" +
+                "<li>" + "<b>Blind Analysis</b>: When possible, evaluate data without knowing which outcome it supports." + "</li>" +
+                "<li>" + "<b>Hold Beliefs Loosely</b>: Be open to the possibility that you might be wrong and be willing to update your beliefs based on new evidence." + "</li>" +
+                "</ol>" +
+                "</div>"
+        }
     ],
     "Economics": [
         {
