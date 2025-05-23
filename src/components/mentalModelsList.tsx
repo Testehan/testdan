@@ -675,7 +675,32 @@ const mentalModels = {
                 "</ol>" +
                 "</div>"
         },
-        { name: "Senescence-Misinfluence Tendency", details: "" },
+        { name: "Senescence-Misinfluence Tendency", details:
+                "<div>" +
+                "<p><b>What It Is</b>: The natural cognitive decline that occurs with aging, which can impair judgment and make individuals more susceptible to being misled.</p>" +
+                "<p><b>Why Did It Evolve</b>:</p>" +
+                "<ol class=\"list-decimal pl-4\">" +
+                "<li>" + "This is a natural consequence of the aging process, not an evolutionary adaptation. As the brain ages, its structures and functions can change, leading to a decline in cognitive abilities." + "</li>" +
+                "</ol>" +
+                "<p><b>How Can It Be Harmful</b>:</p>" +
+                "<ol class=\"list-decimal pl-4\">" +
+                "<li>" + "<b>Resistance to New Ideas</b>: Older individuals may struggle to adapt to new information and technologies, clinging to outdated methods and beliefs." + "</li>" +
+                "<li>" + "<b>Vulnerability to Scams</b>: Cognitive decline can make it harder to detect manipulation and fraud." + "</li>" +
+                "<li>" + "<b>Poor Decision-Making</b>: A general decline in cognitive function can lead to suboptimal decisions in various aspects of life." + "</li>" +
+                "</ol>" +
+                "<p><b>Examples in Real Life</b>:</p>" +
+                "<ol class=\"list-decimal pl-4\">" +
+                "<li>" + "<b>Difficulty with Technology</b>: An older person might struggle to use a new smartphone or computer, preferring older, more familiar technology." + "</li>" +
+                "<li>" + "<b>Falling for Scams</b>: Elderly individuals are often targeted by financial scams due to their potential cognitive vulnerabilities." + "</li>" +
+                "</ol>" +
+                "<p><b>Antidotes</b>:</p>" +
+                "<ol class=\"list-decimal pl-4\">" +
+                "<li>" + "<b>Lifelong Learning</b>: Continuously learning and staying mentally active can help mitigate cognitive decline." + "</li>" +
+                "<li>" + "<b>Stay Humble</b>: Recognize the limitations that can come with age and be open to advice from others." + "</li>" +
+                "<li>" + "<b>Rely on a Network</b>: Build a trusted network of friends, family, and advisors to help with important decisions." + "</li>" +
+                "</ol>" +
+                "</div>"
+        },
         { name: "Authority-Misinfluence Tendency", details: "" },
         { name: "Twaddle Tendency", details: "" },
         { name: "Reason-Respective Tendency", details: "" },
