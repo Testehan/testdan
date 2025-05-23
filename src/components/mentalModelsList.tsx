@@ -54,7 +54,33 @@ const mentalModels = {
     ],
 
     "Cognitive Biases": [
-        { name: "Reward and Punishment Super-response Tendency", details: "TODO" },
+        { name: "Reward and Punishment Super-response Tendency", details:
+                "<div>" +
+                "<p><b>What It Is</b>: The tendency for humans to be powerfully influenced by incentives and disincentives, often in ways they don't fully appreciate.</p>" +
+                "<p><b>Why Did It Evolve</b>:</p>" +
+                "<ol class=\"list-decimal pl-4\">" +
+                "<li>" + "<b>Survival</b>: Seeking rewards (like food and safety) and avoiding punishment (like predators and pain) is a fundamental survival instinct." + "</li>" +
+                "<li>" + "<b>Learning</b>: Rewards and punishments are powerful tools for learning and adapting behavior." + "</li>" +
+                "</ol>" +
+                "<p><b>How Can It Be Harmful</b>:</p>" +
+                "<ol class=\"list-decimal pl-4\">" +
+                "<li>" + "<b>Incentive-Caused Bias</b>: People may unconsciously drift into immoral or unethical behavior to gain a reward." + "</li>" +
+                "<li>" + "<b>Gaming the System</b>: People will often find ways to get the reward without doing the intended work, leading to unintended and often negative consequences (The Cobra Effect)." + "</li>" +
+                "<li>" + "<b>Short-Term Focus</b>: An overemphasis on immediate rewards can lead to poor long-term decision-making." + "</li>" +
+                "</ol>" +
+                "<p><b>Examples in Real Life</b>:</p>" +
+                "<ol class=\"list-decimal pl-4\">" +
+                "<li>" + "<b>FedEx Night Shift</b>: FedEx solved its late-night shift problem by paying employees by the shift instead of by the hour, incentivizing them to finish their work quickly and efficiently." + "</li>" +
+                "<li>" + "<b>Sales Commissions</b>: Salespeople may be incentivized to sell products that are not in the best interest of the customer to meet their sales quotas." + "</li>" +
+                "</ol>" +
+                "<p><b>Antidotes</b>:</p>" +
+                "<ol class=\"list-decimal pl-4\">" +
+                "<li>" + "<b>Audit Your Incentives</b>: Carefully consider the incentives you are creating for yourself and others. Are they aligned with your long-term goals?" + "</li>" +
+                "<li>" + "<b>Beware of Incentive-Caused Bias</b>: Be aware that incentives can cloud your judgment and lead to unethical behavior." + "</li>" +
+                "<li>" + "<b>Focus on the System</b>: Design systems that make it difficult to game the incentives." + "</li>" +
+                "</ol>" +
+                "</div>"
+        },
         { name: "Liking/Loving Tendency", details:
                 "<b>What It Is</b>: Refers to the disproportionate influence that positive feelings (liking or loving) have on our thoughts, judgments, and actions. Once we like or love someone or something, we tend to:" +
                 "<ol class=\"list-decimal pl-4\">" +
