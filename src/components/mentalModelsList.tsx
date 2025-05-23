@@ -728,7 +728,33 @@ const mentalModels = {
                 "</ol>" +
                 "</div>"
         },
-        { name: "Twaddle Tendency", details: "" },
+        { name: "Twaddle Tendency", details:
+                "<div>" +
+                "<p><b>What It Is</b>: The tendency to speak or write in a way that is trivial, pretentious, or nonsensical, especially when trying to appear knowledgeable.</p>" +
+                "<p><b>Why Did It Evolve</b>:</p>" +
+                "<ol class=\"list-decimal pl-4\">" +
+                "<li>" + "<b>Social Pressure</b>: In many social situations, there is pressure to contribute to a conversation, even when one has nothing meaningful to say." + "</li>" +
+                "<li>" + "<b>Avoiding Shame</b>: People may use twaddle to avoid the shame of admitting ignorance." + "</li>" +
+                "</ol>" +
+                "<p><b>How Can It Be Harmful</b>:</p>" +
+                "<ol class=\"list-decimal pl-4\">" +
+                "<li>" + "<b>Wasted Time and Energy</b>: Twaddle can lead to unproductive meetings and conversations, wasting valuable time and energy." + "</li>" +
+                "<li>" + "<b>Poor Decision-Making</b>: When people pretend to know more than they do, it can lead to poor decisions based on flawed or incomplete information." + "</li>" +
+                "<li>" + "<b>Erosion of Trust</b>: Over time, a tendency to engage in twaddle can erode trust and credibility." + "</li>" +
+                "</ol>" +
+                "<p><b>Examples in Real Life</b>:</p>" +
+                "<ol class=\"list-decimal pl-4\">" +
+                "<li>" + "<b>Corporate Jargon</b>: Using overly complex or meaningless business jargon to sound intelligent." + "</li>" +
+                "<li>" + "<b>Political Speeches</b>: Politicians who use vague and meaningless language to avoid taking a clear stance on an issue." + "</li>" +
+                "</ol>" +
+                "<p><b>Antidotes</b>:</p>" +
+                "<ol class=\"list-decimal pl-4\">" +
+                "<li>" + "<b>Intellectual Honesty</b>: Be willing to admit when you don't know something." + "</li>" +
+                "<li>" + "<b>Clarity and Simplicity</b>: Strive for clarity and simplicity in your communication. If you can't explain it simply, you don't understand it well enough." + "</li>" +
+                "<li>" + "<b>Know Your Circle of Competence</b>: Stay within your circle of competence and be humble about what you don't know." + "</li>" +
+                "</ol>" +
+                "</div>"
+        },
         { name: "Reason-Respective Tendency", details: "" },
         { name: "Lollapalooza Tendency", details:
                 "<div>" +
