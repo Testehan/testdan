@@ -755,7 +755,32 @@ const mentalModels = {
                 "</ol>" +
                 "</div>"
         },
-        { name: "Reason-Respective Tendency", details: "" },
+        { name: "Reason-Respective Tendency", details:
+                "<div>" +
+                "<p><b>What It Is</b>: The tendency for people to be more compliant and receptive to instructions when a reason is provided, even if the reason is nonsensical.</p>" +
+                "<p><b>Why Did It Evolve</b>:</p>" +
+                "<ol class=\"list-decimal pl-4\">" +
+                "<li>" + "<b>Desire for Understanding</b>: Humans have an innate desire to understand the world around them. Providing a reason, any reason, can satisfy this desire and make a request seem more legitimate." + "</li>" +
+                "<li>" + "<b>Cognitive Shortcut</b>: It's easier to accept a request with a reason than to critically evaluate every instruction." + "</li>" +
+                "</ol>" +
+                "<p><b>How Can It Be Harmful</b>:</p>" +
+                "<ol class=\"list-decimal pl-4\">" +
+                "<li>" + "<b>Manipulation</b>: People can be manipulated into complying with requests by being given flimsy or irrelevant reasons." + "</li>" +
+                "<li>" + "<b>Lack of Critical Thinking</b>: It can discourage critical thinking and lead people to accept things at face value without proper evaluation." + "</li>" +
+                "</ol>" +
+                "<p><b>Examples in Real Life</b>:</p>" +
+                "<ol class=\"list-decimal pl-4\">" +
+                "<li>" + "<b>The Copy Machine Experiment</b>: A person asking to cut in line at a copy machine was more successful when they gave a reason, even a meaningless one like, 'because I have to make some copies.'" + "</li>" +
+                "<li>" + "<b>Marketing</b>: Advertisements often use vague or pseudo-scientific reasons to persuade consumers to buy their products." + "</li>" +
+                "</ol>" +
+                "<p><b>Antidotes</b>:</p>" +
+                "<ol class=\"list-decimal pl-4\">" +
+                "<li>" + "<b>Evaluate the Reason</b>: Don't just accept a reason at face value. Evaluate its quality and relevance." + "</li>" +
+                "<li>" + "<b>Demand Clarity</b>: If a reason is unclear or nonsensical, ask for clarification." + "</li>" +
+                "<li>" + "<b>Think for Yourself</b>: Cultivate a habit of critical thinking and don't be afraid to question authority or the status quo." + "</li>" +
+                "</ol>" +
+                "</div>"
+        },
         { name: "Lollapalooza Tendency", details:
                 "<div>" +
                 "<p><b>What It Is</b>: The tendency for multiple cognitive biases and psychological tendencies to act in concert, reinforcing each other to produce an extreme outcome. The combined effect is not additive, but multiplicative or exponential.</p>" +
