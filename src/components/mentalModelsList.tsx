@@ -650,7 +650,31 @@ const mentalModels = {
                 "</ol>" +
                 "</div>"
         },
-        { name: "Drug-Misinfluence Tendency", details: "" },
+        { name: "Drug-Misinfluence Tendency", details:
+                "<div>" +
+                "<p><b>What It Is</b>: The tendency for judgment to be impaired by the influence of chemical substances, such as drugs or alcohol. This can lead to poor decisions and irrational behavior.</p>" +
+                "<p><b>Why Did It Evolve</b>:</p>" +
+                "<ol class=\"list-decimal pl-4\">" +
+                "<li>" + "This is not an evolutionary adaptation but rather a vulnerability of our brain chemistry. The brain's reward and judgment systems can be hijacked by substances that mimic or alter neurotransmitters." + "</li>" +
+                "</ol>" +
+                "<p><b>How Can It Be Harmful</b>:</p>" +
+                "<ol class=\"list-decimal pl-4\">" +
+                "<li>" + "<b>Impaired Judgment</b>: Leads to poor decision-making in all aspects of life, from personal relationships to financial choices." + "</li>" +
+                "<li>" + "<b>Addiction</b>: The powerful influence of drugs can lead to a cycle of dependency, causing severe physical and psychological harm." + "</li>" +
+                "<li>" + "<b>Loss of Control</b>: Individuals may act in ways that are completely out of character, damaging their reputation and relationships." + "</li>" +
+                "</ol>" +
+                "<p><b>Examples in Real Life</b>:</p>" +
+                "<ol class=\"list-decimal pl-4\">" +
+                "<li>" + "<b>Drunk Driving</b>: A clear example of impaired judgment leading to life-threatening behavior." + "</li>" +
+                "<li>" + "<b>Financial Ruin</b>: People with gambling or substance abuse problems often make disastrous financial decisions." + "</li>" +
+                "</ol>" +
+                "<p><b>Antidotes</b>:</p>" +
+                "<ol class=\"list-decimal pl-4\">" +
+                "<li>" + "<b>Abstinence or Moderation</b>: The most effective antidote is to avoid mind-altering substances, especially when making important decisions." + "</li>" +
+                "<li>" + "<b>Awareness</b>: Recognize the potential for misinfluence and the situations where you might be vulnerable." + "</li>" +
+                "</ol>" +
+                "</div>"
+        },
         { name: "Senescence-Misinfluence Tendency", details: "" },
         { name: "Authority-Misinfluence Tendency", details: "" },
         { name: "Twaddle Tendency", details: "" },
