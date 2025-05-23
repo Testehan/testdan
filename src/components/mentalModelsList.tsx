@@ -701,7 +701,33 @@ const mentalModels = {
                 "</ol>" +
                 "</div>"
         },
-        { name: "Authority-Misinfluence Tendency", details: "" },
+        { name: "Authority-Misinfluence Tendency", details:
+                "<div>" +
+                "<p><b>What It Is</b>: The tendency to be overly influenced by and obedient to authority figures, even when their instructions are questionable or wrong.</p>" +
+                "<p><b>Why Did It Evolve</b>:</p>" +
+                "<ol class=\"list-decimal pl-4\">" +
+                "<li>" + "<b>Social Hierarchy</b>: Humans evolved in hierarchical social structures where following leaders was often beneficial for survival and group cohesion." + "</li>" +
+                "<li>" + "<b>Efficiency</b>: Obeying authority can be a cognitive shortcut, saving the time and effort of analyzing every decision from scratch." + "</li>" +
+                "</ol>" +
+                "<p><b>How Can It Be Harmful</b>:</p>" +
+                "<ol class=\"list-decimal pl-4\">" +
+                "<li>" + "<b>Unethical Actions</b>: It can lead people to commit immoral acts they would not otherwise consider, as demonstrated in the Milgram experiment." + "</li>" +
+                "<li>" + "<b>Poor Decisions</b>: Blindly following an authority figure can lead to disastrous outcomes if the leader is incompetent or misguided." + "</li>" +
+                "<li>" + "<b>Suppression of Dissent</b>: It can create an environment where people are afraid to challenge authority, even when they have valid concerns." + "</li>" +
+                "</ol>" +
+                "<p><b>Examples in Real Life</b>:</p>" +
+                "<ol class=\"list-decimal pl-4\">" +
+                "<li>" + "<b>The Milgram Experiment</b>: Participants administered what they believed were painful electric shocks to others simply because an authority figure told them to." + "</li>" +
+                "<li>" + "<b>Corporate Scandals</b>: Employees may follow unethical orders from their superiors, leading to widespread fraud or other harmful activities." + "</li>" +
+                "</ol>" +
+                "<p><b>Antidotes</b>:</p>" +
+                "<ol class=\"list-decimal pl-4\">" +
+                "<li>" + "<b>Question Authority</b>: Don't be afraid to challenge authority, especially when you have doubts or concerns." + "</li>" +
+                "<li>" + "<b>Think for Yourself</b>: Develop your own independent judgment and don't rely solely on the opinions of others, no matter their status." + "</li>" +
+                "<li>" + "<b>Create a Culture of Openness</b>: In organizations, encourage a culture where dissent is welcomed and people feel safe to speak up." + "</li>" +
+                "</ol>" +
+                "</div>"
+        },
         { name: "Twaddle Tendency", details: "" },
         { name: "Reason-Respective Tendency", details: "" },
         { name: "Lollapalooza Tendency", details:
