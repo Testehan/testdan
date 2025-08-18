@@ -60,7 +60,51 @@ const StockPage: React.FC = () => {
   const [error, setError] = useState<string | null>(null);
   const [activeTab, setActiveTab] = useState<string>('overview');
 
-  const fieldsToRemove = ['id', 'AssetType', 'CIK', 'Exchange', 'Address', 'FiscalYearEnd', 'Description'];
+  const fieldsToRemove = ['id', 'AssetType', 'CIK', 'Exchange', 'Address', 'FiscalYearEnd', 'Description', 'OfficialSite'];
+  const fieldsToFormatAsLargeNumber = [
+    'MarketCapitalization',
+    'EBITDA',
+    'RevenueTTM',
+    'GrossProfitTTM',
+    'SharesOutstanding',
+    'SharesFloat',
+  ];
+  const fieldsToAppendPercent = [
+    'PercentInsiders',
+    'PercentInstitutions',
+  ];
+  const fieldsToMultiplyBy100AndFormatPercent = [
+    'DividendYield',
+    'ProfitMargin',
+    'OperatingMarginTTM',
+    'QuarterlyEarningsGrowthYOY',
+    'QuarterlyRevenueGrowthYOY',
+    'ReturnOnAssetsTTM',
+    'ReturnOnEquityTTM',
+  ];
+
+  const formatLargeNumber = (numStr: string): string => {
+    const num = parseFloat(numStr);
+    if (isNaN(num)) return numStr;
+
+    const absNum = Math.abs(num);
+    const sign = num < 0 ? '-' : '';
+
+    if (absNum >= 1.0e12) return sign + (absNum / 1.0e12).toFixed(2) + 'T';
+    if (absNum >= 1.0e9) return sign + (absNum / 1.0e9).toFixed(2) + 'B';
+    if (absNum >= 1.0e6) return sign + (absNum / 1.0e6).toFixed(2) + 'M';
+    if (absNum >= 1.0e3) return sign + (absNum / 1.0e3).toFixed(2) + 'K';
+    return num.toFixed(2);
+  };
+
+  const formatPercentage = (numStr: string, multiplyBy100: boolean = false): string => {
+    const num = parseFloat(numStr);
+    if (isNaN(num)) return numStr;
+    if (multiplyBy100) {
+      return (num * 100).toFixed(2) + '%';
+    }
+    return num.toFixed(3) + '%';
+  };
 
   useEffect(() => {
     const fetchStockData = async () => {
@@ -96,17 +140,48 @@ const StockPage: React.FC = () => {
   const renderOverviewTab = () => (
     <div className="p-4 bg-white shadow rounded-lg">
       <h3 className="text-xl font-semibold mb-4">{stockData.Name} ({stockData.Symbol})</h3>
-      <p className="text-gray-700 mb-2">{stockData.Description}</p>
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+      
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4"> {/* Added mb-4 for spacing */}
         {Object.entries(stockData)
           .filter(([key]) => !fieldsToRemove.includes(key))
-          .map(([key, value]) => (
-            <div key={key} className="flex justify-between items-center border-b border-gray-200 py-2">
-              <span className="font-medium text-gray-600">{key}:</span>
-              <span className="text-gray-800">{value}</span>
-            </div>
-          ))}
+          .map(([key, value]) => {
+            let displayValue = value;
+            if (fieldsToFormatAsLargeNumber.includes(key)) {
+              displayValue = formatLargeNumber(value as string);
+            } else if (fieldsToMultiplyBy100AndFormatPercent.includes(key)) {
+              displayValue = formatPercentage(value as string, true);
+            } else if (fieldsToAppendPercent.includes(key)) {
+              displayValue = formatPercentage(value as string, false);
+            }
+            return (
+              <div key={key} className="flex justify-between items-center border-b border-gray-200 py-2">
+                <span className="font-medium text-gray-600">{key}:</span>
+                <span className="text-gray-800">{displayValue}</span>
+              </div>
+            );
+          })}
       </div>
+
+      {stockData.Description && (
+        <div className="mt-4 pt-4 border-t border-gray-200"> {/* Separator and top margin */}
+          <h4 className="text-lg font-semibold mb-2">Description:</h4>
+          <p className="text-gray-700">{stockData.Description}</p>
+        </div>
+      )}
+
+      {stockData.OfficialSite && (
+        <div className="mt-2">
+          <h4 className="text-lg font-semibold mb-1">Official Website:</h4>
+          <a
+            href={stockData.OfficialSite}
+            target="_blank"
+            rel="noopener noreferrer"
+            className="text-blue-600 hover:underline"
+          >
+            {stockData.OfficialSite}
+          </a>
+        </div>
+      )}
     </div>
   );
 
@@ -130,5 +205,6 @@ const StockPage: React.FC = () => {
     </div>
   );
 };
+
 
 export default StockPage;
