@@ -3,6 +3,7 @@ import HomePage from './pages/homePage';
 import QuotesPage from './pages/quotesPage';
 import MentalModelsPage from './pages/mentalModelsPage.tsx';
 import MentalModelsList from "./components/mentalModelsList.tsx";
+import StockPage from './pages/StockPage'; // Import StockPage
 
 function App() {
 
@@ -30,6 +31,7 @@ function App() {
             <Route path="/quotes" element={<QuotesPage />} />
             <Route path="/mental" element={<MentalModelsPage />} />
             <Route path="/mental/:category" element={<MentalModelsList />} />
+            <Route path="/stock" element={<StockPage />} /> {/* New Stock route */}
         </Routes>
       </Router>
     </>
