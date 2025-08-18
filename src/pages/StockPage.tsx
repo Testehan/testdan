@@ -60,7 +60,16 @@ const StockPage: React.FC = () => {
   const [error, setError] = useState<string | null>(null);
   const [activeTab, setActiveTab] = useState<string>('overview');
 
-  const fieldsToRemove = ['id', 'AssetType', 'CIK', 'Exchange', 'Address', 'FiscalYearEnd', 'Description', 'OfficialSite'];
+  const fieldsToRemove = [
+    'id', 'AssetType', 'CIK', 'Exchange', 'Address', 'FiscalYearEnd', 'Description', 'OfficialSite', 'Name', 'Symbol',
+    'AnalystTargetPrice', 'AnalystRatingStrongBuy', 'AnalystRatingBuy', 'AnalystRatingHold', 'AnalystRatingSell', 'AnalystRatingStrongSell',
+    'Country', 'Sector', 'Industry', 'Currency',
+    'SharesOutstanding', 'SharesFloat', 'PercentInsiders', 'PercentInstitutions',
+    'DividendPerShare', 'DividendYield', 'DividendDate', 'ExDividendDate',
+    '52WeekHigh', '52WeekLow', '50DayMovingAverage', '200DayMovingAverage',
+    'PERatio', 'ForwardPE', 'TrailingPE', 'PriceToSalesRatioTTM', 'EVToRevenue', 'EVToEBITDA', 'PriceToBookRatio', 'PEGRatio',
+    'ProfitMargin', 'OperatingMarginTTM', 'ReturnOnAssetsTTM', 'ReturnOnEquityTTM'
+  ];
   const fieldsToFormatAsLargeNumber = [
     'MarketCapitalization',
     'EBITDA',
@@ -69,19 +78,31 @@ const StockPage: React.FC = () => {
     'SharesOutstanding',
     'SharesFloat',
   ];
-  const fieldsToAppendPercent = [
-    'PercentInsiders',
-    'PercentInstitutions',
-  ];
   const fieldsToMultiplyBy100AndFormatPercent = [
     'DividendYield',
-    'ProfitMargin',
-    'OperatingMarginTTM',
     'QuarterlyEarningsGrowthYOY',
     'QuarterlyRevenueGrowthYOY',
-    'ReturnOnAssetsTTM',
-    'ReturnOnEquityTTM',
   ];
+  const analystFields = [
+    'AnalystTargetPrice', 'AnalystRatingStrongBuy', 'AnalystRatingBuy', 'AnalystRatingHold', 'AnalystRatingSell', 'AnalystRatingStrongSell'
+  ];
+  const descriptiveFields = [ // New array for fields to be moved
+    'Country', 'Currency', 'Sector', 'Industry'
+  ];
+  const shareOwnershipFields = [ // New array for share ownership fields
+    'SharesOutstanding', 'SharesFloat', 'PercentInsiders', 'PercentInstitutions'
+  ];
+  const dividendFields = [ // New array for dividend fields
+    'DividendPerShare', 'DividendYield', 'DividendDate', 'ExDividendDate'
+  ];
+  const priceAveragesFields = [ // New array for price averages fields
+    '52WeekHigh', '52WeekLow', '50DayMovingAverage', '200DayMovingAverage'
+  ];
+  const valuationFields = [
+    'PERatio', 'ForwardPE', 'TrailingPE', 'PriceToSalesRatioTTM', 'EVToRevenue', 'EVToEBITDA', 'PriceToBookRatio', 'PEGRatio'
+  ];
+  const marginFields = ['ProfitMargin', 'OperatingMarginTTM'];
+  const returnOnFields = ['ReturnOnAssetsTTM', 'ReturnOnEquityTTM'];
 
   const formatLargeNumber = (numStr: string): string => {
     const num = parseFloat(numStr);
@@ -104,6 +125,19 @@ const StockPage: React.FC = () => {
       return (num * 100).toFixed(2) + '%';
     }
     return num.toFixed(3) + '%';
+  };
+
+  const formatCurrency = (numStr: string): string => {
+    const num = parseFloat(numStr);
+    if (isNaN(num)) return numStr;
+    return '$' + num.toFixed(2);
+  };
+
+  const formatDate = (dateStr: string): string => {
+    if (!dateStr) return dateStr;
+    const date = new Date(dateStr);
+    if (isNaN(date.getTime())) return dateStr;
+    return date.toLocaleDateString(); // Formats to local date string
   };
 
   useEffect(() => {
@@ -150,8 +184,6 @@ const StockPage: React.FC = () => {
               displayValue = formatLargeNumber(value as string);
             } else if (fieldsToMultiplyBy100AndFormatPercent.includes(key)) {
               displayValue = formatPercentage(value as string, true);
-            } else if (fieldsToAppendPercent.includes(key)) {
-              displayValue = formatPercentage(value as string, false);
             }
             return (
               <div key={key} className="flex justify-between items-center border-b border-gray-200 py-2">
@@ -162,10 +194,183 @@ const StockPage: React.FC = () => {
           })}
       </div>
 
+      {priceAveragesFields.some(field => stockData[field as keyof StockData]) && (
+        <div className="mt-4 pt-4 border-t border-gray-200">
+          <h4 className="text-lg font-semibold mb-2">Price Averages:</h4>
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+            {priceAveragesFields.map(key => {
+              const value = stockData[key as keyof StockData];
+              if (value === undefined) return null;
+
+              let displayValue = value;
+              // All these fields are numbers formatted with toFixed(2)
+              displayValue = parseFloat(value as string).toFixed(2);
+              
+              return (
+                <div key={key} className="flex justify-between items-center border-b border-gray-200 py-2">
+                  <span className="font-medium text-gray-600">{key.replace(/([A-Z])/g, ' $1').trim()}:</span>
+                  <span className="text-gray-800">{displayValue}</span>
+                </div>
+              );
+            })}
+          </div>
+        </div>
+      )}
+
+      {valuationFields.some(field => stockData[field as keyof StockData]) && (
+        <div className="mt-4 pt-4 border-t border-gray-200">
+          <h4 className="text-lg font-semibold mb-2">Valuation:</h4>
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+            {valuationFields.map(key => {
+              const value = stockData[key as keyof StockData];
+              if (value === undefined) return null;
+
+              let displayValue = parseFloat(value as string).toFixed(2);
+
+              return (
+                <div key={key} className="flex justify-between items-center border-b border-gray-200 py-2">
+                  <span className="font-medium text-gray-600">{key.replace(/([A-Z])/g, ' $1').trim()}:</span>
+                  <span className="text-gray-800">{displayValue}</span>
+                </div>
+              );
+            })}
+          </div>
+        </div>
+      )}
+
+      {marginFields.some(field => stockData[field as keyof StockData]) && (
+        <div className="mt-4 pt-4 border-t border-gray-200">
+          <h4 className="text-lg font-semibold mb-2">Margins:</h4>
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+            {marginFields.map(key => {
+              const value = stockData[key as keyof StockData];
+              if (value === undefined) return null;
+
+              let displayValue = formatPercentage(value as string, true);
+
+              return (
+                <div key={key} className="flex justify-between items-center border-b border-gray-200 py-2">
+                  <span className="font-medium text-gray-600">{key.replace(/([A-Z])/g, ' $1').trim()}:</span>
+                  <span className="text-gray-800">{displayValue}</span>
+                </div>
+              );
+            })}
+          </div>
+        </div>
+      )}
+
+      {returnOnFields.some(field => stockData[field as keyof StockData]) && (
+        <div className="mt-4 pt-4 border-t border-gray-200">
+          <h4 className="text-lg font-semibold mb-2">Return On:</h4>
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+            {returnOnFields.map(key => {
+              const value = stockData[key as keyof StockData];
+              if (value === undefined) return null;
+
+              let displayValue = formatPercentage(value as string, true);
+
+              return (
+                <div key={key} className="flex justify-between items-center border-b border-gray-200 py-2">
+                  <span className="font-medium text-gray-600">{key.replace(/([A-Z])/g, ' $1').trim()}:</span>
+                  <span className="text-gray-800">{displayValue}</span>
+                </div>
+              );
+            })}
+          </div>
+        </div>
+      )}
+
+      {/* Dividends Section */}
+      {dividendFields.some(field => stockData[field as keyof StockData]) && (
+        <div className="mt-4 pt-4 border-t border-gray-200">
+          <h4 className="text-lg font-semibold mb-2">Dividends:</h4>
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <div className="flex justify-between items-center border-b border-gray-200 py-2">
+              <span className="font-medium text-gray-600">Dividend Per Share:</span>
+              <span className="text-gray-800">{formatCurrency(stockData.DividendPerShare)}</span>
+            </div>
+            <div className="flex justify-between items-center border-b border-gray-200 py-2">
+              <span className="font-medium text-gray-600">Dividend Yield:</span>
+              <span className="text-gray-800">{formatPercentage(stockData.DividendYield, true)}</span>
+            </div>
+            <div className="flex justify-between items-center border-b border-gray-200 py-2">
+              <span className="font-medium text-gray-600">Dividend Date:</span>
+              <span className="text-gray-800">{formatDate(stockData.DividendDate)}</span>
+            </div>
+            <div className="flex justify-between items-center border-b border-gray-200 py-2">
+              <span className="font-medium text-gray-600">Ex-Dividend Date:</span>
+              <span className="text-gray-800">{formatDate(stockData.ExDividendDate)}</span>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {shareOwnershipFields.some(field => stockData[field as keyof StockData]) && (
+        <div className="mt-4 pt-4 border-t border-gray-200">
+          <h4 className="text-lg font-semibold mb-2">Share Ownership:</h4>
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <div className="flex justify-between items-center border-b border-gray-200 py-2">
+              <span className="font-medium text-gray-600">Shares Outstanding:</span>
+              <span className="text-gray-800">{formatLargeNumber(stockData.SharesOutstanding)}</span>
+            </div>
+            <div className="flex justify-between items-center border-b border-gray-200 py-2">
+              <span className="font-medium text-gray-600">Shares Float:</span>
+              <span className="text-gray-800">{formatLargeNumber(stockData.SharesFloat)}</span>
+            </div>
+            <div className="flex justify-between items-center border-b border-gray-200 py-2">
+              <span className="font-medium text-gray-600">Percent Insiders:</span>
+              <span className="text-gray-800">{formatPercentage(stockData.PercentInsiders, false)}</span>
+            </div>
+            <div className="flex justify-between items-center border-b border-gray-200 py-2">
+              <span className="font-medium text-gray-600">Percent Institutions:</span>
+              <span className="text-gray-800">{formatPercentage(stockData.PercentInstitutions, false)}</span>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {analystFields.some(field => stockData[field as keyof StockData]) && (
+        <div className="mt-4 pt-4 border-t border-gray-200">
+          <h4 className="text-lg font-semibold mb-2">Analyst Ratings:</h4>
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+            {analystFields.map(key => {
+              const value = stockData[key as keyof StockData];
+              if (value === undefined) return null; // Handle cases where data might be missing
+
+              let displayValue = value;
+              if (key === 'AnalystTargetPrice') {
+                displayValue = formatCurrency(value as string);
+              }
+              
+              return (
+                <div key={key} className="flex justify-between items-center border-b border-gray-200 py-2">
+                  <span className="font-medium text-gray-600">{key.replace(/([A-Z])/g, ' $1').trim()}:</span>
+                  <span className="text-gray-800">{displayValue}</span>
+                </div>
+              );
+            })}
+          </div>
+        </div>
+      )}
+
       {stockData.Description && (
-        <div className="mt-4 pt-4 border-t border-gray-200"> {/* Separator and top margin */}
+        <div className="mt-4 pt-4 border-t border-gray-200">
           <h4 className="text-lg font-semibold mb-2">Description:</h4>
           <p className="text-gray-700">{stockData.Description}</p>
+          {descriptiveFields.some(field => stockData[field as keyof StockData]) && (
+            <div className="mt-4 grid grid-cols-1 md:grid-cols-2 gap-4"> {/* Grouping these fields */}
+              {descriptiveFields.map(key => {
+                const value = stockData[key as keyof StockData];
+                if (value === undefined) return null;
+                return (
+                  <div key={key} className="flex justify-between items-center border-b border-gray-200 py-2">
+                    <span className="font-medium text-gray-600">{key}:</span>
+                    <span className="text-gray-800">{value}</span>
+                  </div>
+                );
+              })}
+            </div>
+          )}
         </div>
       )}
 
