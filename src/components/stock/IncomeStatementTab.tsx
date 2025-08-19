@@ -42,7 +42,7 @@ const IncomeStatementTab: React.FC = () => {
         if (annualReports.length > 0) {
             const years = annualReports
                 .map(report => new Date(report.fiscalDateEnding).getFullYear().toString())
-                .sort();
+                .sort((a, b) => parseInt(b) - parseInt(a)); // Sort in descending order
             setAvailableYears(Array.from(new Set(years)));
         } else {
             setAvailableYears([]);
@@ -59,8 +59,8 @@ const IncomeStatementTab: React.FC = () => {
                 .sort((a, b) => {
                     const [yearA, qA] = a.split('-Q').map(Number);
                     const [yearB, qB] = b.split('-Q').map(Number);
-                    if (yearA !== yearB) return yearA - yearB;
-                    return qA - qB;
+                    if (yearA !== yearB) return yearB - yearA; // Sort years in descending order
+                    return qB - qA; // Sort quarters in descending order
                 });
             setAvailableQuarters(Array.from(new Set(quarters)));
         } else {
@@ -71,11 +71,11 @@ const IncomeStatementTab: React.FC = () => {
     // Effect to initialize or update selected periods when reportType or available periods change
     useEffect(() => {
         if (reportType === 'annual' && availableYears.length > 0) {
-            setSelectedStartPeriod(availableYears[0]);
-            setSelectedEndPeriod(availableYears[availableYears.length - 1]);
+            setSelectedStartPeriod(availableYears[0]); // Latest year
+            setSelectedEndPeriod(availableYears[Math.min(4, availableYears.length - 1)]); // Latest 5 years, or fewer if not enough
         } else if (reportType === 'quarterly' && availableQuarters.length > 0) {
-            setSelectedStartPeriod(availableQuarters[0]);
-            setSelectedEndPeriod(availableQuarters[availableQuarters.length - 1]);
+            setSelectedStartPeriod(availableQuarters[0]); // Latest quarter
+            setSelectedEndPeriod(availableQuarters[Math.min(4, availableQuarters.length - 1)]); // Latest 5 quarters, or fewer if not enough
         } else {
             // Clear selection if no reports available for the current type
             setSelectedStartPeriod('');
