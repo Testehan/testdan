@@ -6,6 +6,7 @@ interface PeriodRangeSliderProps {
   selectedStart: string;
   selectedEnd: string;
   onRangeChange: (start: string, end: string) => void;
+  isQuarterly: boolean; // New prop to indicate if the periods are quarters
 }
 
 const PeriodRangeSlider: React.FC<PeriodRangeSliderProps> = ({
@@ -13,6 +14,7 @@ const PeriodRangeSlider: React.FC<PeriodRangeSliderProps> = ({
   selectedStart,
   selectedEnd,
   onRangeChange,
+  isQuarterly, // Destructure the new prop
 }) => {
   const [minVal, setMinVal] = useState(0);
   const [maxVal, setMaxVal] = useState(periods.length > 0 ? periods.length - 1 : 0);
@@ -101,11 +103,8 @@ const PeriodRangeSlider: React.FC<PeriodRangeSliderProps> = ({
           max={periods.length - 1}
           value={minVal}
           onChange={handleMinChange}
-          className="absolute w-full -top-1 h-4 bg-transparent appearance-none pointer-events-none z-20 slider-thumb"
-          style={{
-            left: '0%',
-            transform: `translateX(calc(${getPercent(minVal)}% * -1))`,
-          }}
+          className="absolute w-full h-4 bg-transparent appearance-none pointer-events-none z-20 slider-thumb"
+          style={{ top: '-1px' }} // Position them visually on the track
         />
         <input
           type="range"
@@ -113,11 +112,8 @@ const PeriodRangeSlider: React.FC<PeriodRangeSliderProps> = ({
           max={periods.length - 1}
           value={maxVal}
           onChange={handleMaxChange}
-          className="absolute w-full -top-1 h-4 bg-transparent appearance-none pointer-events-none z-20 slider-thumb"
-          style={{
-            left: '0%',
-            transform: `translateX(calc(${getPercent(maxVal)}% * -1))`,
-          }}
+          className="absolute w-full h-4 bg-transparent appearance-none pointer-events-none z-20 slider-thumb"
+          style={{ top: '-1px' }} // Position them visually on the track
         />
 
         {/* New: Clickable circles for each period on the line */}
@@ -163,7 +159,7 @@ const PeriodRangeSlider: React.FC<PeriodRangeSliderProps> = ({
         `}</style>
       </div>
 
-      <div className="flex justify-between mt-2"> {/* Changed -mt-2 to mt-2 for better spacing */}
+      <div className="flex justify-between mt-2">
         {periods.map((period, index) => (
           <button
             key={period}
@@ -174,7 +170,7 @@ const PeriodRangeSlider: React.FC<PeriodRangeSliderProps> = ({
                 : 'text-gray-600 hover:bg-gray-200'
             }`}
           >
-            {period}
+            {isQuarterly ? (index % 5 === 0 ? period : '') : period}
           </button>
         ))}
       </div>

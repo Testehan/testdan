@@ -1,9 +1,38 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useMemo } from 'react';
 import { IncomeStatementReport } from './types';
-import { formatLargeNumber, formatMonthYear } from './utils';
+import { formatLargeNumber, formatMonthYear, formatMetricName } from './utils';
 import PeriodRangeSlider from './PeriodRangeSlider'; // Import the new custom slider
 
+// Define the explicit order of income statement fields for display
+const incomeStatementFieldOrder: (keyof IncomeStatementReport)[] = [
+    'totalRevenue',
+    'costOfRevenue',
+    'costofGoodsAndServicesSold',
+    'grossProfit',
+    'researchAndDevelopment',
+    'sellingGeneralAndAdministrative',
+    'operatingExpenses',
+    'operatingIncome',
+    'investmentIncomeNet',
+    'netInterestIncome',
+    'interestIncome',
+    'interestExpense',
+    'interestAndDebtExpense',
+    'nonInterestIncome',
+    'otherNonOperatingIncome',
+    'incomeBeforeTax',
+    'incomeTaxExpense',
+    'netIncomeFromContinuingOperations',
+    'netIncome',
+    'comprehensiveIncomeNetOfTax',
+    'depreciation',
+    'depreciationAndAmortization',
+    'ebit',
+    'ebitda'
+];
+
 const IncomeStatementTab: React.FC = () => {
+
     const [annualReports, setAnnualReports] = useState<IncomeStatementReport[]>([]);
     const [quarterlyReports, setQuarterlyReports] = useState<IncomeStatementReport[]>([]);
     const [reportType, setReportType] = useState<'annual' | 'quarterly'>('annual');
@@ -16,6 +45,29 @@ const IncomeStatementTab: React.FC = () => {
     // State for the currently selected period range
     const [selectedStartPeriod, setSelectedStartPeriod] = useState<string>('');
     const [selectedEndPeriod, setSelectedEndPeriod] = useState<string>('');
+
+
+    const currentReports = reportType === 'annual' ? annualReports : quarterlyReports;
+
+    const allKeys = useMemo(() => {
+        const uniqueKeys = currentReports.reduce((keys, report) => {
+            Object.keys(report).forEach(key => {
+                if (!keys.includes(key as keyof IncomeStatementReport)) {
+                    keys.push(key as keyof IncomeStatementReport);
+                }
+            });
+            return keys;
+        }, [] as (keyof IncomeStatementReport)[]);
+
+        return uniqueKeys.sort((a, b) => {
+            const indexA = incomeStatementFieldOrder.indexOf(a);
+            const indexB = incomeStatementFieldOrder.indexOf(b);
+            if (indexA === -1 && indexB === -1) return 0; // Keep original order if both not found
+            if (indexA === -1) return 1; // 'a' not found, move to end
+            if (indexB === -1) return -1; // 'b' not found, move to end
+            return indexA - indexB;
+        });
+    }, [currentReports, incomeStatementFieldOrder]);
 
     useEffect(() => {
         const fetchIncomeStatement = async () => {
@@ -101,7 +153,6 @@ const IncomeStatementTab: React.FC = () => {
         return <div className="text-center p-4 text-red-500">Error: {error}</div>;
     }
 
-    const currentReports = reportType === 'annual' ? annualReports : quarterlyReports;
 
     const filteredReports = currentReports.filter(report => {
         if (!selectedStartPeriod || !selectedEndPeriod) {
@@ -134,19 +185,7 @@ const IncomeStatementTab: React.FC = () => {
         return <div className="text-center p-4">No data available for the selected period or date range.</div>;
     }
 
-    // This allKeys part should ideally be derived from all available reports to maintain consistent table headers
-    // even if certain metrics are not present in the filtered reports.
-    // However, if the requirement is to only show keys present in currently displayed reports, then use reportsToDisplay.
-    // For now, sticking to the original behavior of deriving from currentReports (before filtering),
-    // but adjusting to use `reportsToDisplay` if that's what's intended.
-    const allKeys = currentReports.reduce((keys, report) => {
-        Object.keys(report).forEach(key => {
-            if (!keys.includes(key as keyof IncomeStatementReport)) {
-                keys.push(key as keyof IncomeStatementReport);
-            }
-        });
-        return keys;
-    }, [] as (keyof IncomeStatementReport)[]);
+
 
     return (
         <div className="p-4 bg-white shadow rounded-lg">
@@ -174,6 +213,7 @@ const IncomeStatementTab: React.FC = () => {
                         selectedStart={selectedStartPeriod}
                         selectedEnd={selectedEndPeriod}
                         onRangeChange={handlePeriodRangeChange}
+                        isQuarterly={false} // Pass false for annual reports
                     />
                 )}
                 {(reportType === 'quarterly' && availableQuarters.length > 0) && (
@@ -182,6 +222,7 @@ const IncomeStatementTab: React.FC = () => {
                         selectedStart={selectedStartPeriod}
                         selectedEnd={selectedEndPeriod}
                         onRangeChange={handlePeriodRangeChange}
+                        isQuarterly={true} // Pass true for quarterly reports
                     />
                 )}
             </div>
@@ -190,7 +231,7 @@ const IncomeStatementTab: React.FC = () => {
                 <table className="w-full text-sm text-left text-gray-500">
                     <thead className="text-xs text-gray-700 uppercase bg-gray-50">
                         <tr>
-                            <th scope="col" className="px-6 py-3">Metric</th>
+                            <th scope="col" className="px-6 py-3 w-48">Income Statement</th>
                             {reportsToDisplay.map(report => (
                                 <th key={report.fiscalDateEnding} scope="col" className="px-6 py-3 whitespace-nowrap">{formatMonthYear(report.fiscalDateEnding)}</th>
                             ))}
@@ -205,8 +246,8 @@ const IncomeStatementTab: React.FC = () => {
                             }
                             return (
                                 <tr key={key} className="bg-white border-b">
-                                    <th scope="row" className="px-6 py-4 font-medium text-gray-900 whitespace-nowrap">
-                                        {key.replace(/([A-Z])/g, ' $1').trim()}
+                                    <th scope="row" className="px-6 py-4 font-medium text-gray-900 whitespace-nowrap w-48">
+                                        {formatMetricName(key as string)}
                                     </th>
                                     {reportsToDisplay.map(report => {
                                         const value = report[key];
