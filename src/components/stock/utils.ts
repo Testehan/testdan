@@ -33,4 +33,13 @@ export const formatLargeNumber = (numStr: string): string => {
     if (isNaN(date.getTime())) return dateStr;
     return date.toLocaleDateString(); // Formats to local date string
   };
+
+  export const formatMonthYear = (dateStr: string): string => {
+    if (!dateStr) return dateStr;
+    const date = new Date(dateStr);
+    if (isNaN(date.getTime())) return dateStr;
+    const month = date.toLocaleString('default', { month: 'short' });
+    const year = date.getFullYear().toString().slice(-2);
+    return `${month} '${year}`;
+  }
   

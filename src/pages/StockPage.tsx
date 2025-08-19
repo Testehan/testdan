@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { StockData } from '../components/stock/types';
 import OverviewTab from '../components/stock/OverviewTab';
+import IncomeStatementTab from '../components/stock/IncomeStatementTab';
 
 const StockPage: React.FC = () => {
   const [stockData, setStockData] = useState<StockData | null>(null);
@@ -95,10 +96,18 @@ const StockPage: React.FC = () => {
         >
           Overview
         </button>
+        <button
+          className={`px-4 py-2 text-lg font-medium ${
+            activeTab === 'incomeStatement' ? 'border-b-2 border-blue-500 text-blue-600' : 'text-gray-600 hover:text-blue-600'
+          }`}
+          onClick={() => setActiveTab('incomeStatement')}
+        >
+          Income Statement
+        </button>
         {/* Future tabs will go here */}
       </div>
       <div>
-        {activeTab === 'overview' && (
+        {activeTab === 'overview' && stockData && (
           <OverviewTab
             stockData={stockData}
             fieldsToRemove={fieldsToRemove}
@@ -114,6 +123,7 @@ const StockPage: React.FC = () => {
             analystFields={analystFields}
           />
         )}
+        {activeTab === 'incomeStatement' && <IncomeStatementTab />}
       </div>
     </div>
   );
