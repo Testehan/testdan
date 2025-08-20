@@ -1,0 +1,57 @@
+// src/components/stock/types/financialFieldOrders.ts
+import { IncomeStatementReport, BalanceSheetReport } from './stockFinancials';
+
+export const incomeStatementFieldOrder: (keyof IncomeStatementReport)[] = [
+    'totalRevenue',
+    'costOfRevenue',
+    'costofGoodsAndServicesSold',
+    'grossProfit',
+    'researchAndDevelopment',
+    'sellingGeneralAndAdministrative',
+    'operatingExpenses',
+    'operatingIncome',
+    'investmentIncomeNet',
+    'netInterestIncome',
+    'interestIncome',
+    'interestExpense',
+    'interestAndDebtExpense',
+    'nonInterestIncome',
+    'otherNonOperatingIncome',
+    'incomeBeforeTax',
+    'incomeTaxExpense',
+    'netIncomeFromContinuingOperations',
+    'netIncome',
+    'comprehensiveIncomeNetOfTax',
+    'depreciation',
+    'depreciationAndAmortization',
+    'ebit',
+    'ebitda'
+];
+
+export const balanceSheetFieldOrder: (keyof BalanceSheetReport)[] = [
+    'cashAndCashEquivalents',
+    'shortTermInvestments',
+    'netReceivables',
+    'inventory',
+    'otherCurrentAssets',
+    'currentAssets',
+    'propertyPlantEquipment',
+    'goodwill',
+    'intangibleAssets',
+    'longTermInvestments',
+    'otherNonCurrentAssets',
+    'totalAssets',
+    'accountsPayable',
+    'shortTermDebt',
+    'deferredRevenue',
+    'otherCurrentLiabilities',
+    'longTermDebt',
+    'otherNonCurrentLiabilities',
+    'totalLiabilities',
+    'commonStock',
+    'retainedEarnings',
+    'treasuryStock',
+    'accumulatedOtherComprehensiveIncome',
+    'totalShareholderEquity',
+    'reportedCurrency'
+];

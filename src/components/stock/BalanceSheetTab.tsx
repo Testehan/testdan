@@ -1,12 +1,11 @@
 import React, { useState } from 'react';
-import { IncomeStatementReport } from './types/stockFinancials';
+import { BalanceSheetReport } from './types/stockFinancials';
 import PeriodRangeSlider from './PeriodRangeSlider';
 import { useFinancialReports } from './hooks/useFinancialReports';
 import { FinancialStatementTable } from './FinancialStatementTable';
+import { balanceSheetFieldOrder } from './types/financialFieldOrders';
 
-import { incomeStatementFieldOrder } from './types/financialFieldOrders';
-
-const IncomeStatementTab: React.FC<{ symbol: string }> = ({ symbol }) => {
+const BalanceSheetTab: React.FC<{ symbol: string }> = ({ symbol }) => {
     const [numberScale, setNumberScale] = useState<'millions' | 'billions'>('billions');
 
     const {
@@ -20,10 +19,10 @@ const IncomeStatementTab: React.FC<{ symbol: string }> = ({ symbol }) => {
         handlePeriodRangeChange,
         reportsToDisplay,
         allKeys,
-    } = useFinancialReports<IncomeStatementReport>({
+    } = useFinancialReports<BalanceSheetReport>({
         symbol: symbol,
-        reportEndpoint: 'income-statement',
-        fieldOrder: incomeStatementFieldOrder,
+        reportEndpoint: 'balance-sheet',
+        fieldOrder: balanceSheetFieldOrder,
         baseURL: 'http://localhost:8080/stocks' // Hardcoded for now, ideally from env variables
     });
 
@@ -32,7 +31,7 @@ const IncomeStatementTab: React.FC<{ symbol: string }> = ({ symbol }) => {
     };
 
     if (loading) {
-        return <div className="text-center p-4">Loading income statement...</div>;
+        return <div className="text-center p-4">Loading balance sheet...</div>;
     }
 
     if (error) {
@@ -83,14 +82,14 @@ const IncomeStatementTab: React.FC<{ symbol: string }> = ({ symbol }) => {
                 )}
             </div>
 
-            <FinancialStatementTable<IncomeStatementReport>
+            <FinancialStatementTable<BalanceSheetReport>
                 reportsToDisplay={reportsToDisplay}
                 allKeys={allKeys}
                 numberScale={numberScale}
-                tableName="Income Statement"
+                tableName="Balance Sheet"
             />
         </div>
     );
 };
 
-export default IncomeStatementTab;
+export default BalanceSheetTab;
