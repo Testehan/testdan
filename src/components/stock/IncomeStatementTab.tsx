@@ -45,6 +45,7 @@ const IncomeStatementTab: React.FC = () => {
     // State for the currently selected period range
     const [selectedStartPeriod, setSelectedStartPeriod] = useState<string>('');
     const [selectedEndPeriod, setSelectedEndPeriod] = useState<string>('');
+    const [numberScale, setNumberScale] = useState<'millions' | 'billions'>('billions');
 
 
     const currentReports = reportType === 'annual' ? annualReports : quarterlyReports;
@@ -145,6 +146,10 @@ const IncomeStatementTab: React.FC = () => {
         setSelectedEndPeriod(end);
     };
 
+    const handleNumberScaleChange = (scale: 'millions' | 'billions') => {
+        setNumberScale(scale);
+    };
+
     if (loading) {
         return <div className="text-center p-4">Loading income statement...</div>;
     }
@@ -189,8 +194,8 @@ const IncomeStatementTab: React.FC = () => {
 
     return (
         <div className="p-4 bg-white shadow rounded-lg">
-            <div className="flex justify-between items-center mb-4 flex-wrap gap-y-2"> {/* Added flex-wrap and gap-y-2 */}
-                <div className="flex space-x-2">
+            <div className="flex justify-between items-center mb-4 flex-wrap gap-y-2">
+                <div className="flex space-x-2 border rounded-lg p-1">
                     <button
                         className={`px-4 py-2 text-sm font-medium ${reportType === 'annual' ? 'bg-blue-500 text-white' : 'bg-gray-200'}`}
                         onClick={() => handleReportTypeChange('annual')}
@@ -202,6 +207,20 @@ const IncomeStatementTab: React.FC = () => {
                         onClick={() => handleReportTypeChange('quarterly')}
                     >
                         Quarterly
+                    </button>
+                </div>
+                <div className="flex space-x-2 border rounded-lg p-1">
+                    <button
+                        className={`px-4 py-2 text-sm font-medium ${numberScale === 'millions' ? 'bg-blue-500 text-white' : 'bg-gray-200'}`}
+                        onClick={() => handleNumberScaleChange('millions')}
+                    >
+                        Millions
+                    </button>
+                    <button
+                        className={`px-4 py-2 text-sm font-medium ${numberScale === 'billions' ? 'bg-blue-500 text-white' : 'bg-gray-200'}`}
+                        onClick={() => handleNumberScaleChange('billions')}
+                    >
+                        Billions
                     </button>
                 </div>
             </div>
@@ -231,32 +250,28 @@ const IncomeStatementTab: React.FC = () => {
                 <table className="w-full text-sm text-left text-gray-500">
                     <thead className="text-xs text-gray-700 uppercase bg-gray-50">
                         <tr>
-                            <th scope="col" className="px-6 py-3 w-48">Income Statement</th>
+                            <th scope="col" className="px-6 py-2 w-48">Income Statement</th>
                             {reportsToDisplay.map(report => (
-                                <th key={report.fiscalDateEnding} scope="col" className="px-6 py-3 whitespace-nowrap">{formatMonthYear(report.fiscalDateEnding)}</th>
+                                <th key={report.fiscalDateEnding} scope="col" className="px-6 py-2 whitespace-nowrap">{formatMonthYear(report.fiscalDateEnding)}</th>
                             ))}
                         </tr>
                     </thead>
                     <tbody>
-                        {allKeys.map(key => {
-                            if (key === 'fiscalDateEnding') return null; // fiscalDateEnding is used as a column header, not a row item
-                            // Ensure the key exists in at least one displayed report to render the row
+                        {allKeys.map((key, index) => { // Added index here for row styling
+                            if (key === 'fiscalDateEnding') return null;
                             if (!reportsToDisplay.some(report => Object.prototype.hasOwnProperty.call(report, key))) {
                                 return null;
                             }
                             return (
-                                <tr key={key} className="bg-white border-b">
-                                    <th scope="row" className="px-6 py-4 font-medium text-gray-900 whitespace-nowrap w-48">
+                                <tr key={key} className={`border-b ${index % 2 === 0 ? 'bg-gray-100' : 'bg-gray-200'}`}><th scope="row" className="px-6 py-2 font-medium text-gray-900 whitespace-nowrap w-48">
                                         {formatMetricName(key as string)}
                                     </th>
                                     {reportsToDisplay.map(report => {
                                         const value = report[key];
-                                        // Handle 'None' or null/undefined values for display
-                                        if (value === 'None' || value === null || value === undefined) return <td key={report.fiscalDateEnding} className="px-6 py-4">-</td>;
-                                        // Format large numbers if they are numeric
-                                        const displayValue = !isNaN(parseFloat(value as string)) ? formatLargeNumber(value as string) : value;
+                                        if (value === 'None' || value === null || value === undefined) return <td key={report.fiscalDateEnding} className="px-6 py-2">-</td>;
+                                        const displayValue = !isNaN(parseFloat(value as string)) ? formatLargeNumber(value as string, numberScale) : value;
                                         return (
-                                            <td key={report.fiscalDateEnding} className="px-6 py-4">
+                                            <td key={report.fiscalDateEnding} className="px-6 py-2">
                                                 {displayValue as string}
                                             </td>
                                         );

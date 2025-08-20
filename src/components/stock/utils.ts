@@ -1,17 +1,28 @@
-export const formatLargeNumber = (numStr: string): string => {
+export const formatLargeNumber = (numStr: string, scale?: 'millions' | 'billions'): string => {
     const num = parseFloat(numStr);
     if (isNaN(num)) return numStr;
   
     const absNum = Math.abs(num);
     const sign = num < 0 ? '-' : '';
   
-    if (absNum >= 1.0e12) return sign + (absNum / 1.0e12).toFixed(2) + 'T';
-    if (absNum >= 1.0e9) return sign + (absNum / 1.0e9).toFixed(2) + 'B';
-    if (absNum >= 1.0e6) return sign + (absNum / 1.0e6).toFixed(2) + 'M';
-    if (absNum >= 1.0e3) return sign + (absNum / 1.0e3).toFixed(2) + 'K';
-    return num.toFixed(2);
-  };
-  
+    let scaledNum = absNum;
+    let suffix = '';
+
+    if (scale === 'billions') {
+        scaledNum = absNum / 1.0e9;
+        suffix = 'B';
+    } else if (scale === 'millions') {
+        scaledNum = absNum / 1.0e6;
+        suffix = 'M';
+    } else { // Auto-scale
+        if (absNum >= 1.0e12) { scaledNum = absNum / 1.0e12; suffix = 'T'; }
+        else if (absNum >= 1.0e9) { scaledNum = absNum / 1.0e9; suffix = 'B'; }
+        else if (absNum >= 1.0e6) { scaledNum = absNum / 1.0e6; suffix = 'M'; }
+        else if (absNum >= 1.0e3) { scaledNum = absNum / 1.0e3; suffix = 'K'; }
+        else { return num.toFixed(2); } // No suffix needed for < 1000
+    }
+    return sign + scaledNum.toFixed(2) + suffix;
+};  
   export const formatPercentage = (numStr: string, multiplyBy100: boolean = false): string => {
     const num = parseFloat(numStr);
     if (isNaN(num)) return numStr;
