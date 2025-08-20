@@ -3,6 +3,7 @@ import { useParams } from 'react-router-dom';
 import { StockData } from '../components/stock/types/stockFinancials';
 import OverviewTab from '../components/stock/OverviewTab';
 import IncomeStatementTab from '../components/stock/IncomeStatementTab';
+import BalanceSheetTab from '../components/stock/BalanceSheetTab'; // Import BalanceSheetTab
 
 const StockPage: React.FC = () => {
   const { symbol } = useParams<{ symbol?: string }>(); // Make symbol optional to handle cases where it might not be in URL
@@ -112,6 +113,14 @@ const StockPage: React.FC = () => {
         >
           Income Statement
         </button>
+        <button
+          className={`px-4 py-2 text-lg font-medium ${
+            activeTab === 'balanceSheet' ? 'border-b-2 border-blue-500 text-blue-600' : 'text-gray-600 hover:text-blue-600'
+          }`}
+          onClick={() => setActiveTab('balanceSheet')}
+        >
+          Balance Sheet
+        </button>
         {/* Future tabs will go here */}
       </div>
       <div>
@@ -132,10 +141,10 @@ const StockPage: React.FC = () => {
           />
         )}
         {activeTab === 'incomeStatement' && <IncomeStatementTab symbol={symbol} />}
+        {activeTab === 'balanceSheet' && <BalanceSheetTab symbol={symbol} />}
       </div>
     </div>
   );
 };
 
 export default StockPage;
-

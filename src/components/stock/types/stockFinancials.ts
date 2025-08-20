@@ -80,3 +80,37 @@ export interface StockData {
     ebitda: string;
     netIncome: string;
   }
+
+  export interface BalanceSheetReport {
+    fiscalDateEnding: string;
+    reportedCurrency: string;
+    totalAssets: string;
+    currentAssets: string;
+    cashAndCashEquivalents: string;
+    shortTermInvestments: string;
+    cashAndShortTermInvestments: string;
+    netReceivables: string;
+    inventory: string;
+    otherCurrentAssets: string;
+    nonCurrentAssets: string;
+    propertyPlantEquipment: string;
+    accumulatedDepreciationAmortization: string;
+    intangibleAssets: string;
+    goodwill: string; // Added
+    longTermInvestments: string; // Added
+    otherNonCurrentAssets: string;
+    totalLiabilities: string;
+    currentLiabilities: string;
+    shortTermDebt: string;
+    accountsPayable: string;
+    deferredRevenue: string; // Added
+    otherCurrentLiabilities: string;
+    nonCurrentLiabilities: string;
+    longTermDebt: string;
+    otherNonCurrentLiabilities: string;
+    totalShareholderEquity: string;
+    commonStock: string;
+    retainedEarnings: string;
+    treasuryStock: string;
+    accumulatedOtherComprehensiveIncome: string; // Renamed from otherComprehensiveIncome
+  }
