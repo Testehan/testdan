@@ -194,30 +194,30 @@ const IncomeStatementTab: React.FC = () => {
 
     return (
         <div className="p-4 bg-white shadow rounded-lg">
-            <div className="flex justify-between items-center mb-4 flex-wrap gap-y-2">
-                <div className="flex space-x-2 border rounded-lg p-1">
+            <div className="flex items-center mb-4 flex-wrap space-x-2"> {/* Removed justify-between and gap-y-2, added space-x-2 */}
+                <div className="flex space-x-1 border rounded-lg px-1 py-0.5"> {/* Smaller padding, space-x */}
                     <button
-                        className={`px-4 py-2 text-sm font-medium ${reportType === 'annual' ? 'bg-blue-500 text-white' : 'bg-gray-200'}`}
+                        className={`px-2 py-1 text-sm font-medium ${reportType === 'annual' ? 'bg-blue-500 text-white' : 'bg-gray-200'}`}
                         onClick={() => handleReportTypeChange('annual')}
                     >
                         Annual
                     </button>
                     <button
-                        className={`px-4 py-2 text-sm font-medium ${reportType === 'quarterly' ? 'bg-blue-500 text-white' : 'bg-gray-200'}`}
+                        className={`px-2 py-1 text-sm font-medium ${reportType === 'quarterly' ? 'bg-blue-500 text-white' : 'bg-gray-200'}`}
                         onClick={() => handleReportTypeChange('quarterly')}
                     >
                         Quarterly
                     </button>
                 </div>
-                <div className="flex space-x-2 border rounded-lg p-1">
+                <div className="flex space-x-1 border rounded-lg px-1 py-0.5"> {/* Smaller padding, space-x */}
                     <button
-                        className={`px-4 py-2 text-sm font-medium ${numberScale === 'millions' ? 'bg-blue-500 text-white' : 'bg-gray-200'}`}
+                        className={`px-2 py-1 text-sm font-medium ${numberScale === 'millions' ? 'bg-blue-500 text-white' : 'bg-gray-200'}`}
                         onClick={() => handleNumberScaleChange('millions')}
                     >
                         Millions
                     </button>
                     <button
-                        className={`px-4 py-2 text-sm font-medium ${numberScale === 'billions' ? 'bg-blue-500 text-white' : 'bg-gray-200'}`}
+                        className={`px-2 py-1 text-sm font-medium ${numberScale === 'billions' ? 'bg-blue-500 text-white' : 'bg-gray-200'}`}
                         onClick={() => handleNumberScaleChange('billions')}
                     >
                         Billions
