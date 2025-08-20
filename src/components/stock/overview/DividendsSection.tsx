@@ -1,4 +1,4 @@
-import { StockData } from '../../types/stockFinancials';
+import { StockData } from '../types/stockFinancials';
 import { formatCurrency, formatDate, formatPercentage } from '../utils';
 
 interface DividendsSectionProps {

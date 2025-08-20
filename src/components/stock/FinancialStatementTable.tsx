@@ -1,4 +1,3 @@
-import React from 'react';
 import { formatLargeNumber, formatMonthYear, formatMetricName } from './utils';
 
 interface FinancialStatementTableProps<T> {
@@ -17,10 +16,10 @@ export const FinancialStatementTable = <T extends { fiscalDateEnding: string }>(
 
     return (
         <div className="overflow-x-auto">
-            <table className="w-full text-sm text-left text-gray-500">
+            <table className="w-full text-sm text-left text-gray-500 table-fixed">
                 <thead className="text-xs text-gray-700 uppercase bg-gray-50">
                     <tr>
-                        <th scope="col" className="px-6 py-2 w-48">{tableName}</th>
+                        <th scope="col" className="px-6 py-2 w-60">{tableName}</th>
                         {reportsToDisplay.map(report => (
                             <th key={report.fiscalDateEnding} scope="col" className="px-6 py-2 whitespace-nowrap">{formatMonthYear(report.fiscalDateEnding)}</th>
                         ))}
@@ -32,10 +31,14 @@ export const FinancialStatementTable = <T extends { fiscalDateEnding: string }>(
                         if (!reportsToDisplay.some(report => Object.prototype.hasOwnProperty.call(report, key))) {
                             return null;
                         }
+                        const formattedName = formatMetricName(key as string);
                         return (
                             <tr key={key as string} className={`border-b ${index % 2 === 0 ? 'bg-gray-100' : 'bg-gray-200'}`}>
-                                <th scope="row" className="px-6 py-2 font-medium text-gray-900 whitespace-nowrap w-48">
-                                    {formatMetricName(key as string)}
+                                <th scope="row"
+                                    className="px-6 py-2 font-medium text-gray-900 w-60 truncate"
+                                    title={formattedName}
+                                >
+                                    {formattedName}
                                 </th>
                                 {reportsToDisplay.map(report => {
                                     const value = report[key];

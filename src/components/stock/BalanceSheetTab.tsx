@@ -5,6 +5,39 @@ import { useFinancialReports } from './hooks/useFinancialReports';
 import { FinancialStatementTable } from './FinancialStatementTable';
 import { balanceSheetFieldOrder } from './types/financialFieldOrders';
 
+const assetKeys: (keyof BalanceSheetReport)[] = [
+    'cashAndCashEquivalentsAtCarryingValue',
+    'shortTermInvestments',
+    'currentNetReceivables',
+    'inventory',
+    'otherCurrentAssets',
+    'totalCurrentAssets',
+    'longTermInvestments',
+    'propertyPlantEquipment',
+    'goodwill',
+    'intangibleAssets',
+    'otherNonCurrentAssets',
+    'totalAssets',
+];
+
+const liabilityKeys: (keyof BalanceSheetReport)[] = [
+    'currentAccountsPayable',
+    'shortTermDebt',
+    'deferredRevenue',
+    'otherCurrentLiabilities',
+    'longTermDebt',
+    'otherNonCurrentLiabilities',
+    'totalLiabilities',
+];
+
+const equityKeys: (keyof BalanceSheetReport)[] = [
+    'commonStock',
+    'retainedEarnings',
+    'treasuryStock',
+    'accumulatedOtherComprehensiveIncome',
+    'totalShareholderEquity',
+];
+
 const BalanceSheetTab: React.FC<{ symbol: string }> = ({ symbol }) => {
     const [numberScale, setNumberScale] = useState<'millions' | 'billions'>('billions');
 
@@ -18,7 +51,6 @@ const BalanceSheetTab: React.FC<{ symbol: string }> = ({ symbol }) => {
         selectedEndPeriod,
         handlePeriodRangeChange,
         reportsToDisplay,
-        allKeys,
     } = useFinancialReports<BalanceSheetReport>({
         symbol: symbol,
         reportEndpoint: 'balance-sheet',
@@ -39,7 +71,7 @@ const BalanceSheetTab: React.FC<{ symbol: string }> = ({ symbol }) => {
     }
 
     return (
-        <div className="p-4 bg-white shadow rounded-lg">
+        <div className="p-4 bg-white shadow rounded-lg space-y-6">
             <div className="flex items-center mb-4 flex-wrap space-x-2">
                 <div className="flex space-x-1 border rounded-lg px-1 py-0.5">
                     <button
@@ -84,9 +116,23 @@ const BalanceSheetTab: React.FC<{ symbol: string }> = ({ symbol }) => {
 
             <FinancialStatementTable<BalanceSheetReport>
                 reportsToDisplay={reportsToDisplay}
-                allKeys={allKeys}
+                allKeys={assetKeys}
                 numberScale={numberScale}
-                tableName="Balance Sheet"
+                tableName="Assets"
+            />
+
+            <FinancialStatementTable<BalanceSheetReport>
+                reportsToDisplay={reportsToDisplay}
+                allKeys={liabilityKeys}
+                numberScale={numberScale}
+                tableName="Liabilities"
+            />
+
+            <FinancialStatementTable<BalanceSheetReport>
+                reportsToDisplay={reportsToDisplay}
+                allKeys={equityKeys}
+                numberScale={numberScale}
+tableName="Shareholder Equity"
             />
         </div>
     );

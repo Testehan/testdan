@@ -85,32 +85,40 @@ export interface StockData {
     fiscalDateEnding: string;
     reportedCurrency: string;
     totalAssets: string;
-    currentAssets: string;
-    cashAndCashEquivalents: string;
-    shortTermInvestments: string;
+    totalCurrentAssets: string;
+    cashAndCashEquivalentsAtCarryingValue: string;
     cashAndShortTermInvestments: string;
-    netReceivables: string;
     inventory: string;
-    otherCurrentAssets: string;
-    nonCurrentAssets: string;
+    currentNetReceivables: string;
+    totalNonCurrentAssets: string;
     propertyPlantEquipment: string;
-    accumulatedDepreciationAmortization: string;
+    accumulatedDepreciationAmortizationPPE: string;
     intangibleAssets: string;
-    goodwill: string; // Added
-    longTermInvestments: string; // Added
+    intangibleAssetsExcludingGoodwill: string;
+    goodwill: string;
+    investments: string;
+    longTermInvestments: string;
+    shortTermInvestments: string;
+    otherCurrentAssets: string;
     otherNonCurrentAssets: string;
     totalLiabilities: string;
-    currentLiabilities: string;
+    totalCurrentLiabilities: string;
+    currentAccountsPayable: string;
+    deferredRevenue: string;
+    currentDebt: string;
     shortTermDebt: string;
-    accountsPayable: string;
-    deferredRevenue: string; // Added
-    otherCurrentLiabilities: string;
-    nonCurrentLiabilities: string;
+    totalNonCurrentLiabilities: string;
+    capitalLeaseObligations: string;
     longTermDebt: string;
+    currentLongTermDebt: string;
+    longTermDebtNoncurrent: string;
+    shortLongTermDebtTotal: string;
+    otherCurrentLiabilities: string;
     otherNonCurrentLiabilities: string;
     totalShareholderEquity: string;
-    commonStock: string;
-    retainedEarnings: string;
     treasuryStock: string;
-    accumulatedOtherComprehensiveIncome: string; // Renamed from otherComprehensiveIncome
+    retainedEarnings: string;
+    commonStock: string;
+    commonStockSharesOutstanding: string;
+    accumulatedOtherComprehensiveIncome: string;
   }

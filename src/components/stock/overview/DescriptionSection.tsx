@@ -1,4 +1,4 @@
-import { StockData } from '../../types/stockFinancials';
+import { StockData } from '../types/stockFinancials';
 
 interface DescriptionSectionProps {
     stockData: StockData;

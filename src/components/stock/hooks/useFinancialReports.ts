@@ -1,11 +1,26 @@
 import { useState, useEffect, useMemo, useCallback } from 'react';
-import { IncomeStatementReport } from '../types/stockFinancials';
 
 interface UseFinancialReportsProps<T> {
     symbol: string;
     reportEndpoint: string; // e.g., 'income-statement'
     fieldOrder: (keyof T)[];
     baseURL?: string; // Optional base URL
+}
+
+interface FinancialReportData<T> {
+    annualReports: T[];
+    quarterlyReports: T[];
+    currentReports: T[];
+    reportType: 'annual' | 'quarterly';
+    setReportType: (type: 'annual' | 'quarterly') => void;
+    loading: boolean;
+    error: string | null;
+    availablePeriods: string[];
+    selectedStartPeriod: string;
+    selectedEndPeriod: string;
+    handlePeriodRangeChange: (start: string, end: string) => void;
+    reportsToDisplay: T[];
+    allKeys: (keyof T)[];
 }
 
 // ... other interfaces and code ...
