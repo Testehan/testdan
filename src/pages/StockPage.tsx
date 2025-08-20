@@ -1,9 +1,11 @@
 import React, { useState, useEffect } from 'react';
-import { StockData } from '../components/stock/types';
+import { useParams } from 'react-router-dom';
+import { StockData } from '../components/stock/types/stockFinancials';
 import OverviewTab from '../components/stock/OverviewTab';
 import IncomeStatementTab from '../components/stock/IncomeStatementTab';
 
 const StockPage: React.FC = () => {
+  const { symbol } = useParams<{ symbol?: string }>(); // Make symbol optional to handle cases where it might not be in URL
   const [stockData, setStockData] = useState<StockData | null>(null);
   const [loading, setLoading] = useState<boolean>(true);
   const [error, setError] = useState<string | null>(null);
@@ -35,16 +37,16 @@ const StockPage: React.FC = () => {
   const analystFields = [
     'AnalystTargetPrice', 'AnalystRatingStrongBuy', 'AnalystRatingBuy', 'AnalystRatingHold', 'AnalystRatingSell', 'AnalystRatingStrongSell'
   ];
-  const descriptiveFields = [ 
+  const descriptiveFields = [
     'Country', 'Currency', 'Sector', 'Industry'
   ];
-  const shareOwnershipFields = [ 
+  const shareOwnershipFields = [
     'SharesOutstanding', 'SharesFloat', 'PercentInsiders', 'PercentInstitutions'
   ];
-  const dividendFields = [ 
+  const dividendFields = [
     'DividendPerShare', 'DividendYield', 'DividendDate', 'ExDividendDate'
   ];
-  const priceAveragesFields = [ 
+  const priceAveragesFields = [
     '52WeekHigh', '52WeekLow', '50DayMovingAverage', '200DayMovingAverage'
   ];
   const valuationFields = [
@@ -54,9 +56,15 @@ const StockPage: React.FC = () => {
   const returnOnFields = ['ReturnOnAssetsTTM', 'ReturnOnEquityTTM'];
 
   useEffect(() => {
+    if (!symbol) {
+      setError('No stock symbol provided in the URL.');
+      setLoading(false);
+      return;
+    }
+
     const fetchStockData = async () => {
       try {
-        const response = await fetch('http://localhost:8080/stocks/overview/AAPL');
+        const response = await fetch(`http://localhost:8080/stocks/overview/${symbol}`);
         if (!response.ok) {
           throw new Error(`HTTP error! status: ${response.status}`);
         }
@@ -70,7 +78,7 @@ const StockPage: React.FC = () => {
     };
 
     fetchStockData();
-  }, []);
+  }, [symbol]); // Add symbol to dependency array
 
   if (loading) {
     return <div className="text-center p-4">Loading stock data...</div>;
@@ -80,13 +88,13 @@ const StockPage: React.FC = () => {
     return <div className="text-center p-4 text-red-500">Error: {error}</div>;
   }
 
-  if (!stockData) {
-    return <div className="text-center p-4">No stock data available.</div>;
+  if (!stockData || !symbol) { // Check for symbol here too
+    return <div className="text-center p-4">No stock data available or symbol missing.</div>;
   }
 
   return (
     <div className="container mx-auto p-4">
-      <h2 className="text-2xl font-bold mb-4">Stock Details</h2>
+      <h2 className="text-2xl font-bold mb-4">Stock Details for {symbol.toUpperCase()}</h2>
       <div className="flex border-b border-gray-200 mb-4">
         <button
           className={`px-4 py-2 text-lg font-medium ${
@@ -123,7 +131,7 @@ const StockPage: React.FC = () => {
             analystFields={analystFields}
           />
         )}
-        {activeTab === 'incomeStatement' && <IncomeStatementTab />}
+        {activeTab === 'incomeStatement' && <IncomeStatementTab symbol={symbol} />}
       </div>
     </div>
   );

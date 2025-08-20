@@ -31,7 +31,8 @@ function App() {
             <Route path="/quotes" element={<QuotesPage />} />
             <Route path="/mental" element={<MentalModelsPage />} />
             <Route path="/mental/:category" element={<MentalModelsList />} />
-            <Route path="/stock" element={<StockPage />} /> {/* New Stock route */}
+            <Route path="/stock" element={<StockPage />} />
+            <Route path="/stock/:symbol" element={<StockPage />} />
         </Routes>
       </Router>
     </>

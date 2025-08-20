@@ -1,4 +1,4 @@
-import { StockData } from '../types';
+import { StockData } from '../types/stockFinancials';
 import { formatPercentage } from '../utils';
 
 interface ReturnOnSectionProps {

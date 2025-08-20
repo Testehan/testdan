@@ -1,4 +1,4 @@
-import { StockData } from './types';
+import { StockData } from './types/stockFinancials';
 import DescriptionSection from './overview/DescriptionSection';
 import PriceAveragesSection from './overview/PriceAveragesSection';
 import ValuationSection from './overview/ValuationSection';
