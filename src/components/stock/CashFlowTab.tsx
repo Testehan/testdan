@@ -126,6 +126,7 @@ const CashFlowTab: React.FC<{ symbol: string }> = ({ symbol }) => {
                 allKeys={operatingActivitiesKeys}
                 numberScale={numberScale}
                 tableName="Operating Activities"
+                highlightKeys={['operatingCashflow']}
             />
 
             <FinancialStatementTable<CashFlowReport>
@@ -133,6 +134,7 @@ const CashFlowTab: React.FC<{ symbol: string }> = ({ symbol }) => {
                 allKeys={investingActivitiesKeys}
                 numberScale={numberScale}
                 tableName="Investing Activities"
+                highlightKeys={['cashflowFromInvestment']}
             />
 
             <FinancialStatementTable<CashFlowReport>
@@ -140,6 +142,7 @@ const CashFlowTab: React.FC<{ symbol: string }> = ({ symbol }) => {
                 allKeys={financingActivitiesKeys}
                 numberScale={numberScale}
                 tableName="Financing Activities"
+                highlightKeys={['cashflowFromFinancing']}
             />
 
             <FinancialStatementTable<CashFlowReport>
@@ -147,6 +150,7 @@ const CashFlowTab: React.FC<{ symbol: string }> = ({ symbol }) => {
                 allKeys={summaryKeys}
                 numberScale={numberScale}
                 tableName="Summary"
+                highlightKeys={['changeInCashAndCashEquivalents']}
             />
         </div>
     );

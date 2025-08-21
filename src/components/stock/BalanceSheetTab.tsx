@@ -5,37 +5,63 @@ import { useFinancialReports } from './hooks/useFinancialReports';
 import { FinancialStatementTable } from './FinancialStatementTable';
 import { balanceSheetFieldOrder } from './types/financialFieldOrders';
 
-const assetKeys: (keyof BalanceSheetReport)[] = [
-    'cashAndCashEquivalentsAtCarryingValue',
-    'shortTermInvestments',
-    'currentNetReceivables',
-    'inventory',
-    'otherCurrentAssets',
+const currentAssetKeys: (keyof BalanceSheetReport)[] = [
     'totalCurrentAssets',
-    'longTermInvestments',
+    'cashAndCashEquivalentsAtCarryingValue',
+    'cashAndShortTermInvestments',
+    'inventory',
+    'currentNetReceivables',
+    'shortTermInvestments',
+    'otherCurrentAssets',
+];
+
+const nonCurrentAssetKeys: (keyof BalanceSheetReport)[] = [
+    'totalNonCurrentAssets',
     'propertyPlantEquipment',
-    'goodwill',
+    'accumulatedDepreciationAmortizationPPE',
     'intangibleAssets',
+    'intangibleAssetsExcludingGoodwill',
+    'goodwill',
+    'investments',
+    'longTermInvestments',
     'otherNonCurrentAssets',
+];
+
+const totalAssetKeys: (keyof BalanceSheetReport)[] = [
     'totalAssets',
 ];
 
-const liabilityKeys: (keyof BalanceSheetReport)[] = [
+
+
+const currentLiabilityKeys: (keyof BalanceSheetReport)[] = [
+    'totalCurrentLiabilities',
     'currentAccountsPayable',
-    'shortTermDebt',
     'deferredRevenue',
+    'currentDebt',
+    'shortTermDebt',
+    'currentLongTermDebt',
     'otherCurrentLiabilities',
+];
+
+const nonCurrentLiabilityKeys: (keyof BalanceSheetReport)[] = [
+    'totalNonCurrentLiabilities',
+    'capitalLeaseObligations',
     'longTermDebt',
+    'longTermDebtNoncurrent',
+    'shortLongTermDebtTotal',
     'otherNonCurrentLiabilities',
+];
+
+const totalLiabilityKeys: (keyof BalanceSheetReport)[] = [
     'totalLiabilities',
 ];
 
 const equityKeys: (keyof BalanceSheetReport)[] = [
-    'commonStock',
-    'retainedEarnings',
-    'treasuryStock',
-    'accumulatedOtherComprehensiveIncome',
     'totalShareholderEquity',
+    'treasuryStock',
+    'retainedEarnings',
+    'commonStock',
+    'commonStockSharesOutstanding',
 ];
 
 const BalanceSheetTab: React.FC<{ symbol: string }> = ({ symbol }) => {
@@ -116,26 +142,62 @@ const BalanceSheetTab: React.FC<{ symbol: string }> = ({ symbol }) => {
 
             <FinancialStatementTable<BalanceSheetReport>
                 reportsToDisplay={reportsToDisplay}
-                allKeys={assetKeys}
+                allKeys={currentAssetKeys}
                 numberScale={numberScale}
-                tableName="Assets"
+                tableName="Current Assets"
+                highlightKeys={['totalCurrentAssets']}
             />
 
             <FinancialStatementTable<BalanceSheetReport>
                 reportsToDisplay={reportsToDisplay}
-                allKeys={liabilityKeys}
+                allKeys={nonCurrentAssetKeys}
                 numberScale={numberScale}
-                tableName="Liabilities"
+                tableName="Non-Current Assets"
+                highlightKeys={['totalNonCurrentAssets']}
+            />
+
+            <FinancialStatementTable<BalanceSheetReport>
+                reportsToDisplay={reportsToDisplay}
+                allKeys={totalAssetKeys}
+                numberScale={numberScale}
+                tableName="Total Assets"
+                highlightKeys={['totalAssets']}
+            />
+
+            <FinancialStatementTable<BalanceSheetReport>
+                reportsToDisplay={reportsToDisplay}
+                allKeys={currentLiabilityKeys}
+                numberScale={numberScale}
+                tableName="Current Liabilities"
+                highlightKeys={['totalCurrentLiabilities']}
+            />
+
+            <FinancialStatementTable<BalanceSheetReport>
+                reportsToDisplay={reportsToDisplay}
+                allKeys={nonCurrentLiabilityKeys}
+                numberScale={numberScale}
+                tableName="Non-Current Liabilities"
+                highlightKeys={['totalNonCurrentLiabilities']}
+            />
+
+            <FinancialStatementTable<BalanceSheetReport>
+                reportsToDisplay={reportsToDisplay}
+                allKeys={totalLiabilityKeys}
+                numberScale={numberScale}
+                tableName="Total Liabilities"
+                highlightKeys={['totalLiabilities']}
             />
 
             <FinancialStatementTable<BalanceSheetReport>
                 reportsToDisplay={reportsToDisplay}
                 allKeys={equityKeys}
                 numberScale={numberScale}
-tableName="Shareholder Equity"
+                tableName="Shareholder Equity"
+                highlightKeys={['totalShareholderEquity']}
             />
         </div>
     );
 };
 
 export default BalanceSheetTab;
+
