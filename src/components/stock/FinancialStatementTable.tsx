@@ -1,12 +1,13 @@
 import { formatLargeNumber, formatMonthYear, formatMetricName } from './utils';
+import { metricDescriptions } from './metricDescriptions'; // Import metric descriptions
 
 interface FinancialStatementTableProps<T> {
     reportsToDisplay: T[];
     allKeys: (keyof T)[];
-    numberScale: 'none' | 'millions' | 'billions'; // Updated type to include 'none'
+    numberScale: 'none' | 'millions' | 'billions';
     tableName: string; // e.g., "Income Statement"
-    highlightKeys?: (keyof T)[]; // New optional prop
-    percentageKeys?: (keyof T)[]; // New optional prop for keys that should be formatted as percentages
+    highlightKeys?: (keyof T)[];
+    percentageKeys?: (keyof T)[];
 }
 
 export const FinancialStatementTable = <T extends { fiscalDateEnding: string }>(
@@ -17,7 +18,7 @@ export const FinancialStatementTable = <T extends { fiscalDateEnding: string }>(
     }
 
     return (
-        <div className="overflow-x-auto">
+        <div className="overflow-y-visible">
             <table className="w-full text-sm text-left text-gray-500 table-fixed">
                 <thead className="text-xs text-gray-700 uppercase">
                     <tr>
@@ -29,21 +30,46 @@ export const FinancialStatementTable = <T extends { fiscalDateEnding: string }>(
                 </thead>
                 <tbody>
                     {allKeys.map((key, index) => {
-                        if (key === 'fiscalDateEnding' || key === 'reportedCurrency') return null; // Exclude these
+                        if (key === 'fiscalDateEnding' || key === 'reportedCurrency') return null;
                         if (!reportsToDisplay.some(report => Object.prototype.hasOwnProperty.call(report, key))) {
                             return null;
                         }
                         const formattedName = formatMetricName(key as string);
+                        const description = metricDescriptions[key as string]; // Get description
                         const isHighlighted = highlightKeys?.includes(key as keyof T);
                         const textClasses = `text-gray-900 ${isHighlighted ? 'font-semibold' : 'font-normal'}`;
                         const paddingClass = isHighlighted ? 'pl-6' : 'pl-10';
+
                         return (
                             <tr key={key as string} className={`border-b ${index % 2 === 0 ? 'bg-gray-100' : 'bg-gray-200'}`}>
-                                <th scope="row"
-                                    className={`py-2 w-60 truncate ${paddingClass} ${textClasses}`}
-                                    title={formattedName}
+                                <th
+                                    scope="row"
+                                    className={`py-2 w-60 ${paddingClass} ${textClasses} relative overflow-visible`}
+
                                 >
-                                    {formattedName}
+                                    <div className="flex items-center">
+                                        <span className="truncate" title={formattedName}>{formattedName}</span>
+                                        {description && (
+                                            <div className="relative group ml-1 flex-shrink-0">
+                                                <svg
+                                                    xmlns="http://www.w3.org/2000/svg"
+                                                    fill="none"
+                                                    viewBox="0 0 24 24"
+                                                    strokeWidth="1.5"
+                                                    stroke="currentColor"
+                                                    className="w-4 h-4 text-gray-400 cursor-pointer"
+                                                >
+                                                    <path strokeLinecap="round" strokeLinejoin="round" d="M11.25 11.25l.041-.02a.75.75 0 011.063.852l-.708 2.836a.75.75 0 001.063.853l.041-.021M21 12a9 9 0 11-18 0 9 9 0 0118 0zm-9-3.75h.008v.008H12V8.25z" />
+                                                </svg>
+                                                {/* Tooltip positioned to escape the th boundary */}
+                                                <div className="absolute left-full ml-2 top-1/2 -translate-y-1/2 hidden w-64 p-3 text-sm text-white bg-gray-900 rounded-lg shadow-xl group-hover:block z-[9999] whitespace-normal pointer-events-none">
+                                                    {description}
+                                                    {/* Arrow pointing left */}
+                                                    <div className="absolute right-full top-1/2 -translate-y-1/2 border-8 border-transparent border-r-gray-900 -mr-px"></div>
+                                                </div>
+                                            </div>
+                                        )}
+                                    </div>
                                 </th>
                                 {reportsToDisplay.map(report => {
                                     const value = report[key];
@@ -55,11 +81,9 @@ export const FinancialStatementTable = <T extends { fiscalDateEnding: string }>(
                                     if (!isNaN(numValue) && percentageKeys?.includes(key)) {
                                         displayValue = (numValue * 100).toFixed(2) + '%';
                                     } else if (!isNaN(numValue)) {
-                                        // Apply scaling only if the number is large enough and a scale is selected
                                         if (Math.abs(numValue) >= 1000000 && numberScale !== 'none') {
                                             displayValue = formatLargeNumber(value as string, numberScale);
                                         } else {
-                                            // Default formatting for ratios and smaller numbers
                                             displayValue = numValue.toFixed(4); 
                                         }
                                     } else {
