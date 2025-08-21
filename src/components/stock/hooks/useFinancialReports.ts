@@ -46,7 +46,8 @@ export const useFinancialReports = <T extends { fiscalDateEnding: string }>(
             setLoading(true);
             setError(null);
             try {
-                const response = await fetch(`${baseURL}/${reportEndpoint}/${symbol}`);
+                const upperCaseSymbol = symbol.toUpperCase(); // Convert symbol to uppercase
+                const response = await fetch(`${baseURL}/${reportEndpoint}/${upperCaseSymbol}`);
                 if (!response.ok) {
                     throw new Error(`HTTP error! status: ${response.status}`);
                 }

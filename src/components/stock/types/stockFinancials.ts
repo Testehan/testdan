@@ -154,3 +154,47 @@ export interface StockData {
     changeInExchangeRate: string;
     changeInCashAndCashEquivalents: string;
   }
+
+  export interface FinancialRatioReport {
+    fiscalDateEnding: string;
+    grossProfitMargin: number | null;
+    netProfitMargin: number | null;
+    returnOnAssets: number | null;
+    returnOnEquity: number | null;
+    operatingProfitMargin: number | null;
+    ebitdaMargin: number | null;
+    roic: number | null;
+    currentRatio: number | null;
+    quickRatio: number | null;
+    cashRatio: number | null;
+    workingCapital: number | null;
+    debtToAssetsRatio: number | null;
+    debtToEquityRatio: number | null;
+    interestCoverageRatio: number | null;
+    debtServiceCoverageRatio: number | null;
+    netDebtToEbitda: number | null;
+    altmanZScore: number | null;
+    assetTurnover: number | null;
+    inventoryTurnover: number | null;
+    receivablesTurnover: number | null;
+    daysSalesOutstanding: number | null;
+    payablesTurnover: number | null;
+    cashConversionCycle: number | null;
+    daysInventoryOutstanding: number | null;
+    daysPayablesOutstanding: number | null;
+    dividendYield: number | null;
+    dividendPayoutRatio: number | null;
+    buybackYield: number | null;
+    earningsPerShareBasic: number | null;
+    earningsPerShareDiluted: number | null;
+    bookValuePerShare: number | null;
+    salesPerShare: number | null;
+    freeCashFlowPerShare: number | null;
+    operatingCashFlowPerShare: number | null;
+    dividendPerShare: number | null;
+    cashPerShare: number | null;
+    freeCashFlow: number | null;
+    operatingCashFlowRatio: number | null;
+    cashFlowToDebtRatio: number | null;
+    tangibleBookValuePerShare: number | null;
+  }

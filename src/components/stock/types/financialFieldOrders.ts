@@ -1,5 +1,5 @@
 // src/components/stock/types/financialFieldOrders.ts
-import { IncomeStatementReport, BalanceSheetReport, CashFlowReport } from './stockFinancials';
+import { IncomeStatementReport, BalanceSheetReport, CashFlowReport, FinancialRatioReport } from './stockFinancials';
 
 export const incomeStatementFieldOrder: (keyof IncomeStatementReport)[] = [
     'totalRevenue',
@@ -98,4 +98,47 @@ export const cashFlowFieldOrder: (keyof CashFlowReport)[] = [
     'changeInExchangeRate',
     'changeInCashAndCashEquivalents',
     'reportedCurrency'
+];
+
+export const financialRatioFieldOrder: (keyof FinancialRatioReport)[] = [
+    "grossProfitMargin",
+    "netProfitMargin",
+    "operatingProfitMargin",
+    "ebitdaMargin",
+    "returnOnAssets",
+    "returnOnEquity",
+    "roic",
+    "currentRatio",
+    "quickRatio",
+    "cashRatio",
+    "workingCapital",
+    "debtToAssetsRatio",
+    "debtToEquityRatio",
+    "interestCoverageRatio",
+    "debtServiceCoverageRatio",
+    "netDebtToEbitda",
+    "altmanZScore",
+    "assetTurnover",
+    "inventoryTurnover",
+    "receivablesTurnover",
+    "daysSalesOutstanding",
+    "payablesTurnover",
+    "cashConversionCycle",
+    "daysInventoryOutstanding",
+    "daysPayablesOutstanding",
+    "dividendYield",
+    "dividendPayoutRatio",
+    "buybackYield",
+    "earningsPerShareBasic",
+    "earningsPerShareDiluted",
+    "bookValuePerShare",
+    "salesPerShare",
+    "freeCashFlowPerShare",
+    "operatingCashFlowPerShare",
+    "dividendPerShare",
+    "cashPerShare",
+    "freeCashFlow",
+    "operatingCashFlowRatio",
+    "cashFlowToDebtRatio",
+    "tangibleBookValuePerShare"
 ];
