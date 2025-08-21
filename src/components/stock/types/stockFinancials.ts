@@ -198,3 +198,23 @@ export interface StockData {
     cashFlowToDebtRatio: number | null;
     tangibleBookValuePerShare: number | null;
   }
+  
+  export interface AnnualEarnings {
+    fiscalDateEnding: string;
+    reportedEPS: string;
+  }
+  
+  export interface QuarterlyEarnings {
+    fiscalDateEnding: string;
+    reportedDate: string;
+    reportedEPS: string;
+    estimatedEPS: string;
+    surprise: string;
+    surprisePercentage: string;
+  }
+  
+  export interface EarningsHistory {
+    annualEarnings: AnnualEarnings[];
+    quarterlyEarnings: QuarterlyEarnings[];
+  }
+  

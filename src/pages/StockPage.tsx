@@ -6,6 +6,7 @@ import IncomeStatementTab from '../components/stock/IncomeStatementTab';
 import BalanceSheetTab from '../components/stock/BalanceSheetTab'; // Import BalanceSheetTab
 import CashFlowTab from '../components/stock/CashFlowTab';
 import RatiosTab from '../components/stock/RatiosTab'; // Import RatiosTab
+import EarningsTab from '../components/stock/EarningsTab';
 
 const StockPage: React.FC = () => {
   const { symbol } = useParams<{ symbol?: string }>(); // Make symbol optional to handle cases where it might not be in URL
@@ -139,6 +140,14 @@ const StockPage: React.FC = () => {
         >
           Ratios
         </button>
+        <button
+            className={`px-4 py-2 text-lg font-medium ${
+                activeTab === 'earnings' ? 'border-b-2 border-blue-500 text-blue-600' : 'text-gray-600 hover:text-blue-600'
+            }`}
+            onClick={() => setActiveTab('earnings')}
+        >
+          Earnings
+        </button>
       </div>
       <div>
         {activeTab === 'overview' && stockData && (
@@ -161,6 +170,7 @@ const StockPage: React.FC = () => {
         {activeTab === 'balanceSheet' && <BalanceSheetTab symbol={symbol} />}
         {activeTab === 'cashFlow' && <CashFlowTab symbol={symbol} />}
         {activeTab === 'ratios' && <RatiosTab symbol={symbol} />}
+        {activeTab === 'earnings' && <EarningsTab symbol={symbol} />}
       </div>
     </div>
   );
