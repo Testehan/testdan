@@ -47,8 +47,7 @@ export const FinancialStatementTable = <T extends { fiscalDateEnding: string }>(
                                     className={`py-2 w-60 ${paddingClass} ${textClasses} relative overflow-visible`}
 
                                 >
-                                    <div className="flex items-center">
-                                        <span className="truncate" title={formattedName}>{formattedName}</span>
+                                    <div className="flex ">
                                         {description && (
                                             <div className="relative group ml-1 flex-shrink-0">
                                                 <svg
@@ -69,6 +68,7 @@ export const FinancialStatementTable = <T extends { fiscalDateEnding: string }>(
                                                 </div>
                                             </div>
                                         )}
+                                        <span className="truncate" title={formattedName}>{formattedName}</span>
                                     </div>
                                 </th>
                                 {reportsToDisplay.map(report => {
