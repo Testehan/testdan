@@ -1,5 +1,5 @@
 // src/components/stock/types/financialFieldOrders.ts
-import { IncomeStatementReport, BalanceSheetReport } from './stockFinancials';
+import { IncomeStatementReport, BalanceSheetReport, CashFlowReport } from './stockFinancials';
 
 export const incomeStatementFieldOrder: (keyof IncomeStatementReport)[] = [
     'totalRevenue',
@@ -66,5 +66,36 @@ export const balanceSheetFieldOrder: (keyof BalanceSheetReport)[] = [
     'commonStock',
     'commonStockSharesOutstanding',
     'accumulatedOtherComprehensiveIncome',
+    'reportedCurrency'
+];
+
+export const cashFlowFieldOrder: (keyof CashFlowReport)[] = [
+    'netIncome',
+    'profitLoss',
+    'depreciationDepletionAndAmortization',
+    'changeInReceivables',
+    'changeInInventory',
+    'changeInOperatingAssets',
+    'changeInOperatingLiabilities',
+    'proceedsFromOperatingActivities',
+    'paymentsForOperatingActivities',
+    'operatingCashflow',
+    'capitalExpenditures',
+    'cashflowFromInvestment',
+    'proceedsFromIssuanceOfLongTermDebtAndCapitalSecuritiesNet',
+    'proceedsFromRepaymentsOfShortTermDebt',
+    'proceedsFromIssuanceOfCommonStock',
+    'proceedsFromIssuanceOfPreferredStock',
+    'proceedsFromSaleOfTreasuryStock',
+    'proceedsFromRepurchaseOfEquity',
+    'paymentsForRepurchaseOfEquity',
+    'paymentsForRepurchaseOfCommonStock',
+    'paymentsForRepurchaseOfPreferredStock',
+    'dividendPayoutCommonStock',
+    'dividendPayoutPreferredStock',
+    'dividendPayout',
+    'cashflowFromFinancing',
+    'changeInExchangeRate',
+    'changeInCashAndCashEquivalents',
     'reportedCurrency'
 ];

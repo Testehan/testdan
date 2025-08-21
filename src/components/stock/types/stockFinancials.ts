@@ -122,3 +122,35 @@ export interface StockData {
     commonStockSharesOutstanding: string;
     accumulatedOtherComprehensiveIncome: string;
   }
+
+  export interface CashFlowReport {
+    fiscalDateEnding: string;
+    reportedCurrency: string;
+    netIncome: string;
+    profitLoss: string;
+    depreciationDepletionAndAmortization: string;
+    changeInReceivables: string;
+    changeInInventory: string;
+    changeInOperatingAssets: string;
+    changeInOperatingLiabilities: string;
+    proceedsFromOperatingActivities: string;
+    paymentsForOperatingActivities: string;
+    operatingCashflow: string;
+    capitalExpenditures: string;
+    cashflowFromInvestment: string;
+    proceedsFromIssuanceOfLongTermDebtAndCapitalSecuritiesNet: string;
+    proceedsFromRepaymentsOfShortTermDebt: string;
+    proceedsFromIssuanceOfCommonStock: string;
+    proceedsFromIssuanceOfPreferredStock: string;
+    proceedsFromSaleOfTreasuryStock: string;
+    proceedsFromRepurchaseOfEquity: string;
+    paymentsForRepurchaseOfEquity: string;
+    paymentsForRepurchaseOfCommonStock: string;
+    paymentsForRepurchaseOfPreferredStock: string;
+    dividendPayoutCommonStock: string;
+    dividendPayoutPreferredStock: string;
+    dividendPayout: string;
+    cashflowFromFinancing: string;
+    changeInExchangeRate: string;
+    changeInCashAndCashEquivalents: string;
+  }
