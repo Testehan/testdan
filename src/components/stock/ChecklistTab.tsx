@@ -186,7 +186,16 @@ const ChecklistTab: React.FC<ChecklistTabProps> = ({ symbol }) => {
         onMouseEnter={cancelHideTimer}
         onMouseLeave={startHideTimer}
       >
-        <h3 className="text-xl font-semibold mb-4 border-b border-gray-600 pb-2">Checklist Log</h3>
+        <div className="flex justify-between items-center mb-4 border-b border-gray-600 pb-2">
+          <h3 className="text-xl font-semibold">Checklist Log</h3>
+          <button
+            onClick={() => setIsLogVisible(false)}
+            className="text-gray-400 hover:text-white"
+            aria-label="Close log"
+          >
+            <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" /></svg>
+          </button>
+        </div>
         {error && <div className="text-red-400 mb-4">{error}</div>}
         <div className="flex-grow overflow-y-auto">
           <ul>
