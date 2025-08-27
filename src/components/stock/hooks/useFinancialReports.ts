@@ -206,3 +206,41 @@ export const useEarningsHistory = (
       error,
     };
   };
+
+  export const useGlobalQuote = (
+    { symbol, baseURL = 'http://localhost:8080/stocks' }: { symbol: string; baseURL?: string }
+  ) => {
+    const [quote, setQuote] = useState<any | null>(null);
+    const [loading, setLoading] = useState<boolean>(true);
+    const [error, setError] = useState<string | null>(null);
+  
+    const fetchQuote = async () => {
+      setLoading(true);
+      setError(null);
+      try {
+        const upperCaseSymbol = symbol.toUpperCase();
+        const response = await fetch(`${baseURL}/global-quote/${upperCaseSymbol}`);
+        if (!response.ok) {
+          throw new Error(`HTTP error! status: ${response.status}`);
+        }
+        const data = await response.json();
+        setQuote(data.quotes[0]);
+      } catch (e: any) {
+        setError(e.message);
+      } finally {
+        setLoading(false);
+      }
+    };
+  
+    useEffect(() => {
+      fetchQuote();
+      const interval = setInterval(fetchQuote, 5 * 60 * 1000); // 5 minutes
+      return () => clearInterval(interval);
+    }, [symbol, baseURL]);
+  
+    return {
+      quote,
+      loading,
+      error,
+    };
+  };

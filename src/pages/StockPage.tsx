@@ -2,11 +2,8 @@ import React, { useState, useEffect } from 'react';
 import { useParams } from 'react-router-dom';
 import { StockData } from '../components/stock/types/stockFinancials';
 import OverviewTab from '../components/stock/OverviewTab';
-import IncomeStatementTab from '../components/stock/IncomeStatementTab';
-import BalanceSheetTab from '../components/stock/BalanceSheetTab'; // Import BalanceSheetTab
-import CashFlowTab from '../components/stock/CashFlowTab';
-import RatiosTab from '../components/stock/RatiosTab'; // Import RatiosTab
-import EarningsTab from '../components/stock/EarningsTab';
+import FinancialsTab from '../components/stock/FinancialsTab';
+import { useGlobalQuote } from '../components/stock/hooks/useFinancialReports';
 
 const StockPage: React.FC = () => {
   const { symbol } = useParams<{ symbol?: string }>(); // Make symbol optional to handle cases where it might not be in URL
@@ -14,6 +11,8 @@ const StockPage: React.FC = () => {
   const [loading, setLoading] = useState<boolean>(true);
   const [error, setError] = useState<string | null>(null);
   const [activeTab, setActiveTab] = useState<string>('overview');
+
+  const { quote, loading: quoteLoading, error: quoteError } = useGlobalQuote({ symbol: symbol || '' });
 
   const fieldsToRemove = [
     'id', 'AssetType', 'CIK', 'Exchange', 'Address', 'FiscalYearEnd', 'Description', 'OfficialSite', 'Name', 'Symbol',
@@ -96,9 +95,29 @@ const StockPage: React.FC = () => {
     return <div className="text-center p-4">No stock data available or symbol missing.</div>;
   }
 
+  const changePercent = quote ? parseFloat(quote['10. change percent'].replace('%', '')) : 0;
+  const priceColor = changePercent >= 0 ? 'text-green-600' : 'text-red-600';
+
+  const currencySymbol: { [key: string]: string } = {
+    USD: '$',
+    EUR: '€',
+    JPY: '¥',
+    GBP: '£',
+  };
+
   return (
     <div className="container mx-auto p-4">
-      <h2 className="text-2xl font-bold mb-4">Stock Details for {symbol.toUpperCase()}</h2>
+      <h2 className="text-2xl font-bold mb-4">
+        Stock Details for {symbol.toUpperCase()}
+        {quoteLoading && <span className="ml-4 text-sm">Loading quote...</span>}
+        {quoteError && <span className="ml-4 text-sm text-red-500">Error loading quote</span>}
+        {quote && (
+          <span className={`ml-4 ${priceColor}`}>
+            {quote['05. price']} {currencySymbol[stockData.Currency] || stockData.Currency}
+            <span className="text-sm ml-2">({quote['10. change percent']})</span>
+          </span>
+        )}
+      </h2>
       <div className="flex border-b border-gray-200 mb-4">
         <button
           className={`px-4 py-2 text-lg font-medium ${
@@ -110,43 +129,11 @@ const StockPage: React.FC = () => {
         </button>
         <button
           className={`px-4 py-2 text-lg font-medium ${
-            activeTab === 'incomeStatement' ? 'border-b-2 border-blue-500 text-blue-600' : 'text-gray-600 hover:text-blue-600'
+            activeTab === 'financials' ? 'border-b-2 border-blue-500 text-blue-600' : 'text-gray-600 hover:text-blue-600'
           }`}
-          onClick={() => setActiveTab('incomeStatement')}
+          onClick={() => setActiveTab('financials')}
         >
-          Income Statement
-        </button>
-        <button
-          className={`px-4 py-2 text-lg font-medium ${
-            activeTab === 'balanceSheet' ? 'border-b-2 border-blue-500 text-blue-600' : 'text-gray-600 hover:text-blue-600'
-          }`}
-          onClick={() => setActiveTab('balanceSheet')}
-        >
-          Balance Sheet
-        </button>
-        <button
-          className={`px-4 py-2 text-lg font-medium ${
-            activeTab === 'cashFlow' ? 'border-b-2 border-blue-500 text-blue-600' : 'text-gray-600 hover:text-blue-600'
-          }`}
-          onClick={() => setActiveTab('cashFlow')}
-        >
-          Cash Flow
-        </button>
-        <button
-          className={`px-4 py-2 text-lg font-medium ${
-            activeTab === 'ratios' ? 'border-b-2 border-blue-500 text-blue-600' : 'text-gray-600 hover:text-blue-600'
-          }`}
-          onClick={() => setActiveTab('ratios')}
-        >
-          Ratios
-        </button>
-        <button
-            className={`px-4 py-2 text-lg font-medium ${
-                activeTab === 'earnings' ? 'border-b-2 border-blue-500 text-blue-600' : 'text-gray-600 hover:text-blue-600'
-            }`}
-            onClick={() => setActiveTab('earnings')}
-        >
-          Earnings
+          Financials
         </button>
       </div>
       <div>
@@ -166,11 +153,7 @@ const StockPage: React.FC = () => {
             analystFields={analystFields}
           />
         )}
-        {activeTab === 'incomeStatement' && <IncomeStatementTab symbol={symbol} />}
-        {activeTab === 'balanceSheet' && <BalanceSheetTab symbol={symbol} />}
-        {activeTab === 'cashFlow' && <CashFlowTab symbol={symbol} />}
-        {activeTab === 'ratios' && <RatiosTab symbol={symbol} />}
-        {activeTab === 'earnings' && <EarningsTab symbol={symbol} />}
+        {activeTab === 'financials' && <FinancialsTab symbol={symbol} />}
       </div>
     </div>
   );
