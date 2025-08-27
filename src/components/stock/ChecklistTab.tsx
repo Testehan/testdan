@@ -4,10 +4,31 @@ interface ChecklistTabProps {
   symbol: string;
 }
 
+interface ChecklistItem {
+  name: string;
+  score: number;
+  explanation: string;
+}
+
+interface ReportData {
+  generatedAt: string;
+  finalScore: number;
+  items: Record<string, ChecklistItem>;
+}
+
+interface Tooltip {
+  visible: boolean;
+  content: string;
+  x: number;
+  y: number;
+}
+
 const ChecklistTab: React.FC<ChecklistTabProps> = ({ symbol }) => {
-  const [messages, setMessages] = useState<string[]>([]);
+  const [logMessages, setLogMessages] = useState<string[]>([]);
+  const [reportData, setReportData] = useState<Partial<ReportData>>({});
+  const [tooltip, setTooltip] = useState<Tooltip>({ visible: false, content: '', x: 0, y: 0 });
   const [error, setError] = useState<string | null>(null);
-  const [isVisible, setIsVisible] = useState(true);
+  const [isLogVisible, setIsLogVisible] = useState(true);
   const hasReceivedMessages = useRef(false);
   const hideTimeoutId = useRef<NodeJS.Timeout | null>(null);
 
@@ -20,33 +41,47 @@ const ChecklistTab: React.FC<ChecklistTabProps> = ({ symbol }) => {
   const startHideTimer = useCallback(() => {
     cancelHideTimer();
     hideTimeoutId.current = setTimeout(() => {
-      setIsVisible(false);
-    }, 6000); // 6-second delay
+      setIsLogVisible(false);
+    }, 6000);
   }, [cancelHideTimer]);
 
   useEffect(() => {
-    // Reset state for when the symbol changes
-    setMessages([]);
+    setLogMessages([]);
+    setReportData({});
     setError(null);
     hasReceivedMessages.current = false;
-    setIsVisible(true);
+    setIsLogVisible(true);
     cancelHideTimer();
 
     const eventSource = new EventSource(`http://localhost:8080/stocks/reporting/ferol/${symbol}`);
 
     eventSource.onopen = () => {
       setError(null);
-      setIsVisible(true); // Make sure it's visible on new connection
+      setIsLogVisible(true);
     };
 
-    const messageHandler = (event: MessageEvent) => {
+    eventSource.addEventListener('MESSAGE', (event: MessageEvent) => {
       hasReceivedMessages.current = true;
-      setMessages(prevMessages => [event.data, ...prevMessages]);
-    };
+      setLogMessages(prev => [event.data, ...prev]);
+    });
 
-    eventSource.addEventListener('MESSAGE', messageHandler);
+    eventSource.addEventListener('COMPLETED', (event: MessageEvent) => {
+      try {
+        const rawData = JSON.parse(event.data);
+        const finalScore = rawData.items.reduce((sum: number, item: ChecklistItem) => sum + item.score, 0);
+        const itemsMap = rawData.items.reduce((map: Record<string, ChecklistItem>, item: ChecklistItem) => {
+          map[item.name] = item;
+          return map;
+        }, {});
 
-    eventSource.addEventListener('COMPLETED', () => {
+        setReportData({
+          generatedAt: new Date(rawData.generatedAt).toLocaleString(),
+          finalScore,
+          items: itemsMap,
+        });
+      } catch (e) {
+        console.error("Failed to parse checklist data:", e);
+      }
       startHideTimer();
       eventSource.close();
     });
@@ -64,11 +99,75 @@ const ChecklistTab: React.FC<ChecklistTabProps> = ({ symbol }) => {
     };
   }, [symbol, startHideTimer, cancelHideTimer]);
 
-  return (
+  const handleMouseOver = (e: React.MouseEvent, explanation: string) => {
+    setTooltip({
+      visible: true,
+      content: explanation,
+      x: e.clientX,
+      y: e.clientY,
+    });
+  };
+
+  const handleMouseOut = () => {
+    setTooltip({ visible: false, content: '', x: 0, y: 0 });
+  };
+
+  const financialItems = [
+    { key: 'financialResilience', label: 'Financial resilience: (Fragile / Averge / Citadel) (0-5)' },
+    { key: 'grossMargin', label: 'Gross Margin: (<50% / 50% to 80% / > 80%) (0-3)' },
+    { key: 'roic', label: 'Returns on Capital (Low / Average / high, +1 if rising) (0-3)' },
+    { key: 'freeCashFlow', label: 'Free Cash Flow (Negative / Pozitive / Positive and growing fast) (0-3)' },
+    { key: 'earningsPerShare', label: 'Earnings per share (Negative / Pozitive / Positive and growing fast) (0-3)' },
+  ];
+
+  const renderChecklistTable = () => (
+    <div className="p-4">
+      <div className="bg-white shadow rounded-lg p-4">
+        <h3 className="text-lg font-semibold mb-4 border-b pb-2">Financial Checklist</h3>
+        <table className="w-full">
+          <tbody>
+            <tr className="border-b">
+              <td className="py-2 font-medium text-gray-600">Analysis Date</td>
+              <td className="py-2 text-gray-800">{reportData.generatedAt || '...'}</td>
+            </tr>
+            <tr className="border-b">
+              <td className="py-2 font-medium text-gray-600">Final score</td>
+              <td className="py-2 text-gray-800 font-bold">{reportData.finalScore ?? '...'}</td>
+            </tr>
+
+            {/* Financials Sub-header */}
+            <tr className="bg-gray-100">
+              <td colSpan={2} className="py-2 px-1 font-bold text-gray-800">
+                Financials
+              </td>
+            </tr>
+
+            {financialItems.map(({ key, label }, index) => {
+              const item = reportData.items?.[key];
+              const isLast = index === financialItems.length - 1;
+              return (
+                <tr
+                  key={key}
+                  className={!isLast ? 'border-b' : ''}
+                  onMouseEnter={(e) => item && handleMouseOver(e, item.explanation)}
+                  onMouseLeave={handleMouseOut}
+                >
+                  <td className="py-2 font-medium text-gray-600">{label}</td>
+                  <td className="py-2 text-gray-800">{item?.score ?? '...'}</td>
+                </tr>
+              );
+            })}
+          </tbody>
+        </table>
+      </div>
+    </div>
+  );
+
+  const renderLogPanel = () => (
     <>
       <div
         className={`fixed top-0 right-0 h-full w-96 bg-gray-900 bg-opacity-90 text-white shadow-lg p-4 flex flex-col transition-opacity duration-500 ease-in-out ${
-          isVisible ? 'opacity-100' : 'opacity-0 pointer-events-none'
+          isLogVisible ? 'opacity-100' : 'opacity-0 pointer-events-none'
         }`}
         onMouseEnter={cancelHideTimer}
         onMouseLeave={startHideTimer}
@@ -77,7 +176,7 @@ const ChecklistTab: React.FC<ChecklistTabProps> = ({ symbol }) => {
         {error && <div className="text-red-400 mb-4">{error}</div>}
         <div className="flex-grow overflow-y-auto">
           <ul>
-            {messages.map((msg, index) => (
+            {logMessages.map((msg, index) => (
               <li key={index} className="border-b border-gray-700 p-2 font-mono text-sm">
                 {msg}
               </li>
@@ -85,15 +184,28 @@ const ChecklistTab: React.FC<ChecklistTabProps> = ({ symbol }) => {
           </ul>
         </div>
       </div>
-
-      {/* Visible trigger bar on the right edge */}
-      {!isVisible && (
+      {!isLogVisible && (
         <div
           className="fixed top-0 right-0 h-full w-2 bg-gray-700 hover:bg-gray-600 transition-colors duration-300 cursor-pointer"
-          onMouseEnter={() => setIsVisible(true)}
+          onMouseEnter={() => setIsLogVisible(true)}
         />
       )}
     </>
+  );
+
+  return (
+    <div className="container mx-auto">
+      {renderChecklistTable()}
+      {renderLogPanel()}
+      {tooltip.visible && (
+        <div
+          className="fixed p-2 max-w-sm bg-black text-white text-sm rounded-md shadow-lg"
+          style={{ top: tooltip.y + 15, left: tooltip.x + 15 }}
+        >
+          {tooltip.content}
+        </div>
+      )}
+    </div>
   );
 };
 
