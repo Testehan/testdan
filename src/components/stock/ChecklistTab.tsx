@@ -29,6 +29,7 @@ const ChecklistTab: React.FC<ChecklistTabProps> = ({ symbol }) => {
   const [tooltip, setTooltip] = useState<Tooltip>({ visible: false, content: '', x: 0, y: 0 });
   const [error, setError] = useState<string | null>(null);
   const [isLogVisible, setIsLogVisible] = useState(true);
+  const [regenerationCount, setRegenerationCount] = useState(0);
   const hasReceivedMessages = useRef(false);
   const hideTimeoutId = useRef<NodeJS.Timeout | null>(null);
 
@@ -53,7 +54,12 @@ const ChecklistTab: React.FC<ChecklistTabProps> = ({ symbol }) => {
     setIsLogVisible(true);
     cancelHideTimer();
 
-    const eventSource = new EventSource(`http://localhost:8080/stocks/reporting/ferol/${symbol}`);
+    const url =
+      regenerationCount > 0
+        ? `http://localhost:8080/stocks/reporting/ferol/${symbol}?recreateReport=true`
+        : `http://localhost:8080/stocks/reporting/ferol/${symbol}`;
+
+    const eventSource = new EventSource(url);
 
     eventSource.onopen = () => {
       setError(null);
@@ -97,7 +103,7 @@ const ChecklistTab: React.FC<ChecklistTabProps> = ({ symbol }) => {
       eventSource.close();
       cancelHideTimer();
     };
-  }, [symbol, startHideTimer, cancelHideTimer]);
+  }, [symbol, regenerationCount, startHideTimer, cancelHideTimer]);
 
   const handleMouseOver = (e: React.MouseEvent, explanation: string) => {
     setTooltip({
@@ -123,7 +129,15 @@ const ChecklistTab: React.FC<ChecklistTabProps> = ({ symbol }) => {
   const renderChecklistTable = () => (
     <div className="p-4">
       <div className="bg-white shadow rounded-lg p-4">
-        <h3 className="text-lg font-semibold mb-4 border-b pb-2">Financial Checklist</h3>
+        <div className="flex justify-between items-center mb-4 border-b pb-2">
+          <h3 className="text-lg font-semibold">Financial Checklist</h3>
+          <button
+            onClick={() => setRegenerationCount(count => count + 1)}
+            className="bg-blue-500 hover:bg-blue-700 text-white font-bold py-1 px-3 rounded text-sm"
+          >
+            Regenerate
+          </button>
+        </div>
         <table className="w-full">
           <tbody>
             <tr className="border-b">
