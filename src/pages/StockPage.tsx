@@ -15,50 +15,6 @@ const StockPage: React.FC = () => {
 
   const { quote, loading: quoteLoading, error: quoteError } = useGlobalQuote({ symbol: symbol || '' });
 
-  const fieldsToRemove = [
-    'id', 'AssetType', 'CIK', 'Exchange', 'Address', 'FiscalYearEnd', 'Description', 'OfficialSite', 'Name', 'Symbol',
-    'AnalystTargetPrice', 'AnalystRatingStrongBuy', 'AnalystRatingBuy', 'AnalystRatingHold', 'AnalystRatingSell', 'AnalystRatingStrongSell',
-    'Country', 'Sector', 'Industry', 'Currency',
-    'SharesOutstanding', 'SharesFloat', 'PercentInsiders', 'PercentInstitutions',
-    'DividendPerShare', 'DividendYield', 'DividendDate', 'ExDividendDate',
-    '52WeekHigh', '52WeekLow', '50DayMovingAverage', '200DayMovingAverage',
-    'PERatio', 'ForwardPE', 'TrailingPE', 'PriceToSalesRatioTTM', 'EVToRevenue', 'EVToEBITDA', 'PriceToBookRatio', 'PEGRatio',
-    'ProfitMargin', 'OperatingMarginTTM', 'ReturnOnAssetsTTM', 'ReturnOnEquityTTM'
-  ];
-  const fieldsToFormatAsLargeNumber = [
-    'MarketCapitalization',
-    'EBITDA',
-    'RevenueTTM',
-    'GrossProfitTTM',
-    'SharesOutstanding',
-    'SharesFloat',
-  ];
-  const fieldsToMultiplyBy100AndFormatPercent = [
-    'DividendYield',
-    'QuarterlyEarningsGrowthYOY',
-    'QuarterlyRevenueGrowthYOY',
-  ];
-  const analystFields = [
-    'AnalystTargetPrice', 'AnalystRatingStrongBuy', 'AnalystRatingBuy', 'AnalystRatingHold', 'AnalystRatingSell', 'AnalystRatingStrongSell'
-  ];
-  const descriptiveFields = [
-    'Country', 'Currency', 'Sector', 'Industry'
-  ];
-  const shareOwnershipFields = [
-    'SharesOutstanding', 'SharesFloat', 'PercentInsiders', 'PercentInstitutions'
-  ];
-  const dividendFields = [
-    'DividendPerShare', 'DividendYield', 'DividendDate', 'ExDividendDate'
-  ];
-  const priceAveragesFields = [
-    '52WeekHigh', '52WeekLow', '50DayMovingAverage', '200DayMovingAverage'
-  ];
-  const valuationFields = [
-    'PERatio', 'ForwardPE', 'TrailingPE', 'PriceToSalesRatioTTM', 'EVToRevenue', 'EVToEBITDA', 'PriceToBookRatio', 'PEGRatio'
-  ];
-  const marginFields = ['ProfitMargin', 'OperatingMarginTTM'];
-  const returnOnFields = ['ReturnOnAssetsTTM', 'ReturnOnEquityTTM'];
-
   useEffect(() => {
     if (!symbol) {
       setError('No stock symbol provided in the URL.');
@@ -114,7 +70,7 @@ const StockPage: React.FC = () => {
         {quoteError && <span className="ml-4 text-sm text-red-500">Error loading quote</span>}
         {quote && (
           <span className={`ml-4 ${priceColor}`}>
-            {quote['05. price']} {currencySymbol[stockData.Currency] || stockData.Currency}
+            {quote['05. price']} {currencySymbol[stockData.currency] || stockData.currency}
             <span className="text-sm ml-2">({quote['10. change percent']})</span>
           </span>
         )}
@@ -149,17 +105,6 @@ const StockPage: React.FC = () => {
         {activeTab === 'overview' && stockData && (
           <OverviewTab
             stockData={stockData}
-            fieldsToRemove={fieldsToRemove}
-            fieldsToFormatAsLargeNumber={fieldsToFormatAsLargeNumber}
-            fieldsToMultiplyBy100AndFormatPercent={fieldsToMultiplyBy100AndFormatPercent}
-            descriptiveFields={descriptiveFields}
-            priceAveragesFields={priceAveragesFields}
-            valuationFields={valuationFields}
-            marginFields={marginFields}
-            returnOnFields={returnOnFields}
-            dividendFields={dividendFields}
-            shareOwnershipFields={shareOwnershipFields}
-            analystFields={analystFields}
           />
         )}
         {activeTab === 'financials' && <FinancialsTab symbol={symbol} />}
