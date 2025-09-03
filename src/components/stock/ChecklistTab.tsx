@@ -126,6 +126,15 @@ const ChecklistTab: React.FC<ChecklistTabProps> = ({ symbol }) => {
     { key: 'earningsPerShare', label: 'Earnings per share (Negative / Pozitive / Positive and growing fast) (0-3)' },
   ];
 
+  const moatItems = [
+    { key: 'networkEffect', label: 'Network effect, product ecosystem (None / Weak / Strong) (0-15)' },
+    { key: 'switchingCosts', label: 'Switching costs (None / Weak / Strong) (0-15)' },
+    { key: 'durableCostAdvantage', label: 'Durable cost advantage (Scale , Distribution , Physical location , Vertical integration) (0-15)' },
+    { key: 'intangibles', label: 'Intangibles (Premium brand , Patent , Trade secrets , Licence) (0-15)' },
+    { key: 'counterPositioning', label: 'Counter positioning (0-10)' },
+    { key: 'moatDirection', label: 'Moat direction (Narrowing / Stable / Widening) (0-5)' },
+  ];
+
   const renderChecklistTable = () => (
     <div className="p-4">
       <div className="bg-white shadow rounded-lg p-4">
@@ -159,6 +168,29 @@ const ChecklistTab: React.FC<ChecklistTabProps> = ({ symbol }) => {
             {financialItems.map(({ key, label }, index) => {
               const item = reportData.items?.[key];
               const isLast = index === financialItems.length - 1;
+              return (
+                <tr
+                  key={key}
+                  className={!isLast ? 'border-b' : ''}
+                  onMouseEnter={(e) => item && handleMouseOver(e, item.explanation)}
+                  onMouseLeave={handleMouseOut}
+                >
+                  <td className="py-2 font-medium text-gray-600">{label}</td>
+                  <td className="py-2 text-gray-800">{item?.score ?? '...'}</td>
+                </tr>
+              );
+            })}
+
+            {/* Moat/Defence Sub-header */}
+            <tr className="bg-gray-100">
+              <td colSpan={2} className="py-2 px-1 font-bold text-gray-800">
+                Moat/Defence
+              </td>
+            </tr>
+
+            {moatItems.map(({ key, label }, index) => {
+              const item = reportData.items?.[key];
+              const isLast = index === moatItems.length - 1;
               return (
                 <tr
                   key={key}
