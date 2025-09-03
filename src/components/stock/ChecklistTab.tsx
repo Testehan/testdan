@@ -135,6 +135,13 @@ const ChecklistTab: React.FC<ChecklistTabProps> = ({ symbol }) => {
     { key: 'moatDirection', label: 'Moat direction (Narrowing / Stable / Widening) (0-5)' },
   ];
 
+  const potentialItems = [
+    { key: 'optionality', label: 'Optionality (None / Within industry / New industry) (0-7)' },
+    { key: 'organicGrowthRunway', label: 'Organic growth runway (<5% / <10% / <15% / >15% ) (0-4)' },
+    { key: 'topDogFirstMover', label: 'Top dog and first mover in important, emerging industry / Industry disruptor (0-3)' },
+    { key: 'operatingLeverage', label: 'Operating leverage ahead (Negative / None / Modest / Tonnes) (0-4)' },
+  ];
+
   const renderChecklistTable = () => (
     <div className="p-4">
       <div className="bg-white shadow rounded-lg p-4">
@@ -191,6 +198,29 @@ const ChecklistTab: React.FC<ChecklistTabProps> = ({ symbol }) => {
             {moatItems.map(({ key, label }, index) => {
               const item = reportData.items?.[key];
               const isLast = index === moatItems.length - 1;
+              return (
+                <tr
+                  key={key}
+                  className={!isLast ? 'border-b' : ''}
+                  onMouseEnter={(e) => item && handleMouseOver(e, item.explanation)}
+                  onMouseLeave={handleMouseOut}
+                >
+                  <td className="py-2 font-medium text-gray-600">{label}</td>
+                  <td className="py-2 text-gray-800">{item?.score ?? '...'}</td>
+                </tr>
+              );
+            })}
+
+            {/* Potential / Offense Sub-header */}
+            <tr className="bg-gray-100">
+              <td colSpan={2} className="py-2 px-1 font-bold text-gray-800">
+                Potential / Offense
+              </td>
+            </tr>
+
+            {potentialItems.map(({ key, label }, index) => {
+              const item = reportData.items?.[key];
+              const isLast = index === potentialItems.length - 1;
               return (
                 <tr
                   key={key}
