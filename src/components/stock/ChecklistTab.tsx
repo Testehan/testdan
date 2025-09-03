@@ -105,6 +105,14 @@ const ChecklistTab: React.FC<ChecklistTabProps> = ({ symbol }) => {
       clearInterval(timer);
     });
 
+    eventSource.addEventListener('ERROR', (event: MessageEvent) => {
+      setError(event.data);
+      setIsLogVisible(true);
+      setLoading(false);
+      clearInterval(timer);
+      eventSource.close();
+    });
+
     eventSource.onerror = () => {
       if (!hasReceivedMessages.current) {
         setError('Error connecting to the SSE stream. Please check the connection.');
@@ -278,7 +286,7 @@ const ChecklistTab: React.FC<ChecklistTabProps> = ({ symbol }) => {
             <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" /></svg>
           </button>
         </div>
-        {error && <div className="text-red-400 mb-4">{error}</div>}
+        {error && <div className="bg-red-900 text-white p-2 mb-4">{error}</div>}
         <div className="flex-grow overflow-y-auto">
           <ul>
             {logMessages.map((msg, index) => (
