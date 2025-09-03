@@ -224,7 +224,7 @@ export const useEarningsHistory = (
           throw new Error(`HTTP error! status: ${response.status}`);
         }
         const data = await response.json();
-        setQuote(data.quotes[0]);
+        setQuote(data);
       } catch (e: any) {
         setError(e.message);
       } finally {
