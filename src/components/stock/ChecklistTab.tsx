@@ -1,4 +1,5 @@
 import React, { useState, useEffect, useRef, useCallback } from 'react';
+import Spinner from './Spinner';
 
 interface ChecklistTabProps {
   symbol: string;
@@ -30,6 +31,9 @@ const ChecklistTab: React.FC<ChecklistTabProps> = ({ symbol }) => {
   const [error, setError] = useState<string | null>(null);
   const [isLogVisible, setIsLogVisible] = useState(true);
   const [regenerationCount, setRegenerationCount] = useState(0);
+  const [loading, setLoading] = useState(false);
+  const [startTime, setStartTime] = useState<Date | null>(null);
+  const [elapsedTime, setElapsedTime] = useState(0);
   const hasReceivedMessages = useRef(false);
   const hideTimeoutId = useRef<NodeJS.Timeout | null>(null);
 
@@ -53,6 +57,13 @@ const ChecklistTab: React.FC<ChecklistTabProps> = ({ symbol }) => {
     hasReceivedMessages.current = false;
     setIsLogVisible(true);
     cancelHideTimer();
+    setLoading(true);
+    setStartTime(new Date());
+    setElapsedTime(0);
+
+    const timer = setInterval(() => {
+      setElapsedTime(prev => prev + 1);
+    }, 1000);
 
     const url =
       regenerationCount > 0
@@ -90,6 +101,8 @@ const ChecklistTab: React.FC<ChecklistTabProps> = ({ symbol }) => {
       }
       startHideTimer();
       eventSource.close();
+      setLoading(false);
+      clearInterval(timer);
     });
 
     eventSource.onerror = () => {
@@ -97,11 +110,14 @@ const ChecklistTab: React.FC<ChecklistTabProps> = ({ symbol }) => {
         setError('Error connecting to the SSE stream. Please check the connection.');
       }
       eventSource.close();
+      setLoading(false);
+      clearInterval(timer);
     };
 
     return () => {
       eventSource.close();
       cancelHideTimer();
+      clearInterval(timer);
     };
   }, [symbol, regenerationCount, startHideTimer, cancelHideTimer]);
 
@@ -144,98 +160,102 @@ const ChecklistTab: React.FC<ChecklistTabProps> = ({ symbol }) => {
 
   const renderChecklistTable = () => (
     <div className="p-4">
-      <div className="bg-white shadow rounded-lg p-4">
-        <div className="flex justify-between items-center mb-4 border-b pb-2">
-          <h3 className="text-lg font-semibold">Financial Checklist</h3>
-          <button
-            onClick={() => setRegenerationCount(count => count + 1)}
-            className="bg-blue-500 hover:bg-blue-700 text-white font-bold py-1 px-3 rounded text-sm"
-          >
-            Regenerate
-          </button>
+      {loading ? (
+        <Spinner elapsedTime={elapsedTime} />
+      ) : (
+        <div className="bg-white shadow rounded-lg p-4">
+          <div className="flex justify-between items-center mb-4 border-b pb-2">
+            <h3 className="text-lg font-semibold">Financial Checklist</h3>
+            <button
+              onClick={() => setRegenerationCount(count => count + 1)}
+              className="bg-blue-500 hover:bg-blue-700 text-white font-bold py-1 px-3 rounded text-sm"
+            >
+              Regenerate
+            </button>
+          </div>
+          <table className="w-full">
+            <tbody>
+              <tr className="border-b">
+                <td className="py-2 font-medium text-gray-600">Analysis Date</td>
+                <td className="py-2 text-gray-800">{reportData.generatedAt || '...'}</td>
+              </tr>
+              <tr className="border-b">
+                <td className="py-2 font-medium text-gray-600">Final score</td>
+                <td className="py-2 text-gray-800 font-bold">{reportData.finalScore ?? '...'}</td>
+              </tr>
+
+              {/* Financials Sub-header */}
+              <tr className="bg-gray-100">
+                <td colSpan={2} className="py-2 px-1 font-bold text-gray-800">
+                  Financials
+                </td>
+              </tr>
+
+              {financialItems.map(({ key, label }, index) => {
+                const item = reportData.items?.[key];
+                const isLast = index === financialItems.length - 1;
+                return (
+                  <tr
+                    key={key}
+                    className={!isLast ? 'border-b' : ''}
+                    onMouseEnter={(e) => item && handleMouseOver(e, item.explanation)}
+                    onMouseLeave={handleMouseOut}
+                  >
+                    <td className="py-2 font-medium text-gray-600">{label}</td>
+                    <td className="py-2 text-gray-800">{item?.score ?? '...'}</td>
+                  </tr>
+                );
+              })}
+
+              {/* Moat/Defence Sub-header */}
+              <tr className="bg-gray-100">
+                <td colSpan={2} className="py-2 px-1 font-bold text-gray-800">
+                  Moat/Defence
+                </td>
+              </tr>
+
+              {moatItems.map(({ key, label }, index) => {
+                const item = reportData.items?.[key];
+                const isLast = index === moatItems.length - 1;
+                return (
+                  <tr
+                    key={key}
+                    className={!isLast ? 'border-b' : ''}
+                    onMouseEnter={(e) => item && handleMouseOver(e, item.explanation)}
+                    onMouseLeave={handleMouseOut}
+                  >
+                    <td className="py-2 font-medium text-gray-600">{label}</td>
+                    <td className="py-2 text-gray-800">{item?.score ?? '...'}</td>
+                  </tr>
+                );
+              })}
+
+              {/* Potential / Offense Sub-header */}
+              <tr className="bg-gray-100">
+                <td colSpan={2} className="py-2 px-1 font-bold text-gray-800">
+                  Potential / Offense
+                </td>
+              </tr>
+
+              {potentialItems.map(({ key, label }, index) => {
+                const item = reportData.items?.[key];
+                const isLast = index === potentialItems.length - 1;
+                return (
+                  <tr
+                    key={key}
+                    className={!isLast ? 'border-b' : ''}
+                    onMouseEnter={(e) => item && handleMouseOver(e, item.explanation)}
+                    onMouseLeave={handleMouseOut}
+                  >
+                    <td className="py-2 font-medium text-gray-600">{label}</td>
+                    <td className="py-2 text-gray-800">{item?.score ?? '...'}</td>
+                  </tr>
+                );
+              })}
+            </tbody>
+          </table>
         </div>
-        <table className="w-full">
-          <tbody>
-            <tr className="border-b">
-              <td className="py-2 font-medium text-gray-600">Analysis Date</td>
-              <td className="py-2 text-gray-800">{reportData.generatedAt || '...'}</td>
-            </tr>
-            <tr className="border-b">
-              <td className="py-2 font-medium text-gray-600">Final score</td>
-              <td className="py-2 text-gray-800 font-bold">{reportData.finalScore ?? '...'}</td>
-            </tr>
-
-            {/* Financials Sub-header */}
-            <tr className="bg-gray-100">
-              <td colSpan={2} className="py-2 px-1 font-bold text-gray-800">
-                Financials
-              </td>
-            </tr>
-
-            {financialItems.map(({ key, label }, index) => {
-              const item = reportData.items?.[key];
-              const isLast = index === financialItems.length - 1;
-              return (
-                <tr
-                  key={key}
-                  className={!isLast ? 'border-b' : ''}
-                  onMouseEnter={(e) => item && handleMouseOver(e, item.explanation)}
-                  onMouseLeave={handleMouseOut}
-                >
-                  <td className="py-2 font-medium text-gray-600">{label}</td>
-                  <td className="py-2 text-gray-800">{item?.score ?? '...'}</td>
-                </tr>
-              );
-            })}
-
-            {/* Moat/Defence Sub-header */}
-            <tr className="bg-gray-100">
-              <td colSpan={2} className="py-2 px-1 font-bold text-gray-800">
-                Moat/Defence
-              </td>
-            </tr>
-
-            {moatItems.map(({ key, label }, index) => {
-              const item = reportData.items?.[key];
-              const isLast = index === moatItems.length - 1;
-              return (
-                <tr
-                  key={key}
-                  className={!isLast ? 'border-b' : ''}
-                  onMouseEnter={(e) => item && handleMouseOver(e, item.explanation)}
-                  onMouseLeave={handleMouseOut}
-                >
-                  <td className="py-2 font-medium text-gray-600">{label}</td>
-                  <td className="py-2 text-gray-800">{item?.score ?? '...'}</td>
-                </tr>
-              );
-            })}
-
-            {/* Potential / Offense Sub-header */}
-            <tr className="bg-gray-100">
-              <td colSpan={2} className="py-2 px-1 font-bold text-gray-800">
-                Potential / Offense
-              </td>
-            </tr>
-
-            {potentialItems.map(({ key, label }, index) => {
-              const item = reportData.items?.[key];
-              const isLast = index === potentialItems.length - 1;
-              return (
-                <tr
-                  key={key}
-                  className={!isLast ? 'border-b' : ''}
-                  onMouseEnter={(e) => item && handleMouseOver(e, item.explanation)}
-                  onMouseLeave={handleMouseOut}
-                >
-                  <td className="py-2 font-medium text-gray-600">{label}</td>
-                  <td className="py-2 text-gray-800">{item?.score ?? '...'}</td>
-                </tr>
-              );
-            })}
-          </tbody>
-        </table>
-      </div>
+      )}
     </div>
   );
 
