@@ -7,41 +7,51 @@ import { cashFlowFieldOrder } from './types/financialFieldOrders';
 
 const operatingActivitiesKeys: (keyof CashFlowReport)[] = [
     'netIncome',
-    'profitLoss',
-    'depreciationDepletionAndAmortization',
-    'changeInReceivables',
-    'changeInInventory',
-    'changeInOperatingAssets',
-    'changeInOperatingLiabilities',
-    'proceedsFromOperatingActivities',
-    'paymentsForOperatingActivities',
-    'operatingCashflow',
+    'depreciationAndAmortization',
+    'deferredIncomeTax',
+    'stockBasedCompensation',
+    'changeInWorkingCapital',
+    'accountsReceivables',
+    'inventory',
+    'accountsPayables',
+    'otherWorkingCapital',
+    'otherNonCashItems',
+    'netCashProvidedByOperatingActivities',
 ];
 
 const investingActivitiesKeys: (keyof CashFlowReport)[] = [
-    'capitalExpenditures',
-    'cashflowFromInvestment',
+    'investmentsInPropertyPlantAndEquipment',
+    'acquisitionsNet',
+    'purchasesOfInvestments',
+    'salesMaturitiesOfInvestments',
+    'otherInvestingActivities',
+    'netCashProvidedByInvestingActivities',
 ];
 
 const financingActivitiesKeys: (keyof CashFlowReport)[] = [
-    'proceedsFromIssuanceOfLongTermDebtAndCapitalSecuritiesNet',
-    'proceedsFromRepaymentsOfShortTermDebt',
-    'proceedsFromIssuanceOfCommonStock',
-    'proceedsFromIssuanceOfPreferredStock',
-    'proceedsFromSaleOfTreasuryStock',
-    'proceedsFromRepurchaseOfEquity',
-    'paymentsForRepurchaseOfEquity',
-    'paymentsForRepurchaseOfCommonStock',
-    'paymentsForRepurchaseOfPreferredStock',
-    'dividendPayoutCommonStock',
-    'dividendPayoutPreferredStock',
-    'dividendPayout',
-    'cashflowFromFinancing',
+    'netDebtIssuance',
+    'longTermNetDebtIssuance',
+    'shortTermNetDebtIssuance',
+    'netStockIssuance',
+    'netCommonStockIssuance',
+    'commonStockIssuance',
+    'commonStockRepurchased',
+    'netPreferredStockIssuance',
+    'netDividendsPaid',
+    'commonDividendsPaid',
+    'preferredDividendsPaid',
+    'otherFinancingActivities',
+    'netCashProvidedByFinancingActivities',
 ];
 
 const summaryKeys: (keyof CashFlowReport)[] = [
-    'changeInExchangeRate',
-    'changeInCashAndCashEquivalents',
+    'effectOfForexChangesOnCash',
+    'netChangeInCash',
+    'cashAtEndOfPeriod',
+    'cashAtBeginningOfPeriod',
+    'operatingCashFlow',
+    'capitalExpenditure',
+    'freeCashFlow',
 ];
 
 
@@ -126,7 +136,7 @@ const CashFlowTab: React.FC<{ symbol: string }> = ({ symbol }) => {
                 allKeys={operatingActivitiesKeys}
                 numberScale={numberScale}
                 tableName="Operating Activities"
-                highlightKeys={['operatingCashflow']}
+                highlightKeys={['netCashProvidedByOperatingActivities']}
             />
 
             <FinancialStatementTable<CashFlowReport>
@@ -134,7 +144,7 @@ const CashFlowTab: React.FC<{ symbol: string }> = ({ symbol }) => {
                 allKeys={investingActivitiesKeys}
                 numberScale={numberScale}
                 tableName="Investing Activities"
-                highlightKeys={['cashflowFromInvestment']}
+                highlightKeys={['netCashProvidedByInvestingActivities']}
             />
 
             <FinancialStatementTable<CashFlowReport>
@@ -142,7 +152,7 @@ const CashFlowTab: React.FC<{ symbol: string }> = ({ symbol }) => {
                 allKeys={financingActivitiesKeys}
                 numberScale={numberScale}
                 tableName="Financing Activities"
-                highlightKeys={['cashflowFromFinancing']}
+                highlightKeys={['netCashProvidedByFinancingActivities']}
             />
 
             <FinancialStatementTable<CashFlowReport>
@@ -150,7 +160,7 @@ const CashFlowTab: React.FC<{ symbol: string }> = ({ symbol }) => {
                 allKeys={summaryKeys}
                 numberScale={numberScale}
                 tableName="Summary"
-                highlightKeys={['changeInCashAndCashEquivalents']}
+                highlightKeys={['netChangeInCash']}
             />
         </div>
     );
