@@ -162,6 +162,7 @@ export interface StockData {
     returnOnEquity: number | null;
     operatingProfitMargin: number | null;
     ebitdaMargin: number | null;
+    adjustedEbitdaMargin: number | null;
     roic: number | null;
     currentRatio: number | null;
     quickRatio: number | null;

@@ -8,6 +8,7 @@ export const metricDescriptions: { [key: string]: string } = {
     returnOnEquity: "Measures the rate of return on the ownership interest (shareholders' equity) of the common stock owners. It shows how much profit a company generates for each dollar of shareholders' equity.",
     operatingProfitMargin: "Indicates how much profit a company makes on each dollar of sales after paying for variable costs of production, but before interest and tax.",
     ebitdaMargin: "Measures a company's operating profit as a percentage of its revenue, before interest, taxes, depreciation, and amortization. It's a good indicator of operational efficiency.",
+    adjustedEbitdaMargin: "Adjusted EBITDA Margin is EBITDA (excluding one-time items, stock-based comp, etc.) divided by revenue, expressed as a percentage. It measures adjusted operating profitability.",
     roic: "Return on Invested Capital (ROIC) measures the percentage return that a company makes from capital (both debt and equity) invested in the business. It shows how well a company is converting its invested capital into profits.",
 
     // Liquidity Ratios

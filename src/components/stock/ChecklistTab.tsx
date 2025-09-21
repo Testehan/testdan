@@ -166,6 +166,11 @@ const ChecklistTab: React.FC<ChecklistTabProps> = ({ symbol }) => {
     { key: 'operatingLeverage', label: 'Operating leverage ahead (Negative / None / Modest / Tonnes) (0-4)' },
   ];
 
+  const customerItems = [
+    { key: 'customerAcquisition', label: 'Acquisitions (Sales & Marketing % of gross profit: 50% / < 10%) (Expensive / Normal / Word of mouth) (0-5)' },
+    { key: 'companyCyclicality', label: 'Dependence (Highly cyclical / Moderate / Recession proof) (0-5)' },
+  ];
+
   const renderChecklistTable = () => (
     <div className="p-4">
       {loading ? (
@@ -240,7 +245,7 @@ const ChecklistTab: React.FC<ChecklistTabProps> = ({ symbol }) => {
 
               {/* Potential / Offense Sub-header */}
               <tr className="bg-gray-100">
-                <td colSpan={2} className="py-2 px-1 font-bold text-gray-800">
+                <td colSpan={2} className="py-2 px-1 fontbold text-gray-800">
                   Potential / Offense
                 </td>
               </tr>
@@ -248,6 +253,29 @@ const ChecklistTab: React.FC<ChecklistTabProps> = ({ symbol }) => {
               {potentialItems.map(({ key, label }, index) => {
                 const item = reportData.items?.[key];
                 const isLast = index === potentialItems.length - 1;
+                return (
+                  <tr
+                    key={key}
+                    className={!isLast ? 'border-b' : ''}
+                    onMouseEnter={(e) => item && handleMouseOver(e, item.explanation)}
+                    onMouseLeave={handleMouseOut}
+                  >
+                    <td className="py-2 font-medium text-gray-600">{label}</td>
+                    <td className="py-2 text-gray-800">{item?.score ?? '...'}</td>
+                  </tr>
+                );
+              })}
+
+              {/* Customers Sub-header */}
+              <tr className="bg-gray-100">
+                <td colSpan={2} className="py-2 px-1 font-bold text-gray-800">
+                  Customers
+                </td>
+              </tr>
+
+              {customerItems.map(({ key, label }, index) => {
+                const item = reportData.items?.[key];
+                const isLast = index === customerItems.length - 1;
                 return (
                   <tr
                     key={key}
