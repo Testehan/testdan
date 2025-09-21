@@ -32,7 +32,7 @@ const ChecklistTab: React.FC<ChecklistTabProps> = ({ symbol }) => {
   const [isLogVisible, setIsLogVisible] = useState(true);
   const [regenerationCount, setRegenerationCount] = useState(0);
   const [loading, setLoading] = useState(false);
-  const [startTime, setStartTime] = useState<Date | null>(null);
+  // const [startTime, setStartTime] = useState<Date | null>(null);
   const [elapsedTime, setElapsedTime] = useState(0);
   const hasReceivedMessages = useRef(false);
   const hideTimeoutId = useRef<NodeJS.Timeout | null>(null);
@@ -58,7 +58,7 @@ const ChecklistTab: React.FC<ChecklistTabProps> = ({ symbol }) => {
     setIsLogVisible(true);
     cancelHideTimer();
     setLoading(true);
-    setStartTime(new Date());
+    // setStartTime(new Date());
     setElapsedTime(0);
 
     const timer = setInterval(() => {
@@ -171,6 +171,11 @@ const ChecklistTab: React.FC<ChecklistTabProps> = ({ symbol }) => {
     { key: 'companyCyclicality', label: 'Dependence (Highly cyclical / Moderate / Recession proof) (0-5)' },
   ];
 
+  const companySpecificFactorsItems = [
+    { key: 'recurringRevenue', label: 'Recurring revenue (None / Some / Tons) (0-5)' },
+    { key: 'pricingPower', label: 'Princing power (None / Some / Tons) (0-5)' },
+  ];
+
   const renderChecklistTable = () => (
     <div className="p-4">
       {loading ? (
@@ -276,6 +281,29 @@ const ChecklistTab: React.FC<ChecklistTabProps> = ({ symbol }) => {
               {customerItems.map(({ key, label }, index) => {
                 const item = reportData.items?.[key];
                 const isLast = index === customerItems.length - 1;
+                return (
+                  <tr
+                    key={key}
+                    className={!isLast ? 'border-b' : ''}
+                    onMouseEnter={(e) => item && handleMouseOver(e, item.explanation)}
+                    onMouseLeave={handleMouseOut}
+                  >
+                    <td className="py-2 font-medium text-gray-600">{label}</td>
+                    <td className="py-2 text-gray-800">{item?.score ?? '...'}</td>
+                  </tr>
+                );
+              })}
+
+              {/* Company specific factors Sub-header */}
+              <tr className="bg-gray-100">
+                <td colSpan={2} className="py-2 px-1 font-bold text-gray-800">
+                  Company specific factors
+                </td>
+              </tr>
+
+              {companySpecificFactorsItems.map(({ key, label }, index) => {
+                const item = reportData.items?.[key];
+                const isLast = index === companySpecificFactorsItems.length - 1;
                 return (
                   <tr
                     key={key}
