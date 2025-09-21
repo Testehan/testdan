@@ -10,7 +10,7 @@ interface FinancialStatementTableProps<T> {
     percentageKeys?: (keyof T)[];
 }
 
-export const FinancialStatementTable = <T extends { fiscalDateEnding: string }>(
+export const FinancialStatementTable = <T extends { date: string }>(
     { reportsToDisplay, allKeys, numberScale, tableName, highlightKeys, percentageKeys }: FinancialStatementTableProps<T>
 ) => {
     if (reportsToDisplay.length === 0) {
@@ -24,13 +24,13 @@ export const FinancialStatementTable = <T extends { fiscalDateEnding: string }>(
                     <tr>
                         <th scope="col" className="px-6 py-2 w-60 bg-blue-50 font-semibold">{tableName}</th>
                         {reportsToDisplay.map(report => (
-                            <th key={report.fiscalDateEnding} scope="col" className="px-6 py-2 whitespace-nowrap">{formatMonthYear(report.fiscalDateEnding)}</th>
+                            <th key={report.date} scope="col" className="px-6 py-2 whitespace-nowrap">{formatMonthYear(report.date)}</th>
                         ))}
                     </tr>
                 </thead>
                 <tbody>
                     {allKeys.map((key, index) => {
-                        if (key === 'fiscalDateEnding' || key === 'reportedCurrency') return null;
+                        if (key === 'date' || key === 'reportedCurrency') return null;
                         if (!reportsToDisplay.some(report => Object.prototype.hasOwnProperty.call(report, key))) {
                             return null;
                         }
@@ -73,7 +73,7 @@ export const FinancialStatementTable = <T extends { fiscalDateEnding: string }>(
                                 </th>
                                 {reportsToDisplay.map(report => {
                                     const value = report[key];
-                                    if (value === 'None' || value === null || value === undefined) return <td key={report.fiscalDateEnding} className="px-6 py-2">-</td>;
+                                    if (value === 'None' || value === null || value === undefined) return <td key={report.date} className="px-6 py-2">-</td>;
                                     
                                     let displayValue: string;
                                     const numValue = parseFloat(value as string);
@@ -91,7 +91,7 @@ export const FinancialStatementTable = <T extends { fiscalDateEnding: string }>(
                                     }
 
                                     return (
-                                        <td key={report.fiscalDateEnding} className="px-6 py-2">
+                                        <td key={report.date} className="px-6 py-2">
                                             {displayValue}
                                         </td>
                                     );

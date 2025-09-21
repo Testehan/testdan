@@ -42,14 +42,14 @@ const EarningsTab: React.FC<{ symbol: string }> = ({ symbol }) => {
             <EarningsHistoryTable
               title="Annual Earnings"
               data={earningsHistory.annualEarnings}
-              columns={['fiscalDateEnding', 'reportedEPS']}
+              columns={['date', 'reportedEPS']}
             />
           )}
           {reportType === 'quarterly' && (
             <EarningsHistoryTable
               title="Quarterly Earnings"
               data={earningsHistory.quarterlyEarnings}
-              columns={['fiscalDateEnding', 'reportedDate', 'reportedEPS', 'estimatedEPS', 'surprise', 'surprisePercentage']}
+              columns={['date', 'reportedDate', 'reportedEPS', 'estimatedEPS', 'surprise', 'surprisePercentage']}
             />
           )}
         </>

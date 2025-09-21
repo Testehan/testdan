@@ -2,30 +2,38 @@
 import { IncomeStatementReport, BalanceSheetReport, CashFlowReport, FinancialRatioReport } from './stockFinancials';
 
 export const incomeStatementFieldOrder: (keyof IncomeStatementReport)[] = [
-    'totalRevenue',
+    'revenue',
     'costOfRevenue',
-    'costofGoodsAndServicesSold',
     'grossProfit',
-    'researchAndDevelopment',
-    'sellingGeneralAndAdministrative',
+    'researchAndDevelopmentExpenses',
+    'generalAndAdministrativeExpenses',
+    'sellingAndMarketingExpenses',
+    'sellingGeneralAndAdministrativeExpenses',
+    'otherExpenses',
     'operatingExpenses',
-    'operatingIncome',
-    'investmentIncomeNet',
+    'costAndExpenses',
     'netInterestIncome',
     'interestIncome',
     'interestExpense',
-    'interestAndDebtExpense',
-    'nonInterestIncome',
-    'otherNonOperatingIncome',
+    'depreciationAndAmortization',
+    'ebitda',
+    'ebit',
+    'nonOperatingIncomeExcludingInterest',
+    'operatingIncome',
+    'totalOtherIncomeExpensesNet',
     'incomeBeforeTax',
     'incomeTaxExpense',
     'netIncomeFromContinuingOperations',
+    'netIncomeFromDiscontinuedOperations',
+    'otherAdjustmentsToNetIncome',
     'netIncome',
-    'comprehensiveIncomeNetOfTax',
-    'depreciation',
-    'depreciationAndAmortization',
-    'ebit',
-    'ebitda'
+    'netIncomeDeductions',
+    'bottomLineNetIncome',
+    'eps',
+    'epsDiluted',
+    'weightedAverageShsOut',
+    'weightedAverageShsOutDil'
+
 ];
 
 export const balanceSheetFieldOrder: (keyof BalanceSheetReport)[] = [

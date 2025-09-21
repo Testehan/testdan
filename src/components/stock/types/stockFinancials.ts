@@ -17,36 +17,42 @@ export interface StockData {
 }
 
   export interface IncomeStatementReport {
-    fiscalDateEnding: string;
-    reportedCurrency: string;
-    grossProfit: string;
-    totalRevenue: string;
-    costOfRevenue: string;
-    costofGoodsAndServicesSold: string;
-    operatingIncome: string;
-    sellingGeneralAndAdministrative: string;
-    researchAndDevelopment: string;
-    operatingExpenses: string;
-    investmentIncomeNet: string;
-    netInterestIncome: string;
-    interestIncome: string;
-    interestExpense: string;
-    nonInterestIncome: string;
-    otherNonOperatingIncome: string;
-    depreciation: string;
-    depreciationAndAmortization: string;
-    incomeBeforeTax: string;
-    incomeTaxExpense: string;
-    interestAndDebtExpense: string;
-    netIncomeFromContinuingOperations: string;
-    comprehensiveIncomeNetOfTax: string;
-    ebit: string;
-    ebitda: string;
-    netIncome: string;
+    date: string;
+    revenue:  string;
+    costOfRevenue:  string;
+    grossProfit:  string;
+    researchAndDevelopmentExpenses:  string;
+    generalAndAdministrativeExpenses:  string;
+    sellingAndMarketingExpenses:  string;
+    sellingGeneralAndAdministrativeExpenses:  string;
+    otherExpenses:  string;
+    operatingExpenses:  string;
+    costAndExpenses:  string;
+    netInterestIncome:  string;
+    interestIncome:  string;
+    interestExpense:  string;
+    depreciationAndAmortization:  string;
+    ebitda:  string;
+    ebit:  string;
+    nonOperatingIncomeExcludingInterest:  string;
+    operatingIncome:  string;
+    totalOtherIncomeExpensesNet:  string;
+    incomeBeforeTax:  string;
+    incomeTaxExpense:  string;
+    netIncomeFromContinuingOperations:  string;
+    netIncomeFromDiscontinuedOperations:  string;
+    otherAdjustmentsToNetIncome:  string;
+    netIncome:  string;
+    netIncomeDeductions:  string;
+    bottomLineNetIncome:  string;
+    eps:  string;
+    epsDiluted:  string;
+    weightedAverageShsOut:  string;
+    weightedAverageShsOutDil:  string;
   }
 
   export interface BalanceSheetReport {
-    fiscalDateEnding: string;
+    date: string;
     reportedCurrency: string;
     totalAssets: string;
     totalCurrentAssets: string;
@@ -88,7 +94,7 @@ export interface StockData {
   }
 
   export interface CashFlowReport {
-    fiscalDateEnding: string;
+    date: string;
     reportedCurrency: string;
     netIncome: string;
     profitLoss: string;
@@ -120,7 +126,7 @@ export interface StockData {
   }
 
   export interface FinancialRatioReport {
-    fiscalDateEnding: string;
+    date: string;
     grossProfitMargin: number | null;
     netProfitMargin: number | null;
     returnOnAssets: number | null;
@@ -164,12 +170,12 @@ export interface StockData {
   }
   
   export interface AnnualEarnings {
-    fiscalDateEnding: string;
+    date: string;
     reportedEPS: string;
   }
   
   export interface QuarterlyEarnings {
-    fiscalDateEnding: string;
+    date: string;
     reportedDate: string;
     reportedEPS: string;
     estimatedEPS: string;

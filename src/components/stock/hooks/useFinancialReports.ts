@@ -25,7 +25,7 @@ interface FinancialReportData<T> {
 
 // ... other interfaces and code ...
 
-export const useFinancialReports = <T extends { fiscalDateEnding: string }>(
+export const useFinancialReports = <T extends { date: string }>(
     { symbol, reportEndpoint, fieldOrder, baseURL = 'http://localhost:8080/stocks' }: UseFinancialReportsProps<T>
 ): FinancialReportData<T> => {
     const [annualReports, setAnnualReports] = useState<T[]>([]);
@@ -65,7 +65,7 @@ export const useFinancialReports = <T extends { fiscalDateEnding: string }>(
     useEffect(() => {
         if (annualReports.length > 0) {
             const years = annualReports
-                .map(report => new Date(report.fiscalDateEnding).getFullYear().toString())
+                .map(report => new Date(report.date).getFullYear().toString())
                 .sort((a, b) => parseInt(b) - parseInt(a));
             setAvailableYears(Array.from(new Set(years)));
         } else {
@@ -75,7 +75,7 @@ export const useFinancialReports = <T extends { fiscalDateEnding: string }>(
         if (quarterlyReports.length > 0) {
             const quarters = quarterlyReports
                 .map(report => {
-                    const date = new Date(report.fiscalDateEnding);
+                    const date = new Date(report.date);
                     const year = date.getFullYear();
                     const quarter = Math.floor(date.getMonth() / 3) + 1;
                     return `${year}-Q${quarter}`;
@@ -116,7 +116,7 @@ export const useFinancialReports = <T extends { fiscalDateEnding: string }>(
         }
 
         return currentReports.filter(report => {
-            const reportDate = new Date(report.fiscalDateEnding);
+            const reportDate = new Date(report.date);
             let reportPeriod: string;
 
             if (reportType === 'annual') {
@@ -137,9 +137,10 @@ export const useFinancialReports = <T extends { fiscalDateEnding: string }>(
 
 
     const allKeys = useMemo(() => {
+        const excludedKeys = ['symbol', 'cik', 'filingDate', 'acceptedDate', 'fiscalYear', 'period', 'reportedCurrency', 'link', 'finalLink'];
         const uniqueKeys = currentReports.reduce((keys, report) => {
             Object.keys(report).forEach(key => {
-                if (!keys.includes(key as keyof T) && key !== 'fiscalDateEnding') { // Exclude fiscalDateEnding here
+                if (!keys.includes(key as keyof T) && key !== 'date' && !excludedKeys.includes(key)) { // Exclude date and other unwanted keys
                     keys.push(key as keyof T);
                 }
             });
@@ -149,10 +150,10 @@ export const useFinancialReports = <T extends { fiscalDateEnding: string }>(
         return uniqueKeys.sort((a, b) => {
             const indexA = fieldOrder.indexOf(a);
             const indexB = fieldOrder.indexOf(b);
-            if (indexA === -1 && indexB === -1) return 0;
-            if (indexA === -1) return 1;
-            if (indexB === -1) return -1;
-            return indexA - indexB;
+            if (indexA === -1 && indexB === -1) return 0; // if both are not in fieldOrder, keep original order
+            if (indexA === -1) return 1; // if a is not in fieldOrder, it comes after b
+            if (indexB === -1) return -1; // if b is not in fieldOrder, it comes after a
+            return indexA - indexB; // sort based on fieldOrder
         });
     }, [currentReports, fieldOrder]);
 

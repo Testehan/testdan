@@ -170,7 +170,7 @@ const PeriodRangeSlider: React.FC<PeriodRangeSliderProps> = ({
                 : 'text-gray-600 hover:bg-gray-200'
             }`}
           >
-            {isQuarterly ? (index % 5 === 0 ? period : '') : period}
+            {period}
           </button>
         ))}
       </div>
