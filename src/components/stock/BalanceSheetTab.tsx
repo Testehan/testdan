@@ -7,22 +7,19 @@ import { balanceSheetFieldOrder } from './types/financialFieldOrders';
 
 const currentAssetKeys: (keyof BalanceSheetReport)[] = [
     'totalCurrentAssets',
-    'cashAndCashEquivalentsAtCarryingValue',
+    'cashAndCashEquivalents',
     'cashAndShortTermInvestments',
     'inventory',
-    'currentNetReceivables',
+    'netReceivables',
     'shortTermInvestments',
     'otherCurrentAssets',
 ];
 
 const nonCurrentAssetKeys: (keyof BalanceSheetReport)[] = [
     'totalNonCurrentAssets',
-    'propertyPlantEquipment',
-    'accumulatedDepreciationAmortizationPPE',
-    'intangibleAssets',
-    'intangibleAssetsExcludingGoodwill',
+    'propertyPlantEquipmentNet',
     'goodwill',
-    'investments',
+    'intangibleAssets',
     'longTermInvestments',
     'otherNonCurrentAssets',
 ];
@@ -35,11 +32,9 @@ const totalAssetKeys: (keyof BalanceSheetReport)[] = [
 
 const currentLiabilityKeys: (keyof BalanceSheetReport)[] = [
     'totalCurrentLiabilities',
-    'currentAccountsPayable',
+    'accountPayables',
     'deferredRevenue',
-    'currentDebt',
     'shortTermDebt',
-    'currentLongTermDebt',
     'otherCurrentLiabilities',
 ];
 
@@ -47,8 +42,6 @@ const nonCurrentLiabilityKeys: (keyof BalanceSheetReport)[] = [
     'totalNonCurrentLiabilities',
     'capitalLeaseObligations',
     'longTermDebt',
-    'longTermDebtNoncurrent',
-    'shortLongTermDebtTotal',
     'otherNonCurrentLiabilities',
 ];
 
@@ -57,11 +50,10 @@ const totalLiabilityKeys: (keyof BalanceSheetReport)[] = [
 ];
 
 const equityKeys: (keyof BalanceSheetReport)[] = [
-    'totalShareholderEquity',
+    'totalStockholdersEquity',
     'treasuryStock',
     'retainedEarnings',
     'commonStock',
-    'commonStockSharesOutstanding',
 ];
 
 const BalanceSheetTab: React.FC<{ symbol: string }> = ({ symbol }) => {
@@ -193,7 +185,7 @@ const BalanceSheetTab: React.FC<{ symbol: string }> = ({ symbol }) => {
                 allKeys={equityKeys}
                 numberScale={numberScale}
                 tableName="Shareholder Equity"
-                highlightKeys={['totalShareholderEquity']}
+                highlightKeys={['totalStockholdersEquity']}
             />
         </div>
     );
