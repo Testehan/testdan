@@ -4,6 +4,7 @@ import { StockData } from '../components/stock/types/stockFinancials';
 import OverviewTab from '../components/stock/OverviewTab';
 import FinancialsTab from '../components/stock/FinancialsTab';
 import ChecklistTab from '../components/stock/ChecklistTab';
+import ValuationTab from '../components/stock/ValuationTab';
 import { useGlobalQuote } from '../components/stock/hooks/useFinancialReports';
 
 const StockPage: React.FC = () => {
@@ -103,6 +104,14 @@ const StockPage: React.FC = () => {
         >
           Checklist
         </button>
+        <button
+          className={`px-4 py-2 text-lg font-medium ${
+            activeTab === 'valuation' ? 'border-b-2 border-blue-500 text-blue-600' : 'text-gray-600 hover:text-blue-600'
+          }`}
+          onClick={() => setActiveTab('valuation')}
+        >
+          Valuation
+        </button>
       </div>
       <div>
         {activeTab === 'overview' && stockData && (
@@ -112,6 +121,7 @@ const StockPage: React.FC = () => {
         )}
         {activeTab === 'financials' && <FinancialsTab symbol={symbol} />}
         {activeTab === 'checklist' && <ChecklistTab symbol={symbol} />}
+        {activeTab === 'valuation' && <ValuationTab symbol={symbol} />}
       </div>
     </div>
   );

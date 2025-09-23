@@ -16,6 +16,7 @@
     "joi-browser": "^13.4.0",
     "react": "^19.2.0",
     "react-dom": "^19.2.0",
+    "react-number-format": "^5.4.4",
     "react-router-dom": "^7.0.1",
     "react-toastify": "^11.0.5",
     "serve": "^14.2.4"
