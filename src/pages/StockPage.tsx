@@ -52,7 +52,10 @@ const StockPage: React.FC = () => {
     return <div className="text-center p-4">No stock data available or symbol missing.</div>;
   }
 
-  const changePercent = quote ? parseFloat(quote['10. change percent'].replace('%', '')) : 0;
+  const changePercent =
+    quote && quote.adjOpen !== 0
+      ? ((quote.adjClose - quote.adjOpen) / quote.adjOpen) * 100
+      : 0;
   const priceColor = changePercent >= 0 ? 'text-green-600' : 'text-red-600';
 
   const currencySymbol: { [key: string]: string } = {
@@ -70,8 +73,8 @@ const StockPage: React.FC = () => {
         {quoteError && <span className="ml-4 text-sm text-red-500">Error loading quote</span>}
         {quote && (
           <span className={`ml-4 ${priceColor}`}>
-            {quote['05. price']} {currencySymbol[stockData.currency] || stockData.currency}
-            <span className="text-sm ml-2">({quote['10. change percent']})</span>
+            {quote.adjClose} {currencySymbol[stockData.currency] || stockData.currency}{' '}
+            <span className="text-sm ml-2">({changePercent.toFixed(2)}%)</span>
           </span>
         )}
       </h2>

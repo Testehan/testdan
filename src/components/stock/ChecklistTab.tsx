@@ -108,9 +108,9 @@ const ChecklistTab: React.FC<ChecklistTabProps> = ({ symbol }) => {
     eventSource.addEventListener('ERROR', (event: MessageEvent) => {
       setError(event.data);
       setIsLogVisible(true);
-      setLoading(false);
-      clearInterval(timer);
-      eventSource.close();
+      // setLoading(false);
+      // clearInterval(timer);
+      // eventSource.close();
     });
 
     eventSource.onerror = () => {
@@ -179,7 +179,7 @@ const ChecklistTab: React.FC<ChecklistTabProps> = ({ symbol }) => {
   const managementAndCultureItems = [
     { key: 'soulInTheGame', label: 'Soul in the game (Founder / Family Run / Long time CEO) (0-4)' },
     { key: 'insideOwnership', label: 'Inside ownership (None / Modest / Very high) (0-3)' },
-    { key: 'glassdoorRatings', label: 'Glassdoor ratings (Overall score, CEO approval, Recommend to a friend) (0-4)' },
+    { key: 'cultureRatings', label: 'Culture ratings (Overall score, CEO approval, Recommend to a friend) (0-4)' },
     { key: 'missionStatement', label: 'Mission statement (Simple, inspirational, optionable) (0-3)' },
   ];
 
