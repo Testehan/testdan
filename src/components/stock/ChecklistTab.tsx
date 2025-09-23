@@ -27,6 +27,8 @@ interface Tooltip {
 const ChecklistTab: React.FC<ChecklistTabProps> = ({ symbol }) => {
   const [logMessages, setLogMessages] = useState<string[]>([]);
   const [reportData, setReportData] = useState<Partial<ReportData>>({});
+  const [editableScores, setEditableScores] = useState<Record<string, ChecklistItem>>({});
+  const [hasScoresChanged, setHasScoresChanged] = useState<boolean>(false);
   const [tooltip, setTooltip] = useState<Tooltip>({ visible: false, content: '', x: 0, y: 0 });
   const [error, setError] = useState<string | null>(null);
   const [isLogVisible, setIsLogVisible] = useState(true);
@@ -36,6 +38,13 @@ const ChecklistTab: React.FC<ChecklistTabProps> = ({ symbol }) => {
   const [elapsedTime, setElapsedTime] = useState(0);
   const hasReceivedMessages = useRef(false);
   const hideTimeoutId = useRef<NodeJS.Timeout | null>(null);
+
+  useEffect(() => {
+    if (reportData.items) {
+      setEditableScores(reportData.items);
+      setHasScoresChanged(false); // Reset on new report data
+    }
+  }, [reportData.items]);
 
   const cancelHideTimer = useCallback(() => {
     if (hideTimeoutId.current) {
@@ -96,6 +105,7 @@ const ChecklistTab: React.FC<ChecklistTabProps> = ({ symbol }) => {
           finalScore,
           items: itemsMap,
         });
+        setEditableScores(itemsMap);
       } catch (e) {
         console.error("Failed to parse checklist data:", e);
       }
@@ -140,6 +150,20 @@ const ChecklistTab: React.FC<ChecklistTabProps> = ({ symbol }) => {
 
   const handleMouseOut = () => {
     setTooltip({ visible: false, content: '', x: 0, y: 0 });
+  };
+
+  const handleChangeScore = (key: string, value: string) => {
+    setEditableScores(prevScores => {
+      const newScores = {
+        ...prevScores,
+        [key]: {
+          ...prevScores[key],
+          score: parseFloat(value) || 0, // Ensure it's a number
+        },
+      };
+      return newScores;
+    });
+    setHasScoresChanged(true);
   };
 
   const financialItems = [
@@ -204,6 +228,45 @@ const ChecklistTab: React.FC<ChecklistTabProps> = ({ symbol }) => {
     { key: 'currencyRisk', label: 'Currency risk (>75% foreign / >50% foreign / <50% foreign) (-2, -1, 0)' },
   ];
 
+  const handleSave = async () => {
+    try {
+      setLoading(true);
+      setError(null);
+      const itemsArray = Object.keys(editableScores).map(key => ({
+        name: key,
+        score: editableScores[key].score,
+        explanation: editableScores[key].explanation,
+      }));
+
+      const response = await fetch(`http://localhost:8080/stocks/reporting/ferol/${symbol}`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(itemsArray),
+      });
+
+      if (!response.ok) {
+        throw new Error(`HTTP error! status: ${response.status}`);
+      }
+
+      setHasScoresChanged(false);
+      setLogMessages(prev => [`Scores saved successfully at ${new Date().toLocaleString()}`, ...prev]);
+
+      // Recalculate final score after saving
+      const newFinalScore = Object.values(editableScores).reduce((sum, item) => sum + item.score, 0);
+      setReportData(prevReportData => ({
+        ...prevReportData,
+        finalScore: newFinalScore,
+      }));
+    } catch (e: any) {
+      setError(`Failed to save scores: ${e.message}`);
+      setLogMessages(prev => [`Failed to save scores: ${e.message}`, ...prev]);
+    } finally {
+      setLoading(false);
+    }
+  };
+
   const renderChecklistTable = () => {
     const positiveScore = Object.values(reportData.items || {}).reduce((sum, item) => {
       if (item.score > 0) {
@@ -227,12 +290,26 @@ const ChecklistTab: React.FC<ChecklistTabProps> = ({ symbol }) => {
           <div className="bg-white shadow rounded-lg p-4">
             <div className="flex justify-between items-center mb-4 border-b pb-2">
               <h3 className="text-lg font-semibold">Financial Checklist</h3>
-              <button
-                onClick={() => setRegenerationCount(count => count + 1)}
-                className="bg-blue-500 hover:bg-blue-700 text-white font-bold py-1 px-3 rounded text-sm"
-              >
-                Regenerate
-              </button>
+              <div className="space-x-2">
+                <button
+                  onClick={() => setRegenerationCount(count => count + 1)}
+                  className="bg-blue-500 hover:bg-blue-700 text-white font-bold py-1 px-3 rounded text-sm"
+                  disabled={loading}
+                >
+                  Regenerate
+                </button>
+                <button
+                  onClick={handleSave}
+                  className={`font-bold py-1 px-3 rounded text-sm ${
+                    hasScoresChanged && !loading
+                      ? 'bg-green-500 hover:bg-green-700 text-white'
+                      : 'bg-gray-300 text-gray-500 cursor-not-allowed'
+                  }`}
+                  disabled={!hasScoresChanged || loading}
+                >
+                  Save
+                </button>
+              </div>
             </div>
             <table className="w-full">
               <tbody>
@@ -253,7 +330,7 @@ const ChecklistTab: React.FC<ChecklistTabProps> = ({ symbol }) => {
                 </tr>
 
                 {financialItems.map(({ key, label }, index) => {
-                  const item = reportData.items?.[key];
+                  const item = editableScores?.[key]; // Use editableScores
                   const isLast = index === financialItems.length - 1;
                   return (
                     <tr
@@ -263,7 +340,14 @@ const ChecklistTab: React.FC<ChecklistTabProps> = ({ symbol }) => {
                       onMouseLeave={handleMouseOut}
                     >
                       <td className="py-2 font-medium text-gray-600">{label}</td>
-                      <td className="py-2 text-gray-800">{item?.score ?? '...'}</td>
+                      <td className="py-2 text-gray-800">
+                        <input
+                          type="number"
+                          value={item?.score ?? ''}
+                          onChange={(e) => handleChangeScore(key, e.target.value)}
+                          className="w-20 p-1 border rounded-md text-gray-800 text-right"
+                        />
+                      </td>
                     </tr>
                   );
                 })}
@@ -276,7 +360,7 @@ const ChecklistTab: React.FC<ChecklistTabProps> = ({ symbol }) => {
                 </tr>
 
                 {moatItems.map(({ key, label }, index) => {
-                  const item = reportData.items?.[key];
+                  const item = editableScores?.[key]; // Use editableScores
                   const isLast = index === moatItems.length - 1;
                   return (
                     <tr
@@ -286,7 +370,14 @@ const ChecklistTab: React.FC<ChecklistTabProps> = ({ symbol }) => {
                       onMouseLeave={handleMouseOut}
                     >
                       <td className="py-2 font-medium text-gray-600">{label}</td>
-                      <td className="py-2 text-gray-800">{item?.score ?? '...'}</td>
+                      <td className="py-2 text-gray-800">
+                        <input
+                          type="number"
+                          value={item?.score ?? ''}
+                          onChange={(e) => handleChangeScore(key, e.target.value)}
+                          className="w-20 p-1 border rounded-md text-gray-800 text-right"
+                        />
+                      </td>
                     </tr>
                   );
                 })}
@@ -299,7 +390,7 @@ const ChecklistTab: React.FC<ChecklistTabProps> = ({ symbol }) => {
                 </tr>
 
                 {potentialItems.map(({ key, label }, index) => {
-                  const item = reportData.items?.[key];
+                  const item = editableScores?.[key]; // Use editableScores
                   const isLast = index === potentialItems.length - 1;
                   return (
                     <tr
@@ -309,7 +400,14 @@ const ChecklistTab: React.FC<ChecklistTabProps> = ({ symbol }) => {
                       onMouseLeave={handleMouseOut}
                     >
                       <td className="py-2 font-medium text-gray-600">{label}</td>
-                      <td className="py-2 text-gray-800">{item?.score ?? '...'}</td>
+                      <td className="py-2 text-gray-800">
+                        <input
+                          type="number"
+                          value={item?.score ?? ''}
+                          onChange={(e) => handleChangeScore(key, e.target.value)}
+                          className="w-20 p-1 border rounded-md text-gray-800 text-right"
+                        />
+                      </td>
                     </tr>
                   );
                 })}
@@ -322,7 +420,7 @@ const ChecklistTab: React.FC<ChecklistTabProps> = ({ symbol }) => {
                 </tr>
 
                 {customerItems.map(({ key, label }, index) => {
-                  const item = reportData.items?.[key];
+                  const item = editableScores?.[key]; // Use editableScores
                   const isLast = index === customerItems.length - 1;
                   return (
                     <tr
@@ -332,7 +430,14 @@ const ChecklistTab: React.FC<ChecklistTabProps> = ({ symbol }) => {
                       onMouseLeave={handleMouseOut}
                     >
                       <td className="py-2 font-medium text-gray-600">{label}</td>
-                      <td className="py-2 text-gray-800">{item?.score ?? '...'}</td>
+                      <td className="py-2 text-gray-800">
+                        <input
+                          type="number"
+                          value={item?.score ?? ''}
+                          onChange={(e) => handleChangeScore(key, e.target.value)}
+                          className="w-20 p-1 border rounded-md text-gray-800 text-right"
+                        />
+                      </td>
                     </tr>
                   );
                 })}
@@ -345,7 +450,7 @@ const ChecklistTab: React.FC<ChecklistTabProps> = ({ symbol }) => {
                 </tr>
 
                 {companySpecificFactorsItems.map(({ key, label }, index) => {
-                  const item = reportData.items?.[key];
+                  const item = editableScores?.[key]; // Use editableScores
                   const isLast = index === companySpecificFactorsItems.length - 1;
                   return (
                     <tr
@@ -355,7 +460,14 @@ const ChecklistTab: React.FC<ChecklistTabProps> = ({ symbol }) => {
                       onMouseLeave={handleMouseOut}
                     >
                       <td className="py-2 font-medium text-gray-600">{label}</td>
-                      <td className="py-2 text-gray-800">{item?.score ?? '...'}</td>
+                      <td className="py-2 text-gray-800">
+                        <input
+                          type="number"
+                          value={item?.score ?? ''}
+                          onChange={(e) => handleChangeScore(key, e.target.value)}
+                          className="w-20 p-1 border rounded-md text-gray-800 text-right"
+                        />
+                      </td>
                     </tr>
                   );
                 })}
@@ -368,7 +480,7 @@ const ChecklistTab: React.FC<ChecklistTabProps> = ({ symbol }) => {
                 </tr>
 
                 {managementAndCultureItems.map(({ key, label }, index) => {
-                  const item = reportData.items?.[key];
+                  const item = editableScores?.[key]; // Use editableScores
                   const isLast = index === managementAndCultureItems.length - 1;
                   return (
                     <tr
@@ -378,7 +490,14 @@ const ChecklistTab: React.FC<ChecklistTabProps> = ({ symbol }) => {
                       onMouseLeave={handleMouseOut}
                     >
                       <td className="py-2 font-medium text-gray-600">{label}</td>
-                      <td className="py-2 text-gray-800">{item?.score ?? '...'}</td>
+                      <td className="py-2 text-gray-800">
+                        <input
+                          type="number"
+                          value={item?.score ?? ''}
+                          onChange={(e) => handleChangeScore(key, e.target.value)}
+                          className="w-20 p-1 border rounded-md text-gray-800 text-right"
+                        />
+                      </td>
                     </tr>
                   );
                 })}
@@ -391,7 +510,7 @@ const ChecklistTab: React.FC<ChecklistTabProps> = ({ symbol }) => {
                 </tr>
 
                 {stockItems.map(({ key, label }, index) => {
-                  const item = reportData.items?.[key];
+                  const item = editableScores?.[key]; // Use editableScores
                   const isLast = index === stockItems.length - 1;
                   return (
                     <tr
@@ -401,7 +520,14 @@ const ChecklistTab: React.FC<ChecklistTabProps> = ({ symbol }) => {
                       onMouseLeave={handleMouseOut}
                     >
                       <td className="py-2 font-medium text-gray-600">{label}</td>
-                      <td className="py-2 text-gray-800">{item?.score ?? '...'}</td>
+                      <td className="py-2 text-gray-800">
+                        <input
+                          type="number"
+                          value={item?.score ?? ''}
+                          onChange={(e) => handleChangeScore(key, e.target.value)}
+                          className="w-20 p-1 border rounded-md text-gray-800 text-right"
+                        />
+                      </td>
                     </tr>
                   );
                 })}
@@ -419,7 +545,7 @@ const ChecklistTab: React.FC<ChecklistTabProps> = ({ symbol }) => {
                 </tr>
 
                 {negativeItems.map(({ key, label }, index) => {
-                  const item = reportData.items?.[key];
+                  const item = editableScores?.[key]; // Use editableScores
                   const isLast = index === negativeItems.length - 1;
                   return (
                     <tr
@@ -429,7 +555,14 @@ const ChecklistTab: React.FC<ChecklistTabProps> = ({ symbol }) => {
                       onMouseLeave={handleMouseOut}
                     >
                       <td className="py-2 font-medium text-gray-600">{label}</td>
-                      <td className="py-2 text-gray-800">{item?.score ?? '...'}</td>
+                      <td className="py-2 text-gray-800">
+                        <input
+                          type="number"
+                          value={item?.score ?? ''}
+                          onChange={(e) => handleChangeScore(key, e.target.value)}
+                          className="w-20 p-1 border rounded-md text-gray-800 text-right"
+                        />
+                      </td>
                     </tr>
                   );
                 })}

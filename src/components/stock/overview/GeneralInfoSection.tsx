@@ -1,5 +1,6 @@
 import React from 'react';
 import { StockData } from '../types/stockFinancials';
+import { formatLargeNumber } from '../utils';
 
 interface GeneralInfoSectionProps {
   stockData: StockData;
@@ -16,7 +17,7 @@ const GeneralInfoSection: React.FC<GeneralInfoSectionProps> = ({ stockData }) =>
     "Website": stockData.website,
     "CEO": stockData.ceo,
     "Full Time Employees": stockData.fullTimeEmployees,
-    "Market Cap": stockData.marketCap,
+    "Market Cap": stockData.marketCap ? formatLargeNumber(stockData.marketCap.toString()) : 'N/A',
     "Beta": stockData.beta,
     "Last Dividend": stockData.lastDividend,
     "52 Week Range": stockData.range,
