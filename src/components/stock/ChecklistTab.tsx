@@ -176,152 +176,275 @@ const ChecklistTab: React.FC<ChecklistTabProps> = ({ symbol }) => {
     { key: 'pricingPower', label: 'Princing power (None / Some / Tons) (0-5)' },
   ];
 
-  const renderChecklistTable = () => (
-    <div className="p-4">
-      {loading ? (
-        <Spinner elapsedTime={elapsedTime} />
-      ) : (
-        <div className="bg-white shadow rounded-lg p-4">
-          <div className="flex justify-between items-center mb-4 border-b pb-2">
-            <h3 className="text-lg font-semibold">Financial Checklist</h3>
-            <button
-              onClick={() => setRegenerationCount(count => count + 1)}
-              className="bg-blue-500 hover:bg-blue-700 text-white font-bold py-1 px-3 rounded text-sm"
-            >
-              Regenerate
-            </button>
+  const managementAndCultureItems = [
+    { key: 'soulInTheGame', label: 'Soul in the game (Founder / Family Run / Long time CEO) (0-4)' },
+    { key: 'insideOwnership', label: 'Inside ownership (None / Modest / Very high) (0-3)' },
+    { key: 'glassdoorRatings', label: 'Glassdoor ratings (Overall score, CEO approval, Recommend to a friend) (0-4)' },
+    { key: 'missionStatement', label: 'Mission statement (Simple, inspirational, optionable) (0-3)' },
+  ];
+
+  const stockItems = [
+    { key: 'performanceVsIndex', label: '5 year performance vs S&P500 or Since IPO (+50% / +100% + Gain) (0-4)' },
+    { key: 'shareholderFriendlyActivity', label: 'Shareholder friendly activity (Share buybacks, rising dividends, debt repayment) (0-3)' },
+    { key: 'consistentlyBeatExpectations', label: 'Consistently beat expectations (+1 big beat, +0.5 beat, -1 miss) (0-4)' },
+  ];
+
+  const negativeItems = [
+    { key: 'accountingIrregularities', label: 'Accounting irregularities ? (-10)' },
+    { key: 'customerConcentration', label: 'Customer concentration (> 20% of revenue or account receivables / One or Few > 10% / None) (-5, -3, 0)' },
+    { key: 'industryDisruption', label: 'Industry disruption (Active / Possible / None) (-5, -3, 0)' },
+    { key: 'outsideForces', label: 'Outside forces (commodity prices, interest rates, stock price, strong economy) (-5, -3, 0)' },
+    { key: 'bigMarketLoser', label: 'Big Market Loser (>50% loss to S&P500 over the past 5 years or since IPO) (-5, -3, 0)' },
+    { key: 'binaryEvent', label: 'Binary event (loosing patent protection, legal ruling) (-5, 0)' },
+    { key: 'extremeDilution', label: 'Extreme dilution (> 5% annual share count growth / 3% to 5% / <3%) (-4, -2, 0)' },
+    { key: 'growthByAcquisition', label: 'Growth by acquisition (exclusively / partially / none) (-4, -2, 0)' },
+    { key: 'complicatedFinancials', label: 'Complicated financials (-3, 0)' },
+    { key: 'antitrustConcerns', label: 'Antitrust concerns (-3, 0)' },
+    { key: 'headquarters', label: 'Headquarters (High risk country / Medium risk country / Low risk country) (-3, -2, 0)' },
+    { key: 'currencyRisk', label: 'Currency risk (>75% foreign / >50% foreign / <50% foreign) (-2, -1, 0)' },
+  ];
+
+  const renderChecklistTable = () => {
+    const positiveScore = Object.values(reportData.items || {}).reduce((sum, item) => {
+      if (item.score > 0) {
+        return sum + item.score;
+      }
+      return sum;
+    }, 0);
+
+    const negativeScore = Object.values(reportData.items || {}).reduce((sum, item) => {
+      if (item.score < 0) {
+        return sum + item.score;
+      }
+      return sum;
+    }, 0);
+
+    return (
+      <div className="p-4">
+        {loading ? (
+          <Spinner elapsedTime={elapsedTime} />
+        ) : (
+          <div className="bg-white shadow rounded-lg p-4">
+            <div className="flex justify-between items-center mb-4 border-b pb-2">
+              <h3 className="text-lg font-semibold">Financial Checklist</h3>
+              <button
+                onClick={() => setRegenerationCount(count => count + 1)}
+                className="bg-blue-500 hover:bg-blue-700 text-white font-bold py-1 px-3 rounded text-sm"
+              >
+                Regenerate
+              </button>
+            </div>
+            <table className="w-full">
+              <tbody>
+                <tr className="border-b">
+                  <td className="py-2 font-medium text-gray-600">Analysis Date</td>
+                  <td className="py-2 text-gray-800">{reportData.generatedAt || '...'}</td>
+                </tr>
+                <tr className="border-b">
+                  <td className="py-2 font-medium text-gray-600">Final score</td>
+                  <td className="py-2 text-gray-800 font-bold">{reportData.finalScore ?? '...'}</td>
+                </tr>
+
+                {/* Financials Sub-header */}
+                <tr className="bg-gray-100">
+                  <td colSpan={2} className="py-2 px-1 font-bold text-gray-800">
+                    Financials
+                  </td>
+                </tr>
+
+                {financialItems.map(({ key, label }, index) => {
+                  const item = reportData.items?.[key];
+                  const isLast = index === financialItems.length - 1;
+                  return (
+                    <tr
+                      key={key}
+                      className={!isLast ? 'border-b' : ''}
+                      onMouseEnter={(e) => item && handleMouseOver(e, item.explanation)}
+                      onMouseLeave={handleMouseOut}
+                    >
+                      <td className="py-2 font-medium text-gray-600">{label}</td>
+                      <td className="py-2 text-gray-800">{item?.score ?? '...'}</td>
+                    </tr>
+                  );
+                })}
+
+                {/* Moat/Defence Sub-header */}
+                <tr className="bg-gray-100">
+                  <td colSpan={2} className="py-2 px-1 font-bold text-gray-800">
+                    Moat/Defence
+                  </td>
+                </tr>
+
+                {moatItems.map(({ key, label }, index) => {
+                  const item = reportData.items?.[key];
+                  const isLast = index === moatItems.length - 1;
+                  return (
+                    <tr
+                      key={key}
+                      className={!isLast ? 'border-b' : ''}
+                      onMouseEnter={(e) => item && handleMouseOver(e, item.explanation)}
+                      onMouseLeave={handleMouseOut}
+                    >
+                      <td className="py-2 font-medium text-gray-600">{label}</td>
+                      <td className="py-2 text-gray-800">{item?.score ?? '...'}</td>
+                    </tr>
+                  );
+                })}
+
+                {/* Potential / Offense Sub-header */}
+                <tr className="bg-gray-100">
+                  <td colSpan={2} className="py-2 px-1 fontbold text-gray-800">
+                    Potential / Offense
+                  </td>
+                </tr>
+
+                {potentialItems.map(({ key, label }, index) => {
+                  const item = reportData.items?.[key];
+                  const isLast = index === potentialItems.length - 1;
+                  return (
+                    <tr
+                      key={key}
+                      className={!isLast ? 'border-b' : ''}
+                      onMouseEnter={(e) => item && handleMouseOver(e, item.explanation)}
+                      onMouseLeave={handleMouseOut}
+                    >
+                      <td className="py-2 font-medium text-gray-600">{label}</td>
+                      <td className="py-2 text-gray-800">{item?.score ?? '...'}</td>
+                    </tr>
+                  );
+                })}
+
+                {/* Customers Sub-header */}
+                <tr className="bg-gray-100">
+                  <td colSpan={2} className="py-2 px-1 font-bold text-gray-800">
+                    Customers
+                  </td>
+                </tr>
+
+                {customerItems.map(({ key, label }, index) => {
+                  const item = reportData.items?.[key];
+                  const isLast = index === customerItems.length - 1;
+                  return (
+                    <tr
+                      key={key}
+                      className={!isLast ? 'border-b' : ''}
+                      onMouseEnter={(e) => item && handleMouseOver(e, item.explanation)}
+                      onMouseLeave={handleMouseOut}
+                    >
+                      <td className="py-2 font-medium text-gray-600">{label}</td>
+                      <td className="py-2 text-gray-800">{item?.score ?? '...'}</td>
+                    </tr>
+                  );
+                })}
+
+                {/* Company specific factors Sub-header */}
+                <tr className="bg-gray-100">
+                  <td colSpan={2} className="py-2 px-1 font-bold text-gray-800">
+                    Company specific factors
+                  </td>
+                </tr>
+
+                {companySpecificFactorsItems.map(({ key, label }, index) => {
+                  const item = reportData.items?.[key];
+                  const isLast = index === companySpecificFactorsItems.length - 1;
+                  return (
+                    <tr
+                      key={key}
+                      className={!isLast ? 'border-b' : ''}
+                      onMouseEnter={(e) => item && handleMouseOver(e, item.explanation)}
+                      onMouseLeave={handleMouseOut}
+                    >
+                      <td className="py-2 font-medium text-gray-600">{label}</td>
+                      <td className="py-2 text-gray-800">{item?.score ?? '...'}</td>
+                    </tr>
+                  );
+                })}
+
+                {/* Management and culture Sub-header */}
+                <tr className="bg-gray-100">
+                  <td colSpan={2} className="py-2 px-1 font-bold text-gray-800">
+                    Management and culture
+                  </td>
+                </tr>
+
+                {managementAndCultureItems.map(({ key, label }, index) => {
+                  const item = reportData.items?.[key];
+                  const isLast = index === managementAndCultureItems.length - 1;
+                  return (
+                    <tr
+                      key={key}
+                      className={!isLast ? 'border-b' : ''}
+                      onMouseEnter={(e) => item && handleMouseOver(e, item.explanation)}
+                      onMouseLeave={handleMouseOut}
+                    >
+                      <td className="py-2 font-medium text-gray-600">{label}</td>
+                      <td className="py-2 text-gray-800">{item?.score ?? '...'}</td>
+                    </tr>
+                  );
+                })}
+
+                {/* Stock Sub-header */}
+                <tr className="bg-gray-100">
+                  <td colSpan={2} className="py-2 px-1 font-bold text-gray-800">
+                    Stock
+                  </td>
+                </tr>
+
+                {stockItems.map(({ key, label }, index) => {
+                  const item = reportData.items?.[key];
+                  const isLast = index === stockItems.length - 1;
+                  return (
+                    <tr
+                      key={key}
+                      className={!isLast ? 'border-b' : ''}
+                      onMouseEnter={(e) => item && handleMouseOver(e, item.explanation)}
+                      onMouseLeave={handleMouseOut}
+                    >
+                      <td className="py-2 font-medium text-gray-600">{label}</td>
+                      <td className="py-2 text-gray-800">{item?.score ?? '...'}</td>
+                    </tr>
+                  );
+                })}
+
+                <tr className="bg-green-200 border-b">
+                  <td className="py-2 font-medium text-gray-600">Positives score</td>
+                  <td className="py-2 text-gray-800 font-bold">{positiveScore}</td>
+                </tr>
+
+                {/* The negatives :( Sub-header */}
+                <tr className="bg-gray-100">
+                  <td colSpan={2} className="py-2 px-1 font-bold text-gray-800">
+                    The negatives :(
+                  </td>
+                </tr>
+
+                {negativeItems.map(({ key, label }, index) => {
+                  const item = reportData.items?.[key];
+                  const isLast = index === negativeItems.length - 1;
+                  return (
+                    <tr
+                      key={key}
+                      className={!isLast ? 'border-b' : ''}
+                      onMouseEnter={(e) => item && handleMouseOver(e, item.explanation)}
+                      onMouseLeave={handleMouseOut}
+                    >
+                      <td className="py-2 font-medium text-gray-600">{label}</td>
+                      <td className="py-2 text-gray-800">{item?.score ?? '...'}</td>
+                    </tr>
+                  );
+                })}
+
+                <tr className="bg-red-200 border-b">
+                    <td className="py-2 font-medium text-gray-600">Negatives score</td>
+                    <td className="py-2 text-gray-800 font-bold">{negativeScore}</td>
+                </tr>
+              </tbody>
+            </table>
           </div>
-          <table className="w-full">
-            <tbody>
-              <tr className="border-b">
-                <td className="py-2 font-medium text-gray-600">Analysis Date</td>
-                <td className="py-2 text-gray-800">{reportData.generatedAt || '...'}</td>
-              </tr>
-              <tr className="border-b">
-                <td className="py-2 font-medium text-gray-600">Final score</td>
-                <td className="py-2 text-gray-800 font-bold">{reportData.finalScore ?? '...'}</td>
-              </tr>
-
-              {/* Financials Sub-header */}
-              <tr className="bg-gray-100">
-                <td colSpan={2} className="py-2 px-1 font-bold text-gray-800">
-                  Financials
-                </td>
-              </tr>
-
-              {financialItems.map(({ key, label }, index) => {
-                const item = reportData.items?.[key];
-                const isLast = index === financialItems.length - 1;
-                return (
-                  <tr
-                    key={key}
-                    className={!isLast ? 'border-b' : ''}
-                    onMouseEnter={(e) => item && handleMouseOver(e, item.explanation)}
-                    onMouseLeave={handleMouseOut}
-                  >
-                    <td className="py-2 font-medium text-gray-600">{label}</td>
-                    <td className="py-2 text-gray-800">{item?.score ?? '...'}</td>
-                  </tr>
-                );
-              })}
-
-              {/* Moat/Defence Sub-header */}
-              <tr className="bg-gray-100">
-                <td colSpan={2} className="py-2 px-1 font-bold text-gray-800">
-                  Moat/Defence
-                </td>
-              </tr>
-
-              {moatItems.map(({ key, label }, index) => {
-                const item = reportData.items?.[key];
-                const isLast = index === moatItems.length - 1;
-                return (
-                  <tr
-                    key={key}
-                    className={!isLast ? 'border-b' : ''}
-                    onMouseEnter={(e) => item && handleMouseOver(e, item.explanation)}
-                    onMouseLeave={handleMouseOut}
-                  >
-                    <td className="py-2 font-medium text-gray-600">{label}</td>
-                    <td className="py-2 text-gray-800">{item?.score ?? '...'}</td>
-                  </tr>
-                );
-              })}
-
-              {/* Potential / Offense Sub-header */}
-              <tr className="bg-gray-100">
-                <td colSpan={2} className="py-2 px-1 fontbold text-gray-800">
-                  Potential / Offense
-                </td>
-              </tr>
-
-              {potentialItems.map(({ key, label }, index) => {
-                const item = reportData.items?.[key];
-                const isLast = index === potentialItems.length - 1;
-                return (
-                  <tr
-                    key={key}
-                    className={!isLast ? 'border-b' : ''}
-                    onMouseEnter={(e) => item && handleMouseOver(e, item.explanation)}
-                    onMouseLeave={handleMouseOut}
-                  >
-                    <td className="py-2 font-medium text-gray-600">{label}</td>
-                    <td className="py-2 text-gray-800">{item?.score ?? '...'}</td>
-                  </tr>
-                );
-              })}
-
-              {/* Customers Sub-header */}
-              <tr className="bg-gray-100">
-                <td colSpan={2} className="py-2 px-1 font-bold text-gray-800">
-                  Customers
-                </td>
-              </tr>
-
-              {customerItems.map(({ key, label }, index) => {
-                const item = reportData.items?.[key];
-                const isLast = index === customerItems.length - 1;
-                return (
-                  <tr
-                    key={key}
-                    className={!isLast ? 'border-b' : ''}
-                    onMouseEnter={(e) => item && handleMouseOver(e, item.explanation)}
-                    onMouseLeave={handleMouseOut}
-                  >
-                    <td className="py-2 font-medium text-gray-600">{label}</td>
-                    <td className="py-2 text-gray-800">{item?.score ?? '...'}</td>
-                  </tr>
-                );
-              })}
-
-              {/* Company specific factors Sub-header */}
-              <tr className="bg-gray-100">
-                <td colSpan={2} className="py-2 px-1 font-bold text-gray-800">
-                  Company specific factors
-                </td>
-              </tr>
-
-              {companySpecificFactorsItems.map(({ key, label }, index) => {
-                const item = reportData.items?.[key];
-                const isLast = index === companySpecificFactorsItems.length - 1;
-                return (
-                  <tr
-                    key={key}
-                    className={!isLast ? 'border-b' : ''}
-                    onMouseEnter={(e) => item && handleMouseOver(e, item.explanation)}
-                    onMouseLeave={handleMouseOut}
-                  >
-                    <td className="py-2 font-medium text-gray-600">{label}</td>
-                    <td className="py-2 text-gray-800">{item?.score ?? '...'}</td>
-                  </tr>
-                );
-              })}
-            </tbody>
-          </table>
-        </div>
-      )}
-    </div>
-  );
+        )}
+      </div>
+    )
+  };
 
   const renderLogPanel = () => (
     <>
