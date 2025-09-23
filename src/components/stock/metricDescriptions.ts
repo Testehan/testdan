@@ -56,5 +56,16 @@ export const metricDescriptions: { [key: string]: string } = {
     // Cash Flow Ratios
     freeCashFlow: "The cash a company generates after accounting for cash outflows to support operations and maintain its capital assets. Represents the cash available to pay debt and dividends.",
     operatingCashFlowRatio: "Measures how efficiently a company's operations are generating cash to cover sales. A higher ratio is generally better.",
-    cashFlowToDebtRatio: "Compares a company's operating cash flow to its total debt, indicating its ability to pay off debt with cash generated from operations."
+    cashFlowToDebtRatio: "Compares a company's operating cash flow to its total debt, indicating its ability to pay off debt with cash generated from operations.",
+
+    // DCF Inputs
+    beta: "Beta measures a stock's volatility in relation to the overall market. A beta greater than 1 indicates the stock is more volatile than the market, while a beta less than 1 indicates it's less volatile.",
+    riskFreeRate: "The theoretical rate of return of an investment with zero risk. It's often represented by the yield on a government bond.",
+    marketRiskPremium: "The excess return that investing in the stock market provides over a risk-free rate. It's the compensation for taking on the higher risk of equity investing.",
+    effectiveTaxRate: "The percentage of its pre-tax profits that a company pays in taxes. It's calculated by dividing the tax expense by the pre-tax income.",
+    projectedRevenueGrowthRate: "The estimated annual percentage increase in a company's revenue over a future period. It's a key assumption in projecting future cash flows.",
+    projectedEbitMargin: "The estimated Earnings Before Interest and Taxes (EBIT) as a percentage of revenue for future periods. It reflects the assumed future profitability of the company's core operations.",
+    perpetualGrowthRate: "The rate at which a company's free cash flow is expected to grow forever after the initial projection period. It's used to calculate the terminal value.",
+    wacc: "The Weighted Average Cost of Capital (WACC) represents a company's average after-tax cost of capital from all sources, including common stock, preferred stock, bonds, and other forms of debt. It is the discount rate used to value future cash flows in a DCF analysis.",
+    projectionYears: "The number of years into the future for which free cash flows are explicitly projected. After this period, a terminal value is calculated."
 };

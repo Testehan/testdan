@@ -1,5 +1,26 @@
 import React, { useState, useEffect, useCallback } from 'react';
 import { NumericFormat } from 'react-number-format';
+import { metricDescriptions } from './metricDescriptions'; // Import metric descriptions
+
+// InfoIcon component for displaying tooltips
+const InfoIcon: React.FC<{ description: string }> = ({ description }) => (
+  <div className="relative group ml-1 flex-shrink-0">
+    <svg
+      xmlns="http://www.w3.org/2000/svg"
+      fill="none"
+      viewBox="0 0 24 24"
+      strokeWidth="1.5"
+      stroke="currentColor"
+      className="w-4 h-4 text-gray-400 cursor-pointer"
+    >
+      <path strokeLinecap="round" strokeLinejoin="round" d="M11.25 11.25l.041-.02a.75.75 0 011.063.852l-.708 2.836a.75.75 0 001.063.853l.041-.021M21 12a9 9 0 11-18 0 9 9 0 0118 0zm-9-3.75h.008v.008H12V8.25z" />
+    </svg>
+    <div className="absolute bottom-full left-1/2 -translate-x-1/2 mb-2 hidden w-64 p-3 text-sm text-white bg-gray-900 rounded-lg shadow-xl group-hover:block z-10 whitespace-normal pointer-events-none">
+      {description}
+      <div className="absolute top-full left-1/2 -translate-x-1/2 border-8 border-transparent border-t-gray-900"></div>
+    </div>
+  </div>
+);
 
 interface DcfData {
   meta: {
@@ -77,6 +98,7 @@ const DcfCalculator: React.FC<DcfCalculatorProps> = ({ symbol }) => {
   // Original historical metrics (display-only now)
   const [historicalRevenueGrowthCagr3Year, setHistoricalRevenueGrowthCagr3Year] = useState<number>(0);
   const [historicalAverageEbitMargin3Year, setHistoricalAverageEbitMargin3Year] = useState<number>(0);
+  const [inputPerpetualGrowthRate, setInputPerpetualGrowthRate] = useState<number>(0.02);
 
   // Remaining editable inputs (debt, cash, D&A, CapEx)
   // These are not displayed as inputs anymore based on the previous request, but their state is kept
@@ -153,8 +175,6 @@ const DcfCalculator: React.FC<DcfCalculatorProps> = ({ symbol }) => {
     const ebitMarginUsed = projectedAverageEbitMargin;
 
     const totalCashAndEquivalents = inputTotalCashAndEquivalents;
-    const totalShortTermDebt = inputTotalShortTermDebt;
-    const totalLongTermDebt = inputTotalLongTermDebt;
     const interestExpense = inputInterestExpense;
     const depreciationAndAmortization = inputDepreciationAndAmortization;
     const capitalExpenditure = inputCapitalExpenditure;
@@ -209,7 +229,7 @@ const DcfCalculator: React.FC<DcfCalculatorProps> = ({ symbol }) => {
     setProjectedFcfs(fcfProjections);
 
     // --- Terminal Value Calculation ---
-    const perpetualGrowthRate = 0.02; // Assuming 2% perpetual growth rate
+    const perpetualGrowthRate = inputPerpetualGrowthRate; // Assuming 2% perpetual growth rate
     let calculatedTerminalValue = 0;
     if (fcfProjections.length > 0 && calculatedWacc > perpetualGrowthRate) {
       const lastProjectedFcf = fcfProjections[fcfProjections.length - 1].fcf;
@@ -251,6 +271,7 @@ const DcfCalculator: React.FC<DcfCalculatorProps> = ({ symbol }) => {
     inputInterestExpense,
     inputDepreciationAndAmortization,
     inputCapitalExpenditure,
+    inputPerpetualGrowthRate,
   ]);
 
   // Effect to trigger calculations when dcfData changes (for initial load)
@@ -308,7 +329,10 @@ const DcfCalculator: React.FC<DcfCalculatorProps> = ({ symbol }) => {
           </div>
           {/* Assumptions */}
           <label className="block">
-            <span className="text-gray-700">Beta:</span>
+            <div className="flex items-center">
+              <span className="text-gray-700">Beta:</span>
+              <InfoIcon description={metricDescriptions.beta} />
+            </div>
             <input
               type="number"
               step="0.01"
@@ -318,7 +342,10 @@ const DcfCalculator: React.FC<DcfCalculatorProps> = ({ symbol }) => {
             />
           </label>
           <label className="block">
-            <span className="text-gray-700">Risk Free Rate:</span>
+            <div className="flex items-center">
+              <span className="text-gray-700">Risk Free Rate:</span>
+              <InfoIcon description={metricDescriptions.riskFreeRate} />
+            </div>
             <NumericFormat
               value={inputRiskFreeRate * 100}
               onValueChange={(values) => {
@@ -331,7 +358,10 @@ const DcfCalculator: React.FC<DcfCalculatorProps> = ({ symbol }) => {
             />
           </label>
           <label className="block">
-            <span className="text-gray-700">Market Risk Premium:</span>
+            <div className="flex items-center">
+              <span className="text-gray-700">Market Risk Premium:</span>
+              <InfoIcon description={metricDescriptions.marketRiskPremium} />
+            </div>
             <NumericFormat
               value={inputMarketRiskPremium * 100}
               onValueChange={(values) => {
@@ -344,7 +374,10 @@ const DcfCalculator: React.FC<DcfCalculatorProps> = ({ symbol }) => {
             />
           </label>
           <label className="block">
-            <span className="text-gray-700">Effective Tax Rate:</span>
+            <div className="flex items-center">
+              <span className="text-gray-700">Effective Tax Rate:</span>
+              <InfoIcon description={metricDescriptions.effectiveTaxRate} />
+            </div>
             <NumericFormat
               value={inputEffectiveTaxRate * 100}
               onValueChange={(values) => {
@@ -359,7 +392,10 @@ const DcfCalculator: React.FC<DcfCalculatorProps> = ({ symbol }) => {
 
           {/* Projected Editable Metrics */}
           <label className="block">
-            <span className="text-gray-700">Projected Revenue Growth Rate:</span>
+            <div className="flex items-center">
+              <span className="text-gray-700">Projected Revenue Growth Rate:</span>
+              <InfoIcon description={metricDescriptions.projectedRevenueGrowthRate} />
+            </div>
             <NumericFormat
               value={projectedRevenueGrowthRate * 100}
               onValueChange={(values) => {
@@ -372,7 +408,10 @@ const DcfCalculator: React.FC<DcfCalculatorProps> = ({ symbol }) => {
             />
           </label>
           <label className="block">
-            <span className="text-gray-700">Projected EBIT Margin:</span>
+            <div className="flex items-center">
+              <span className="text-gray-700">Projected EBIT Margin:</span>
+              <InfoIcon description={metricDescriptions.projectedEbitMargin} />
+            </div>
             <NumericFormat
               value={projectedAverageEbitMargin * 100}
               onValueChange={(values) => {
@@ -382,6 +421,23 @@ const DcfCalculator: React.FC<DcfCalculatorProps> = ({ symbol }) => {
               decimalScale={3}
               fixedDecimalScale={true}
               className="mt-1 block w-24 rounded-md border-gray-300 shadow-sm focus:border-indigo-300 focus:ring focus:ring-ring-indigo-200 focus:ring-opacity-50 bg-blue-100"
+            />
+          </label>
+
+          <label className="block">
+            <div className="flex items-center">
+              <span className="text-gray-700">Perpetual Growth Rate:</span>
+              <InfoIcon description={metricDescriptions.perpetualGrowthRate} />
+            </div>
+            <NumericFormat
+              value={inputPerpetualGrowthRate * 100}
+              onValueChange={(values) => {
+                setInputPerpetualGrowthRate(values.floatValue ? values.floatValue / 100 : 0);
+              }}
+              suffix="%"
+              decimalScale={3}
+              fixedDecimalScale={true}
+              className="mt-1 block w-24 rounded-md border-gray-300 shadow-sm focus:border-indigo-300 focus:ring focus:ring-indigo-200 focus:ring-opacity-50 bg-blue-100"
             />
           </label>
         </div>
