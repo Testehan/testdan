@@ -1,5 +1,15 @@
 import React, { useState, useEffect, useRef, useCallback } from 'react';
 import Spinner from './Spinner';
+import {
+  financialItems,
+  moatItems,
+  potentialItems,
+  customerItems,
+  companySpecificFactorsItems,
+  managementAndCultureItems,
+  stockItems,
+  negativeItems,
+} from './checklistDefinitions';
 
 interface ChecklistTabProps {
   symbol: string;
@@ -24,7 +34,25 @@ interface Tooltip {
   y: number;
 }
 
+const checklists = {
+  Ferol: {
+    name: 'Ferol',
+    items: [
+      { title: 'Financials', items: financialItems },
+      { title: 'Moat/Defence', items: moatItems },
+      { title: 'Potential / Offense', items: potentialItems },
+      { title: 'Customers', items: customerItems },
+      { title: 'Company specific factors', items: companySpecificFactorsItems },
+      { title: 'Management and culture', items: managementAndCultureItems },
+      { title: 'Stock', items: stockItems },
+      { title: 'The negatives :(', items: negativeItems, scoreClass: 'bg-red-200' },
+    ],
+  },
+  // Add other checklists here in the future
+};
+
 const ChecklistTab: React.FC<ChecklistTabProps> = ({ symbol }) => {
+  const [activeChecklist, setActiveChecklist] = useState('Ferol');
   const [logMessages, setLogMessages] = useState<string[]>([]);
   const [reportData, setReportData] = useState<Partial<ReportData>>({});
   const [editableScores, setEditableScores] = useState<Record<string, ChecklistItem>>({});
@@ -34,7 +62,6 @@ const ChecklistTab: React.FC<ChecklistTabProps> = ({ symbol }) => {
   const [isLogVisible, setIsLogVisible] = useState(true);
   const [regenerationCount, setRegenerationCount] = useState(0);
   const [loading, setLoading] = useState(false);
-  // const [startTime, setStartTime] = useState<Date | null>(null);
   const [elapsedTime, setElapsedTime] = useState(0);
   const hasReceivedMessages = useRef(false);
   const hideTimeoutId = useRef<NodeJS.Timeout | null>(null);
@@ -43,7 +70,7 @@ const ChecklistTab: React.FC<ChecklistTabProps> = ({ symbol }) => {
   useEffect(() => {
     if (reportData.items) {
       setEditableScores(reportData.items);
-      setHasScoresChanged(false); // Reset on new report data
+      setHasScoresChanged(false);
     }
   }, [reportData.items]);
 
@@ -65,11 +92,10 @@ const ChecklistTab: React.FC<ChecklistTabProps> = ({ symbol }) => {
     setReportData({});
     setError(null);
     hasReceivedMessages.current = false;
-    isLoadedFromDbRef.current = false; // Reset the ref for a new generation
+    isLoadedFromDbRef.current = false;
     setIsLogVisible(true);
     cancelHideTimer();
     setLoading(true);
-    // setStartTime(new Date());
     setElapsedTime(0);
 
     const timer = setInterval(() => {
@@ -78,8 +104,8 @@ const ChecklistTab: React.FC<ChecklistTabProps> = ({ symbol }) => {
 
     const url =
       regenerationCount > 0
-        ? `http://localhost:8080/stocks/reporting/ferol/${symbol}?recreateReport=true`
-        : `http://localhost:8080/stocks/reporting/ferol/${symbol}`;
+        ? `http://localhost:8080/stocks/reporting/${activeChecklist.toLowerCase()}/${symbol}?recreateReport=true`
+        : `http://localhost:8080/stocks/reporting/${activeChecklist.toLowerCase()}/${symbol}`;
 
     const eventSource = new EventSource(url);
 
@@ -112,7 +138,6 @@ const ChecklistTab: React.FC<ChecklistTabProps> = ({ symbol }) => {
         });
         setEditableScores(itemsMap);
 
-        // Check if report was loaded from database to immediately hide log
         if (isLoadedFromDbRef.current) {
           setIsLogVisible(false);
           cancelHideTimer();
@@ -121,7 +146,7 @@ const ChecklistTab: React.FC<ChecklistTabProps> = ({ symbol }) => {
         }
       } catch (e) {
         console.error("Failed to parse checklist data:", e);
-        startHideTimer(); // Still hide if parsing fails
+        startHideTimer();
       }
       eventSource.close();
       setLoading(false);
@@ -131,9 +156,6 @@ const ChecklistTab: React.FC<ChecklistTabProps> = ({ symbol }) => {
     eventSource.addEventListener('ERROR', (event: MessageEvent) => {
       setError(event.data);
       setIsLogVisible(true);
-      // setLoading(false);
-      // clearInterval(timer);
-      // eventSource.close();
     });
 
     eventSource.onerror = () => {
@@ -150,7 +172,7 @@ const ChecklistTab: React.FC<ChecklistTabProps> = ({ symbol }) => {
       cancelHideTimer();
       clearInterval(timer);
     };
-  }, [symbol, regenerationCount, startHideTimer, cancelHideTimer]);
+  }, [symbol, regenerationCount, startHideTimer, cancelHideTimer, activeChecklist]);
 
   const handleMouseOver = (e: React.MouseEvent, explanation: string) => {
     setTooltip({
@@ -171,75 +193,13 @@ const ChecklistTab: React.FC<ChecklistTabProps> = ({ symbol }) => {
         ...prevScores,
         [key]: {
           ...prevScores[key],
-          score: parseFloat(value) || 0, // Ensure it's a number
+          score: parseFloat(value) || 0,
         },
       };
       return newScores;
     });
     setHasScoresChanged(true);
   };
-
-  const financialItems = [
-    { key: 'financialResilience', label: 'Financial resilience: (Fragile / Averge / Citadel) (0-5)' },
-    { key: 'grossMargin', label: 'Gross Margin: (<50% / 50% to 80% / > 80%) (0-3)' },
-    { key: 'roic', label: 'Returns on Capital (Low / Average / high, +1 if rising) (0-3)' },
-    { key: 'freeCashFlow', label: 'Free Cash Flow (Negative / Pozitive / Positive and growing fast) (0-3)' },
-    { key: 'earningsPerShare', label: 'Earnings per share (Negative / Pozitive / Positive and growing fast) (0-3)' },
-  ];
-
-  const moatItems = [
-    { key: 'networkEffect', label: 'Network effect, product ecosystem (None / Weak / Strong) (0-15)' },
-    { key: 'switchingCosts', label: 'Switching costs (None / Weak / Strong) (0-15)' },
-    { key: 'durableCostAdvantage', label: 'Durable cost advantage (Scale , Distribution , Physical location , Vertical integration) (0-15)' },
-    { key: 'intangibles', label: 'Intangibles (Premium brand , Patent , Trade secrets , Licence) (0-15)' },
-    { key: 'counterPositioning', label: 'Counter positioning (0-10)' },
-    { key: 'moatDirection', label: 'Moat direction (Narrowing / Stable / Widening) (0-5)' },
-  ];
-
-  const potentialItems = [
-    { key: 'optionality', label: 'Optionality (None / Within industry / New industry) (0-7)' },
-    { key: 'organicGrowthRunway', label: 'Organic growth runway (<5% / <10% / <15% / >15% ) (0-4)' },
-    { key: 'topDogFirstMover', label: 'Top dog and first mover in important, emerging industry / Industry disruptor (0-3)' },
-    { key: 'operatingLeverage', label: 'Operating leverage ahead (Negative / None / Modest / Tonnes) (0-4)' },
-  ];
-
-  const customerItems = [
-    { key: 'customerAcquisition', label: 'Acquisitions (Sales & Marketing % of gross profit: 50% / < 10%) (Expensive / Normal / Word of mouth) (0-5)' },
-    { key: 'companyCyclicality', label: 'Dependence (Highly cyclical / Moderate / Recession proof) (0-5)' },
-  ];
-
-  const companySpecificFactorsItems = [
-    { key: 'recurringRevenue', label: 'Recurring revenue (None / Some / Tons) (0-5)' },
-    { key: 'pricingPower', label: 'Princing power (None / Some / Tons) (0-5)' },
-  ];
-
-  const managementAndCultureItems = [
-    { key: 'soulInTheGame', label: 'Soul in the game (Founder / Family Run / Long time CEO) (0-4)' },
-    { key: 'insideOwnership', label: 'Inside ownership (None / Modest / Very high) (0-3)' },
-    { key: 'cultureRatings', label: 'Culture ratings (Overall score, CEO approval, Recommend to a friend) (0-4)' },
-    { key: 'missionStatement', label: 'Mission statement (Simple, inspirational, optionable) (0-3)' },
-  ];
-
-  const stockItems = [
-    { key: 'performanceVsIndex', label: '5 year performance vs S&P500 or Since IPO (+50% / +100% + Gain) (0-4)' },
-    { key: 'shareholderFriendlyActivity', label: 'Shareholder friendly activity (Share buybacks, rising dividends, debt repayment) (0-3)' },
-    { key: 'consistentlyBeatExpectations', label: 'Consistently beat expectations (+1 big beat, +0.5 beat, -1 miss) (0-4)' },
-  ];
-
-  const negativeItems = [
-    { key: 'accountingIrregularities', label: 'Accounting irregularities ? (-10)' },
-    { key: 'customerConcentration', label: 'Customer concentration (> 20% of revenue or account receivables / One or Few > 10% / None) (-5, -3, 0)' },
-    { key: 'industryDisruption', label: 'Industry disruption (Active / Possible / None) (-5, -3, 0)' },
-    { key: 'outsideForces', label: 'Outside forces (commodity prices, interest rates, stock price, strong economy) (-5, -3, 0)' },
-    { key: 'bigMarketLoser', label: 'Big Market Loser (>50% loss to S&P500 over the past 5 years or since IPO) (-5, -3, 0)' },
-    { key: 'binaryEvent', label: 'Binary event (loosing patent protection, legal ruling) (-5, 0)' },
-    { key: 'extremeDilution', label: 'Extreme dilution (> 5% annual share count growth / 3% to 5% / <3%) (-4, -2, 0)' },
-    { key: 'growthByAcquisition', label: 'Growth by acquisition (exclusively / partially / none) (-4, -2, 0)' },
-    { key: 'complicatedFinancials', label: 'Complicated financials (-3, 0)' },
-    { key: 'antitrustConcerns', label: 'Antitrust concerns (-3, 0)' },
-    { key: 'headquarters', label: 'Headquarters (High risk country / Medium risk country / Low risk country) (-3, -2, 0)' },
-    { key: 'currencyRisk', label: 'Currency risk (>75% foreign / >50% foreign / <50% foreign) (-2, -1, 0)' },
-  ];
 
   const handleSave = async () => {
     try {
@@ -251,7 +211,7 @@ const ChecklistTab: React.FC<ChecklistTabProps> = ({ symbol }) => {
         explanation: editableScores[key].explanation,
       }));
 
-      const response = await fetch(`http://localhost:8080/stocks/reporting/ferol/${symbol}`, {
+      const response = await fetch(`http://localhost:8080/stocks/reporting/${activeChecklist.toLowerCase()}/${symbol}`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -266,7 +226,6 @@ const ChecklistTab: React.FC<ChecklistTabProps> = ({ symbol }) => {
       setHasScoresChanged(false);
       setLogMessages(prev => [`Scores saved successfully at ${new Date().toLocaleString()}`, ...prev]);
 
-      // Recalculate final score after saving
       const newFinalScore = Object.values(editableScores).reduce((sum, item) => sum + item.score, 0);
       setReportData(prevReportData => ({
         ...prevReportData,
@@ -281,6 +240,8 @@ const ChecklistTab: React.FC<ChecklistTabProps> = ({ symbol }) => {
   };
 
   const renderChecklistTable = () => {
+    const checklist = checklists[activeChecklist];
+
     const positiveScore = Object.values(reportData.items || {}).reduce((sum, item) => {
       if (item.score > 0) {
         return sum + item.score;
@@ -302,7 +263,7 @@ const ChecklistTab: React.FC<ChecklistTabProps> = ({ symbol }) => {
         ) : (
           <div className="bg-white shadow rounded-lg p-4">
             <div className="flex justify-between items-center mb-4 border-b pb-2">
-              <h3 className="text-lg font-semibold">Financial Checklist</h3>
+              <h3 className="text-lg font-semibold">{checklist.name} Checklist</h3>
               <div className="space-x-2">
                 <button
                   onClick={() => setRegenerationCount(count => count + 1)}
@@ -335,251 +296,42 @@ const ChecklistTab: React.FC<ChecklistTabProps> = ({ symbol }) => {
                   <td className="py-2 text-gray-800 font-bold">{reportData.finalScore ?? '...'}</td>
                 </tr>
 
-                {/* Financials Sub-header */}
-                <tr className="bg-gray-100">
-                  <td colSpan={2} className="py-2 px-1 font-bold text-gray-800">
-                    Financials
-                  </td>
-                </tr>
-
-                {financialItems.map(({ key, label }, index) => {
-                  const item = editableScores?.[key]; // Use editableScores
-                  const isLast = index === financialItems.length - 1;
-                  return (
-                    <tr
-                      key={key}
-                      className={!isLast ? 'border-b' : ''}
-                      onMouseEnter={(e) => item && handleMouseOver(e, item.explanation)}
-                      onMouseLeave={handleMouseOut}
-                    >
-                      <td className="py-2 font-medium text-gray-600">{label}</td>
-                      <td className="py-2 text-gray-800">
-                        <input
-                          type="number"
-                          value={item?.score ?? ''}
-                          onChange={(e) => handleChangeScore(key, e.target.value)}
-                          className="w-20 p-1 border rounded-md text-gray-800 text-right"
-                        />
+                {checklist.items.map(section => (
+                  <React.Fragment key={section.title}>
+                    <tr className="bg-gray-100">
+                      <td colSpan={2} className="py-2 px-1 font-bold text-gray-800">
+                        {section.title}
                       </td>
                     </tr>
-                  );
-                })}
-
-                {/* Moat/Defence Sub-header */}
-                <tr className="bg-gray-100">
-                  <td colSpan={2} className="py-2 px-1 font-bold text-gray-800">
-                    Moat/Defence
-                  </td>
-                </tr>
-
-                {moatItems.map(({ key, label }, index) => {
-                  const item = editableScores?.[key]; // Use editableScores
-                  const isLast = index === moatItems.length - 1;
-                  return (
-                    <tr
-                      key={key}
-                      className={!isLast ? 'border-b' : ''}
-                      onMouseEnter={(e) => item && handleMouseOver(e, item.explanation)}
-                      onMouseLeave={handleMouseOut}
-                    >
-                      <td className="py-2 font-medium text-gray-600">{label}</td>
-                      <td className="py-2 text-gray-800">
-                        <input
-                          type="number"
-                          value={item?.score ?? ''}
-                          onChange={(e) => handleChangeScore(key, e.target.value)}
-                          className="w-20 p-1 border rounded-md text-gray-800 text-right"
-                        />
-                      </td>
-                    </tr>
-                  );
-                })}
-
-                {/* Potential / Offense Sub-header */}
-                <tr className="bg-gray-100">
-                  <td colSpan={2} className="py-2 px-1 fontbold text-gray-800">
-                    Potential / Offense
-                  </td>
-                </tr>
-
-                {potentialItems.map(({ key, label }, index) => {
-                  const item = editableScores?.[key]; // Use editableScores
-                  const isLast = index === potentialItems.length - 1;
-                  return (
-                    <tr
-                      key={key}
-                      className={!isLast ? 'border-b' : ''}
-                      onMouseEnter={(e) => item && handleMouseOver(e, item.explanation)}
-                      onMouseLeave={handleMouseOut}
-                    >
-                      <td className="py-2 font-medium text-gray-600">{label}</td>
-                      <td className="py-2 text-gray-800">
-                        <input
-                          type="number"
-                          value={item?.score ?? ''}
-                          onChange={(e) => handleChangeScore(key, e.target.value)}
-                          className="w-20 p-1 border rounded-md text-gray-800 text-right"
-                        />
-                      </td>
-                    </tr>
-                  );
-                })}
-
-                {/* Customers Sub-header */}
-                <tr className="bg-gray-100">
-                  <td colSpan={2} className="py-2 px-1 font-bold text-gray-800">
-                    Customers
-                  </td>
-                </tr>
-
-                {customerItems.map(({ key, label }, index) => {
-                  const item = editableScores?.[key]; // Use editableScores
-                  const isLast = index === customerItems.length - 1;
-                  return (
-                    <tr
-                      key={key}
-                      className={!isLast ? 'border-b' : ''}
-                      onMouseEnter={(e) => item && handleMouseOver(e, item.explanation)}
-                      onMouseLeave={handleMouseOut}
-                    >
-                      <td className="py-2 font-medium text-gray-600">{label}</td>
-                      <td className="py-2 text-gray-800">
-                        <input
-                          type="number"
-                          value={item?.score ?? ''}
-                          onChange={(e) => handleChangeScore(key, e.target.value)}
-                          className="w-20 p-1 border rounded-md text-gray-800 text-right"
-                        />
-                      </td>
-                    </tr>
-                  );
-                })}
-
-                {/* Company specific factors Sub-header */}
-                <tr className="bg-gray-100">
-                  <td colSpan={2} className="py-2 px-1 font-bold text-gray-800">
-                    Company specific factors
-                  </td>
-                </tr>
-
-                {companySpecificFactorsItems.map(({ key, label }, index) => {
-                  const item = editableScores?.[key]; // Use editableScores
-                  const isLast = index === companySpecificFactorsItems.length - 1;
-                  return (
-                    <tr
-                      key={key}
-                      className={!isLast ? 'border-b' : ''}
-                      onMouseEnter={(e) => item && handleMouseOver(e, item.explanation)}
-                      onMouseLeave={handleMouseOut}
-                    >
-                      <td className="py-2 font-medium text-gray-600">{label}</td>
-                      <td className="py-2 text-gray-800">
-                        <input
-                          type="number"
-                          value={item?.score ?? ''}
-                          onChange={(e) => handleChangeScore(key, e.target.value)}
-                          className="w-20 p-1 border rounded-md text-gray-800 text-right"
-                        />
-                      </td>
-                    </tr>
-                  );
-                })}
-
-                {/* Management and culture Sub-header */}
-                <tr className="bg-gray-100">
-                  <td colSpan={2} className="py-2 px-1 font-bold text-gray-800">
-                    Management and culture
-                  </td>
-                </tr>
-
-                {managementAndCultureItems.map(({ key, label }, index) => {
-                  const item = editableScores?.[key]; // Use editableScores
-                  const isLast = index === managementAndCultureItems.length - 1;
-                  return (
-                    <tr
-                      key={key}
-                      className={!isLast ? 'border-b' : ''}
-                      onMouseEnter={(e) => item && handleMouseOver(e, item.explanation)}
-                      onMouseLeave={handleMouseOut}
-                    >
-                      <td className="py-2 font-medium text-gray-600">{label}</td>
-                      <td className="py-2 text-gray-800">
-                        <input
-                          type="number"
-                          value={item?.score ?? ''}
-                          onChange={(e) => handleChangeScore(key, e.target.value)}
-                          className="w-20 p-1 border rounded-md text-gray-800 text-right"
-                        />
-                      </td>
-                    </tr>
-                  );
-                })}
-
-                {/* Stock Sub-header */}
-                <tr className="bg-gray-100">
-                  <td colSpan={2} className="py-2 px-1 font-bold text-gray-800">
-                    Stock
-                  </td>
-                </tr>
-
-                {stockItems.map(({ key, label }, index) => {
-                  const item = editableScores?.[key]; // Use editableScores
-                  const isLast = index === stockItems.length - 1;
-                  return (
-                    <tr
-                      key={key}
-                      className={!isLast ? 'border-b' : ''}
-                      onMouseEnter={(e) => item && handleMouseOver(e, item.explanation)}
-                      onMouseLeave={handleMouseOut}
-                    >
-                      <td className="py-2 font-medium text-gray-600">{label}</td>
-                      <td className="py-2 text-gray-800">
-                        <input
-                          type="number"
-                          value={item?.score ?? ''}
-                          onChange={(e) => handleChangeScore(key, e.target.value)}
-                          className="w-20 p-1 border rounded-md text-gray-800 text-right"
-                        />
-                      </td>
-                    </tr>
-                  );
-                })}
+                    {section.items.map(({ key, label }, index) => {
+                      const item = editableScores?.[key];
+                      const isLast = index === section.items.length - 1;
+                      return (
+                        <tr
+                          key={key}
+                          className={!isLast ? 'border-b' : ''}
+                          onMouseEnter={(e) => item && handleMouseOver(e, item.explanation)}
+                          onMouseLeave={handleMouseOut}
+                        >
+                          <td className="py-2 font-medium text-gray-600">{label}</td>
+                          <td className="py-2 text-gray-800">
+                            <input
+                              type="number"
+                              value={item?.score ?? ''}
+                              onChange={(e) => handleChangeScore(key, e.target.value)}
+                              className="w-20 p-1 border rounded-md text-gray-800 text-right"
+                            />
+                          </td>
+                        </tr>
+                      );
+                    })}
+                  </React.Fragment>
+                ))}
 
                 <tr className="bg-green-200 border-b">
                   <td className="py-2 font-medium text-gray-600">Positives score</td>
                   <td className="py-2 text-gray-800 font-bold">{positiveScore}</td>
                 </tr>
-
-                {/* The negatives :( Sub-header */}
-                <tr className="bg-gray-100">
-                  <td colSpan={2} className="py-2 px-1 font-bold text-gray-800">
-                    The negatives :(
-                  </td>
-                </tr>
-
-                {negativeItems.map(({ key, label }, index) => {
-                  const item = editableScores?.[key]; // Use editableScores
-                  const isLast = index === negativeItems.length - 1;
-                  return (
-                    <tr
-                      key={key}
-                      className={!isLast ? 'border-b' : ''}
-                      onMouseEnter={(e) => item && handleMouseOver(e, item.explanation)}
-                      onMouseLeave={handleMouseOut}
-                    >
-                      <td className="py-2 font-medium text-gray-600">{label}</td>
-                      <td className="py-2 text-gray-800">
-                        <input
-                          type="number"
-                          value={item?.score ?? ''}
-                          onChange={(e) => handleChangeScore(key, e.target.value)}
-                          className="w-20 p-1 border rounded-md text-gray-800 text-right"
-                        />
-                      </td>
-                    </tr>
-                  );
-                })}
-
                 <tr className="bg-red-200 border-b">
                     <td className="py-2 font-medium text-gray-600">Negatives score</td>
                     <td className="py-2 text-gray-800 font-bold">{negativeScore}</td>
@@ -589,7 +341,7 @@ const ChecklistTab: React.FC<ChecklistTabProps> = ({ symbol }) => {
           </div>
         )}
       </div>
-    )
+    );
   };
 
   const renderLogPanel = () => (
@@ -633,6 +385,21 @@ const ChecklistTab: React.FC<ChecklistTabProps> = ({ symbol }) => {
 
   return (
     <div className="container mx-auto">
+      <div className="flex border-b">
+        {Object.keys(checklists).map(name => (
+          <button
+            key={name}
+            onClick={() => setActiveChecklist(name)}
+            className={`py-2 px-4 text-sm font-medium ${
+              activeChecklist === name
+                ? 'border-b-2 border-blue-500 text-blue-600'
+                : 'text-gray-500 hover:text-gray-700'
+            }`}
+          >
+            {name}
+          </button>
+        ))}
+      </div>
       {renderChecklistTable()}
       {renderLogPanel()}
       {tooltip.visible && (
