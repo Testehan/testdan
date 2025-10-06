@@ -11,6 +11,16 @@ import {
   negativeItems,
 } from './checklistDefinitions';
 
+import {
+  reinvestmentEngineItems,
+  managementItems as managementItems100Bagger,
+  marketAndScalabilityItems,
+  businessQualityItems,
+  valuationItems,
+  shareholderImpactItems,
+  investorFitCoffeeCanItems,
+} from './100BaggerChecklistDefinitions';
+
 interface ChecklistTabProps {
   symbol: string;
 }
@@ -48,7 +58,18 @@ const checklists = {
       { title: 'The negatives :(', items: negativeItems, scoreClass: 'bg-red-200' },
     ],
   },
-  // Add other checklists here in the future
+  '100 Bagger': {
+    name: '100 Bagger',
+    items: [
+      { title: 'Reinvestment Engine', items: reinvestmentEngineItems },
+      { title: 'Management', items: managementItems100Bagger },
+      { title: 'Market & Scalability', items: marketAndScalabilityItems },
+      { title: 'Business Quality', items: businessQualityItems },
+      { title: 'Valuation', items: valuationItems },
+      { title: 'Shareholder Impact', items: shareholderImpactItems },
+      { title: 'Investor Fit / Coffee Can', items: investorFitCoffeeCanItems },
+    ],
+  },
 };
 
 const ChecklistTab: React.FC<ChecklistTabProps> = ({ symbol }) => {
