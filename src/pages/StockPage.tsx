@@ -88,6 +88,9 @@ const StockPage: React.FC = () => {
   return (
     <div className="container mx-auto p-4">
       <h2 className="text-2xl font-bold mb-4">
+        <i className=" text-red-500">“Let us fall back on the principle that when any rule or formula become a
+          substitute for thought rather than an aid to thinking, it is dangerous and should be discarded.” </i>
+        <br />
         Stock Details for {symbol.toUpperCase()}
         {quoteLoading && <span className="ml-4 text-sm">Loading quote...</span>}
         {quoteError && <span className="ml-4 text-sm text-red-500">Error loading quote</span>}
