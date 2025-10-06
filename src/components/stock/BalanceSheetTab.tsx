@@ -32,7 +32,7 @@ const totalAssetKeys: (keyof BalanceSheetReport)[] = [
 
 const currentLiabilityKeys: (keyof BalanceSheetReport)[] = [
     'totalCurrentLiabilities',
-    'accountPayables',
+    'accountsPayables',
     'deferredRevenue',
     'shortTermDebt',
     'otherCurrentLiabilities',

@@ -195,7 +195,7 @@ const ReverseDcfCalculator: React.FC<ReverseDcfCalculatorProps> = ({ symbol }) =
                         <label className="block">
                             <div className="flex items-center">
                                 <span className="text-gray-700">Discount Rate - minimum annual return from your investment (WACC)</span>
-                                <InfoIcon description={metricDescriptions.wacc} />
+                                <InfoIcon description={metricDescriptions.dcfInputs.wacc} />
                             </div>
                             <NumericFormat
                                 value={wacc * 100}
@@ -209,7 +209,7 @@ const ReverseDcfCalculator: React.FC<ReverseDcfCalculatorProps> = ({ symbol }) =
                         <label className="block">
                             <div className="flex items-center">
                                 <span className="text-gray-700">Perpetual Growth Rate</span>
-                                <InfoIcon description={metricDescriptions.perpetualGrowthRate} />
+                                <InfoIcon description={metricDescriptions.dcfInputs.perpetualGrowthRate} />
                             </div>
                             <NumericFormat
                                 value={perpetualGrowthRate * 100}
@@ -221,7 +221,7 @@ const ReverseDcfCalculator: React.FC<ReverseDcfCalculatorProps> = ({ symbol }) =
                         <label className="block">
                             <div className="flex items-center">
                                 <span className="text-gray-700">Projection Years</span>
-                                <InfoIcon description={metricDescriptions.projectionYears} />
+                                <InfoIcon description={metricDescriptions.dcfInputs.projectionYears} />
                             </div>
                             <input
                                 type="number"

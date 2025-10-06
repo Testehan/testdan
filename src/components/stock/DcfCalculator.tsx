@@ -312,7 +312,7 @@ const DcfCalculator: React.FC<DcfCalculatorProps> = ({ symbol }) => {
           <label className="block">
             <div className="flex items-center">
               <span className="text-gray-700">Beta:</span>
-              <InfoIcon description={metricDescriptions.beta} />
+              <InfoIcon description={metricDescriptions.dcfInputs.beta} />
             </div>
             <input
               type="number"
@@ -325,7 +325,7 @@ const DcfCalculator: React.FC<DcfCalculatorProps> = ({ symbol }) => {
           <label className="block">
             <div className="flex items-center">
               <span className="text-gray-700">Risk Free Rate:</span>
-              <InfoIcon description={metricDescriptions.riskFreeRate} />
+              <InfoIcon description={metricDescriptions.dcfInputs.riskFreeRate} />
             </div>
             <NumericFormat
               value={inputRiskFreeRate * 100}
@@ -341,7 +341,7 @@ const DcfCalculator: React.FC<DcfCalculatorProps> = ({ symbol }) => {
           <label className="block">
             <div className="flex items-center">
               <span className="text-gray-700">Market Risk Premium:</span>
-              <InfoIcon description={metricDescriptions.marketRiskPremium} />
+              <InfoIcon description={metricDescriptions.dcfInputs.marketRiskPremium} />
             </div>
             <NumericFormat
               value={inputMarketRiskPremium * 100}
@@ -357,7 +357,7 @@ const DcfCalculator: React.FC<DcfCalculatorProps> = ({ symbol }) => {
           <label className="block">
             <div className="flex items-center">
               <span className="text-gray-700">Effective Tax Rate:</span>
-              <InfoIcon description={metricDescriptions.effectiveTaxRate} />
+              <InfoIcon description={metricDescriptions.dcfInputs.effectiveTaxRate} />
             </div>
             <NumericFormat
               value={inputEffectiveTaxRate * 100}
@@ -375,7 +375,7 @@ const DcfCalculator: React.FC<DcfCalculatorProps> = ({ symbol }) => {
           <label className="block">
             <div className="flex items-center">
               <span className="text-gray-700">Projected Revenue Growth Rate:</span>
-              <InfoIcon description={metricDescriptions.projectedRevenueGrowthRate} />
+              <InfoIcon description={metricDescriptions.dcfInputs.projectedRevenueGrowthRate} />
             </div>
             <NumericFormat
               value={projectedRevenueGrowthRate * 100}
@@ -391,7 +391,7 @@ const DcfCalculator: React.FC<DcfCalculatorProps> = ({ symbol }) => {
           <label className="block">
             <div className="flex items-center">
               <span className="text-gray-700">Projected EBIT Margin:</span>
-              <InfoIcon description={metricDescriptions.projectedEbitMargin} />
+              <InfoIcon description={metricDescriptions.dcfInputs.projectedEbitMargin} />
             </div>
             <NumericFormat
               value={projectedAverageEbitMargin * 100}
@@ -408,7 +408,7 @@ const DcfCalculator: React.FC<DcfCalculatorProps> = ({ symbol }) => {
           <label className="block">
             <div className="flex items-center">
               <span className="text-gray-700">Perpetual Growth Rate:</span>
-              <InfoIcon description={metricDescriptions.perpetualGrowthRate} />
+              <InfoIcon description={metricDescriptions.dcfInputs.perpetualGrowthRate} />
             </div>
             <NumericFormat
               value={inputPerpetualGrowthRate * 100}
