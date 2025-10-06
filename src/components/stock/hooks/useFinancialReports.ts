@@ -216,6 +216,13 @@ export const useEarningsHistory = (
     const [error, setError] = useState<string | null>(null);
   
     const fetchQuote = async () => {
+      if (!symbol) { // Add this check
+        setQuote(null);
+        setLoading(false);
+        setError(null); // Clear error if symbol becomes empty
+        return;
+      }
+
       setLoading(true);
       setError(null);
       try {
@@ -237,7 +244,7 @@ export const useEarningsHistory = (
       fetchQuote();
       const interval = setInterval(fetchQuote, 5 * 60 * 1000); // 5 minutes
       return () => clearInterval(interval);
-    }, [symbol, baseURL]);
+    }, [symbol, baseURL]); // Ensure fetchQuote is in the dependency array if it uses any outside state/props
   
     return {
       quote,

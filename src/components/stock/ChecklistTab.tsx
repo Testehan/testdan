@@ -38,6 +38,7 @@ const ChecklistTab: React.FC<ChecklistTabProps> = ({ symbol }) => {
   const [elapsedTime, setElapsedTime] = useState(0);
   const hasReceivedMessages = useRef(false);
   const hideTimeoutId = useRef<NodeJS.Timeout | null>(null);
+  const isLoadedFromDbRef = useRef(false);
 
   useEffect(() => {
     if (reportData.items) {
@@ -64,6 +65,7 @@ const ChecklistTab: React.FC<ChecklistTabProps> = ({ symbol }) => {
     setReportData({});
     setError(null);
     hasReceivedMessages.current = false;
+    isLoadedFromDbRef.current = false; // Reset the ref for a new generation
     setIsLogVisible(true);
     cancelHideTimer();
     setLoading(true);
@@ -88,6 +90,9 @@ const ChecklistTab: React.FC<ChecklistTabProps> = ({ symbol }) => {
 
     eventSource.addEventListener('MESSAGE', (event: MessageEvent) => {
       hasReceivedMessages.current = true;
+      if (event.data.includes("Report loaded from database.")) {
+        isLoadedFromDbRef.current = true;
+      }
       setLogMessages(prev => [event.data, ...prev]);
     });
 
@@ -106,10 +111,18 @@ const ChecklistTab: React.FC<ChecklistTabProps> = ({ symbol }) => {
           items: itemsMap,
         });
         setEditableScores(itemsMap);
+
+        // Check if report was loaded from database to immediately hide log
+        if (isLoadedFromDbRef.current) {
+          setIsLogVisible(false);
+          cancelHideTimer();
+        } else {
+          startHideTimer();
+        }
       } catch (e) {
         console.error("Failed to parse checklist data:", e);
+        startHideTimer(); // Still hide if parsing fails
       }
-      startHideTimer();
       eventSource.close();
       setLoading(false);
       clearInterval(timer);

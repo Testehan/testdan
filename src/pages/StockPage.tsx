@@ -6,24 +6,30 @@ import FinancialsTab from '../components/stock/FinancialsTab';
 import ChecklistTab from '../components/stock/ChecklistTab';
 import ValuationTab from '../components/stock/ValuationTab';
 import { useGlobalQuote } from '../components/stock/hooks/useFinancialReports';
+import StockSummaryTable from '../components/stock/StockSummaryTable';
 
 const StockPage: React.FC = () => {
-  const { symbol } = useParams<{ symbol?: string }>(); // Make symbol optional to handle cases where it might not be in URL
+  const { symbol } = useParams<{ symbol?: string }>();
   const [stockData, setStockData] = useState<StockData | null>(null);
-  const [loading, setLoading] = useState<boolean>(true);
-  const [error, setError] = useState<string | null>(null);
+  const [dataLoading, setDataLoading] = useState<boolean>(true); // Renamed from loading to dataLoading
+  const [dataError, setDataError] = useState<string | null>(null); // Renamed from error to dataError
   const [activeTab, setActiveTab] = useState<string>('overview');
 
   const { quote, loading: quoteLoading, error: quoteError } = useGlobalQuote({ symbol: symbol || '' });
 
   useEffect(() => {
+    // console.log('StockPage: useEffect symbol:', symbol);
     if (!symbol) {
-      setError('No stock symbol provided in the URL.');
-      setLoading(false);
+      setDataLoading(false);
+      setStockData(null);
+      setDataError(null);
       return;
     }
 
     const fetchStockData = async () => {
+      // console.log('StockPage: fetchStockData symbol:', symbol);
+      setDataLoading(true);
+      setDataError(null);
       try {
         const response = await fetch(`http://localhost:8080/stocks/overview/${symbol}`);
         if (!response.ok) {
@@ -32,25 +38,36 @@ const StockPage: React.FC = () => {
         const data: StockData = await response.json();
         setStockData(data);
       } catch (e: any) {
-        setError(e.message);
+        setDataError(e.message);
       } finally {
-        setLoading(false);
+        setDataLoading(false);
       }
     };
 
     fetchStockData();
-  }, [symbol]); // Add symbol to dependency array
+  }, [symbol]);
 
-  if (loading) {
+  const isLoading = dataLoading || quoteLoading;
+  const hasError = dataError || quoteError;
+
+  if (!symbol) {
+    return (
+      <div className="container mx-auto p-4">
+        <StockSummaryTable />
+      </div>
+    );
+  }
+
+  if (isLoading) {
     return <div className="text-center p-4">Loading stock data...</div>;
   }
 
-  if (error) {
-    return <div className="text-center p-4 text-red-500">Error: {error}</div>;
+  if (hasError) {
+    return <div className="text-center p-4 text-red-500">Error: {hasError}</div>;
   }
 
-  if (!stockData || !symbol) { // Check for symbol here too
-    return <div className="text-center p-4">No stock data available or symbol missing.</div>;
+  if (!stockData) {
+    return <div className="text-center p-4">No stock data available.</div>;
   }
 
   const changePercent =
@@ -65,6 +82,8 @@ const StockPage: React.FC = () => {
     JPY: '¥',
     GBP: '£',
   };
+
+
 
   return (
     <div className="container mx-auto p-4">

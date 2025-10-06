@@ -40,7 +40,9 @@ const EarningsHistoryTable: React.FC<EarningsHistoryTableProps> = ({ title, data
               <tr key={index} className={`border-b ${getRowColor(row)}`}>
                 {columns.map(col => (
                   <td key={col} className="py-2 px-3">
-                    {col === 'surprisePercentage' ? `${row[col]}%` : row[col]}
+                    {col === 'surprise' || col === 'surprisePercentage'
+                      ? (typeof row[col] === 'number' ? row[col].toFixed(3) : parseFloat(row[col]).toFixed(3)) + (col === 'surprisePercentage' ? '%' : '')
+                      : row[col]}
                   </td>
                 ))}
               </tr>
