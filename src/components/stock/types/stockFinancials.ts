@@ -182,6 +182,7 @@ export interface StockData {
     cashConversionCycle: number | null;
     daysInventoryOutstanding: number | null;
     daysPayablesOutstanding: number | null;
+    salesToCapitalRatio: number | null;
     dividendYield: number | null;
     dividendPayoutRatio: number | null;
     buybackYield: number | null;

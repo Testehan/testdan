@@ -41,6 +41,7 @@ const efficiencyKeys: (keyof FinancialRatioReport)[] = [
     'cashConversionCycle',
     'daysInventoryOutstanding',
     'daysPayablesOutstanding',
+    'salesToCapitalRatio'
 ];
 
 const shareholderReturnsKeys: (keyof FinancialRatioReport)[] = [

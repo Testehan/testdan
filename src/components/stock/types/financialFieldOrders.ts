@@ -165,6 +165,7 @@ export const financialRatioFieldOrder: (keyof FinancialRatioReport)[] = [
     "cashConversionCycle",
     "daysInventoryOutstanding",
     "daysPayablesOutstanding",
+    "salesToCapitalRatio",
     "dividendYield",
     "dividendPayoutRatio",
     "buybackYield",

@@ -34,6 +34,7 @@ export const metricDescriptions: { [key: string]: string } = {
     cashConversionCycle: "Measures the number of days it takes for a company to convert its investments in inventory and accounts receivable into cash flows.",
     daysInventoryOutstanding: "Measures the average number of days a company holds its inventory before selling it.",
     daysPayablesOutstanding: "Measures the average number of days a company takes to pay its trade payables.",
+    salesToCapitalRatio: "how much a company needs to reinvest to generate future growth. for every 1$ invested, this tells us how much sales it will generate",
 
     // Shareholder Returns
     dividendYield: "The dividend per share divided by the share price. Represents the return on investment from dividends alone.",
