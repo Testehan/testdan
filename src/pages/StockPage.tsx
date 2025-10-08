@@ -11,14 +11,46 @@ import StockSummaryTable from '../components/stock/StockSummaryTable';
 const StockPage: React.FC = () => {
   const { symbol } = useParams<{ symbol?: string }>();
   const [stockData, setStockData] = useState<StockData | null>(null);
-  const [dataLoading, setDataLoading] = useState<boolean>(true); // Renamed from loading to dataLoading
-  const [dataError, setDataError] = useState<string | null>(null); // Renamed from error to dataError
+  const [dataLoading, setDataLoading] = useState<boolean>(true);
+  const [dataError, setDataError] = useState<string | null>(null);
   const [activeTab, setActiveTab] = useState<string>('overview');
+  const [activeSubTab, setActiveSubTab] = useState<string>('');
 
   const { quote, loading: quoteLoading, error: quoteError } = useGlobalQuote({ symbol: symbol || '' });
 
   useEffect(() => {
-    // console.log('StockPage: useEffect symbol:', symbol);
+    const handleHashChange = () => {
+      const hash = window.location.hash.replace('#', '');
+      const [main, sub] = hash.split('/');
+      setActiveTab(main || 'overview');
+      setActiveSubTab(sub ? decodeURIComponent(sub) : '');
+    };
+
+    handleHashChange(); // Initial check
+    window.addEventListener('hashchange', handleHashChange);
+
+    return () => {
+      window.removeEventListener('hashchange', handleHashChange);
+    };
+  }, []);
+
+  const handleTabClick = (tabName: string) => {
+    let newHash = tabName;
+    if (tabName === 'financials') {
+      newHash += '/incomeStatement';
+    } else if (tabName === 'checklist') {
+      newHash += '/Ferol';
+    } else if (tabName === 'valuation') {
+      newHash += '/dcf';
+    }
+    window.location.hash = newHash;
+  };
+
+  const handleSubTabClick = (subTabName: string) => {
+    window.location.hash = `${activeTab}/${encodeURIComponent(subTabName)}`;
+  };
+
+  useEffect(() => {
     if (!symbol) {
       setDataLoading(false);
       setStockData(null);
@@ -27,7 +59,6 @@ const StockPage: React.FC = () => {
     }
 
     const fetchStockData = async () => {
-      // console.log('StockPage: fetchStockData symbol:', symbol);
       setDataLoading(true);
       setDataError(null);
       try {
@@ -83,8 +114,6 @@ const StockPage: React.FC = () => {
     GBP: '£',
   };
 
-
-
   return (
     <div className="container mx-auto p-4">
       <h2 className="text-2xl font-bold mb-4">
@@ -106,7 +135,7 @@ const StockPage: React.FC = () => {
           className={`px-4 py-2 text-lg font-medium ${
             activeTab === 'overview' ? 'border-b-2 border-blue-500 text-blue-600' : 'text-gray-600 hover:text-blue-600'
           }`}
-          onClick={() => setActiveTab('overview')}
+          onClick={() => handleTabClick('overview')}
         >
           Overview
         </button>
@@ -114,7 +143,7 @@ const StockPage: React.FC = () => {
           className={`px-4 py-2 text-lg font-medium ${
             activeTab === 'financials' ? 'border-b-2 border-blue-500 text-blue-600' : 'text-gray-600 hover:text-blue-600'
           }`}
-          onClick={() => setActiveTab('financials')}
+          onClick={() => handleTabClick('financials')}
         >
           Financials
         </button>
@@ -122,7 +151,7 @@ const StockPage: React.FC = () => {
           className={`px-4 py-2 text-lg font-medium ${
             activeTab === 'checklist' ? 'border-b-2 border-blue-500 text-blue-600' : 'text-gray-600 hover:text-blue-600'
           }`}
-          onClick={() => setActiveTab('checklist')}
+          onClick={() => handleTabClick('checklist')}
         >
           Checklist
         </button>
@@ -130,7 +159,7 @@ const StockPage: React.FC = () => {
           className={`px-4 py-2 text-lg font-medium ${
             activeTab === 'valuation' ? 'border-b-2 border-blue-500 text-blue-600' : 'text-gray-600 hover:text-blue-600'
           }`}
-          onClick={() => setActiveTab('valuation')}
+          onClick={() => handleTabClick('valuation')}
         >
           Valuation
         </button>
@@ -141,9 +170,9 @@ const StockPage: React.FC = () => {
             stockData={stockData}
           />
         )}
-        {activeTab === 'financials' && <FinancialsTab symbol={symbol} />}
-        {activeTab === 'checklist' && <ChecklistTab symbol={symbol} />}
-        {activeTab === 'valuation' && <ValuationTab symbol={symbol} />}
+        {activeTab === 'financials' && <FinancialsTab symbol={symbol} activeSubTab={activeSubTab} onSubTabClick={handleSubTabClick} />}
+        {activeTab === 'checklist' && <ChecklistTab symbol={symbol} activeSubTab={activeSubTab} onSubTabClick={handleSubTabClick} />}
+        {activeTab === 'valuation' && <ValuationTab symbol={symbol} activeSubTab={activeSubTab} onSubTabClick={handleSubTabClick} />}
       </div>
     </div>
   );

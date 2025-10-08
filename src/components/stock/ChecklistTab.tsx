@@ -24,6 +24,8 @@ import {
 
 interface ChecklistTabProps {
   symbol: string;
+  activeSubTab: string;
+  onSubTabClick: (subTab: string) => void;
 }
 
 interface ChecklistItem {
@@ -74,8 +76,7 @@ const checklists = {
   },
 };
 
-const ChecklistTab: React.FC<ChecklistTabProps> = ({ symbol }) => {
-  const [activeChecklist, setActiveChecklist] = useState('Ferol');
+const ChecklistTab: React.FC<ChecklistTabProps> = ({ symbol, activeSubTab, onSubTabClick }) => {
   const [logMessages, setLogMessages] = useState<string[]>([]);
   const [reportData, setReportData] = useState<Partial<ReportData>>({});
   const [editableScores, setEditableScores] = useState<Record<string, ChecklistItem>>({});
@@ -125,7 +126,7 @@ const ChecklistTab: React.FC<ChecklistTabProps> = ({ symbol }) => {
       setElapsedTime(prev => prev + 1);
     }, 1000);
 
-    const reportType = activeChecklist === '100 Bagger' ? 'ONE_HUNDRED_BAGGER' : activeChecklist;
+    const reportType = activeSubTab === '100 Bagger' ? 'ONE_HUNDRED_BAGGER' : activeSubTab;
     const url = `http://localhost:8080/stocks/reporting/checklist/${symbol}?reportType=${reportType}${
       regenerationCount > 0 ? '&recreateReport=true' : ''
     }`;
@@ -195,7 +196,7 @@ const ChecklistTab: React.FC<ChecklistTabProps> = ({ symbol }) => {
       cancelHideTimer();
       clearInterval(timer);
     };
-  }, [symbol, regenerationCount, startHideTimer, cancelHideTimer, activeChecklist]);
+  }, [symbol, regenerationCount, startHideTimer, cancelHideTimer, activeSubTab]);
 
   const handleMouseOver = (e: React.MouseEvent, explanation: string) => {
     setTooltip({
@@ -234,7 +235,8 @@ const ChecklistTab: React.FC<ChecklistTabProps> = ({ symbol }) => {
         explanation: editableScores[key].explanation,
       }));
 
-      const response = await fetch(`http://localhost:8080/stocks/reporting/checklist/${symbol}?reportType=${activeChecklist}`, {
+      const reportType = activeSubTab === '100 Bagger' ? 'ONE_HUNDRED_BAGGER' : activeSubTab;
+      const response = await fetch(`http://localhost:8080/stocks/reporting/checklist/${symbol}?reportType=${reportType}`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -263,7 +265,10 @@ const ChecklistTab: React.FC<ChecklistTabProps> = ({ symbol }) => {
   };
 
   const renderChecklistTable = () => {
-    const checklist = checklists[activeChecklist];
+    const checklist = checklists[activeSubTab];
+    if (!checklist) {
+        return <div>Checklist not found</div>;
+    }
     const lastPositiveSectionIndex = checklist.items.findIndex(section => section.title.includes('The negatives :(')) - 1;
     const negativeSectionIndex = checklist.items.findIndex(section => section.title.includes('The negatives :('));
 
@@ -418,11 +423,11 @@ const ChecklistTab: React.FC<ChecklistTabProps> = ({ symbol }) => {
           <button
             key={name}
             onClick={() => {
-              setActiveChecklist(name);
+              onSubTabClick(name)
               setRegenerationCount(0);
             }}
             className={`py-2 px-4 text-sm font-medium ${
-              activeChecklist === name
+              activeSubTab === name
                 ? 'border-b-2 border-blue-500 text-blue-600'
                 : 'text-gray-500 hover:text-gray-700'
             }`}
