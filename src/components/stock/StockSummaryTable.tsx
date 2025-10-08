@@ -3,8 +3,10 @@ import { useNavigate } from 'react-router-dom';
 
 interface StockSummary {
   ticker: string;
-  totalScore: number;
-  generationDate: string;
+  totalFerolScore: number;
+  total100BaggerScore: number;
+  generationFerolDate: string;
+  generation100BaggerDate: string;
 }
 
 type SortColumn = keyof StockSummary;
@@ -50,9 +52,9 @@ const StockSummaryTable: React.FC = () => {
     const aValue = a[sortColumn];
     const bValue = b[sortColumn];
 
-    if (sortColumn === 'totalScore') {
-      return sortDirection === 'asc' ? aValue - bValue : bValue - aValue;
-    } else if (sortColumn === 'generationDate') {
+    if (sortColumn === 'totalFerolScore' || sortColumn === 'total100BaggerScore') {
+      return sortDirection === 'asc' ? (aValue as number) - (bValue as number) : (bValue as number) - (aValue as number);
+    } else if (sortColumn === 'generationFerolDate' || sortColumn === 'generation100BaggerDate') {
       const dateA = new Date(aValue as string).getTime();
       const dateB = new Date(bValue as string).getTime();
       return sortDirection === 'asc' ? dateA - dateB : dateB - dateA;
@@ -86,15 +88,27 @@ const StockSummaryTable: React.FC = () => {
             </th>
             <th
               className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider cursor-pointer"
-              onClick={() => handleSort('totalScore')}
+              onClick={() => handleSort('totalFerolScore')}
             >
-              Total Score {sortColumn === 'totalScore' ? (sortDirection === 'asc' ? '▲' : '▼') : ''}
+              Ferol Score {sortColumn === 'totalFerolScore' ? (sortDirection === 'asc' ? '▲' : '▼') : ''}
             </th>
             <th
               className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider cursor-pointer"
-              onClick={() => handleSort('generationDate')}
+              onClick={() => handleSort('generationFerolDate')}
             >
-              Generation Date {sortColumn === 'generationDate' ? (sortDirection === 'asc' ? '▲' : '▼') : ''}
+              Ferol Date {sortColumn === 'generationFerolDate' ? (sortDirection === 'asc' ? '▲' : '▼') : ''}
+            </th>
+            <th
+              className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider cursor-pointer"
+              onClick={() => handleSort('total100BaggerScore')}
+            >
+              100Bagger Score {sortColumn === 'total100BaggerScore' ? (sortDirection === 'asc' ? '▲' : '▼') : ''}
+            </th>
+            <th
+              className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider cursor-pointer"
+              onClick={() => handleSort('generation100BaggerDate')}
+            >
+              100Bagger Date {sortColumn === 'generation100BaggerDate' ? (sortDirection === 'asc' ? '▲' : '▼') : ''}
             </th>
           </tr>
         </thead>
@@ -109,10 +123,16 @@ const StockSummaryTable: React.FC = () => {
                 {summary.ticker}
               </td>
               <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
-                {summary.totalScore.toFixed(2)}
+                {summary.totalFerolScore}
               </td>
               <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
-                {new Date(summary.generationDate).toLocaleString()}
+                {new Date(summary.generationFerolDate).toLocaleString()}
+              </td>
+              <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                {summary.total100BaggerScore}
+              </td>
+              <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                {new Date(summary.generation100BaggerDate).toLocaleString()}
               </td>
             </tr>
           ))}
