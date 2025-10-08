@@ -19,6 +19,7 @@ import {
   valuationItems,
   shareholderImpactItems,
   investorFitCoffeeCanItems,
+  negativeItems100Bagger,
 } from './100BaggerChecklistDefinitions';
 
 interface ChecklistTabProps {
@@ -68,6 +69,7 @@ const checklists = {
       { title: 'Valuation', items: valuationItems },
       { title: 'Shareholder Impact', items: shareholderImpactItems },
       { title: 'Investor Fit / Coffee Can', items: investorFitCoffeeCanItems },
+      { title: 'The negatives :(', items: negativeItems100Bagger, scoreClass: 'bg-red-200' },
     ],
   },
 };
@@ -262,6 +264,8 @@ const ChecklistTab: React.FC<ChecklistTabProps> = ({ symbol }) => {
 
   const renderChecklistTable = () => {
     const checklist = checklists[activeChecklist];
+    const lastPositiveSectionIndex = checklist.items.findIndex(section => section.title.includes('The negatives :(')) - 1;
+    const negativeSectionIndex = checklist.items.findIndex(section => section.title.includes('The negatives :('));
 
     const positiveScore = Object.values(reportData.items || {}).reduce((sum, item) => {
       if (item.score > 0) {
@@ -317,7 +321,7 @@ const ChecklistTab: React.FC<ChecklistTabProps> = ({ symbol }) => {
                   <td className="py-2 text-gray-800 font-bold">{reportData.finalScore ?? '...'}</td>
                 </tr>
 
-                {checklist.items.map(section => (
+                {checklist.items.map((section, sectionIndex) => (
                   <React.Fragment key={section.title}>
                     <tr className="bg-gray-100">
                       <td colSpan={2} className="py-2 px-1 font-bold text-gray-800">
@@ -346,17 +350,20 @@ const ChecklistTab: React.FC<ChecklistTabProps> = ({ symbol }) => {
                         </tr>
                       );
                     })}
+                    {sectionIndex === lastPositiveSectionIndex && (
+                      <tr className="bg-green-200 border-b">
+                        <td className="py-2 font-medium text-gray-600">Positives score</td>
+                        <td className="py-2 text-gray-800 font-bold">{positiveScore}</td>
+                      </tr>
+                    )}
+                    {sectionIndex === negativeSectionIndex && (
+                      <tr className="bg-red-200 border-b">
+                          <td className="py-2 font-medium text-gray-600">Negatives score</td>
+                          <td className="py-2 text-gray-800 font-bold">{negativeScore}</td>
+                      </tr>
+                    )}
                   </React.Fragment>
                 ))}
-
-                <tr className="bg-green-200 border-b">
-                  <td className="py-2 font-medium text-gray-600">Positives score</td>
-                  <td className="py-2 text-gray-800 font-bold">{positiveScore}</td>
-                </tr>
-                <tr className="bg-red-200 border-b">
-                    <td className="py-2 font-medium text-gray-600">Negatives score</td>
-                    <td className="py-2 text-gray-800 font-bold">{negativeScore}</td>
-                </tr>
               </tbody>
             </table>
           </div>

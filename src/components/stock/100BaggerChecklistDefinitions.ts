@@ -1,5 +1,15 @@
 export const reinvestmentEngineItems = [
-  { key: 'reinvestmentCapacity', label: 'Internal Reinvestment capacity: (Cannot reinvest = 0 / <50% FCF reinvested = 7 / >50% FCF at 20%+ ROIC = 15) (0-15)' },
+  {
+    key: 'reinvestmentCapacity',
+    label: 'Reinvestment (5y): ' +
+        '(Cannot reinvest profitably = 0 / ' +
+        '<50% earnings reinvested OR ROIC/ROE <15% = 5 / ' +
+        '>50% earnings reinvested at sustained 20%+ ROIC/ROE = 10) (0-10)'
+  },
+  {
+    key: 'sustainedHighReturns',
+    label: 'Sustained returns on capital (avg ROE or ROIC 5y): (<12% = 0 / 12–20% = 3 / >20% consistently = 5) (0-5)'
+  },
   { key: 'reinvestmentRunway', label: 'Reinvestment runway: (<5 yrs or M&A-dependent = 0 / 5–10 yrs = 5 / 10–20+ yrs = 10) (0-10)' },
 ];
 
@@ -9,17 +19,31 @@ export const managementItems = [
 ];
 
 export const marketAndScalabilityItems = [
-  { key: 'totalAddressableMarket', label: 'TAM & Penetration runway: (Niche/<$10B or limited share potential = 0 / $10–50B moderate opportunity = 3 / >$50B global/underpenetrated with meaningful share path = 5) (0-5)' },
-  { key: 'scalabilityOfModel', label: 'Scalability of business: (Requires heavy ongoing capital or labor to grow = 0 / Moderately scalable = 5 / Capital-light with low marginal costs (e.g., software, brands) = 10) (0-10)' },
+  {
+    key: 'totalAddressableMarket',
+    label: 'Total Addressable Market (TAM): (Niche or <$10B market = 0 / $10–50B market = 3 / >$50B global market = 5) (0-5)',
+  },
+  {
+    key: 'tamPenetrationRunway',
+    label: 'Current TAM penetration: (>30% of TAM already captured = 0 / 10–30% penetration = 3 / <10% penetration with clear share-gain path = 5) (0-5)',
+  },
+  { key: 'scalabilityOfModel', label: 'Scalability of business: (Requires heavy ongoing capital or labor to grow = 0 / Moderately scalable = 3 / Capital-light with low marginal costs (e.g., software, brands) = 5) (0-5)' },
 ];
 
 export const businessQualityItems = [
-  { key: 'competitiveAdvantageMoat', label: 'Moat: (None or easily replicable = 0 / Temporary advantage (e.g., early mover) or weak moat = 7 / Durable and widening moat = 13) (0-13)' },
-  { key: 'earlyGrowthCurveInflection', label: 'Early Growth Curve / Inflection Point: (Declining/stagnant business = 0 / Mature but steady growth = 5 / Entering hyper-growth phase (e.g., early adoption, market share gains) = 7) (0-7)' },
+  { key: 'competitiveAdvantageMoat', label: 'Moat: (None or easily replicable = 0 / Temporary advantage (e.g., early mover) or weak moat = 5 / Durable and widening moat = 10) (0-10)' },
+  { key: 'earlyGrowthCurveInflection', label: 'Growth Curve / Inflection Point: (Declining/stagnant business = 0 / Mature but steady growth = 3 / Entering hyper-growth phase (e.g., early adoption, market share gains) = 5) (0-5)' },
 ];
 
 export const valuationItems = [
-  { key: 'startingValuation', label: 'Starting valuation: (>50x earnings OR >3-4x sales with no clear profit path = 0 / 20–50x trailing (or 2–4x sales for growth) = 3 / <20x trailing (or <2x sales) with strong growth runway = 5) (0-5)' },
+  {
+    key: 'marketCapSize',
+    label: 'Starting Market Cap: (> $50B = 0 / $5–50B = 3 / < $5B (preferably <$1–2B) = 5) (0-5)'
+  },
+  {
+    key: 'valuationContext',
+    label: 'Valuation & Multiple Expansion: (Overvalued/Hype priced = 0 / Fair Price = 3 / Bargain price allowing for "Twin Engine" (EPS growth + Multiple expansion) = 5) (0-5)'
+  }
 ];
 
 export const shareholderImpactItems = [
@@ -28,4 +52,13 @@ export const shareholderImpactItems = [
 
 export const investorFitCoffeeCanItems = [
   { key: 'holdabilityVolatility', label: 'Holdability / Volatility: (You cannot survive 50%+ drops or hold for 15+ years = 0 / Manageable = 3 / Can hold long-term = 5) (0-5)' },
+];
+
+export const negativeItems100Bagger = [
+  { key: 'noReinvestmentCapacity', label: 'Cannot reinvest most earnings at high returns? (No meaningful compounding engine) (0/-25)' },
+  { key: 'shortReinvestmentRunway', label: 'Growth runway too short? (<5 years organic or reliant on acquisitions) (0/-25)' },
+  { key: 'noOwnerOperator', label: 'No real owner-operator? (Insiders own <5% of the company) (0/-20)' },
+  { key: 'noDurableMoat', label: 'No durable moat? (Easy for others to copy or compete away profits) (0/-20)' },
+  { key: 'poorCapitalAllocation', label: 'Bad capital allocation history? (Wasteful acquisitions or constant heavy dilution) (0/-15)' },
+  { key: 'financialFragility', label: 'Existential Financial Risk? (Net Debt/EBITDA > 5x OR Interest Coverage < 2x OR <12 months cash runway) (0/-20)'}
 ];
