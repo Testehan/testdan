@@ -21,7 +21,7 @@ const StockSummaryTable: React.FC = () => {
   useEffect(() => {
     const fetchSummaryData = async () => {
       try {
-        const response = await fetch('http://localhost:8080/stocks/reporting/ferol/summary');
+        const response = await fetch('http://localhost:8080/stocks/reporting/checklist/summary?reportType=Ferol');
         if (!response.ok) {
           throw new Error(`HTTP error! status: ${response.status}`);
         }

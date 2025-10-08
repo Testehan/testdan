@@ -125,10 +125,9 @@ const ChecklistTab: React.FC<ChecklistTabProps> = ({ symbol }) => {
       setElapsedTime(prev => prev + 1);
     }, 1000);
 
-    const url =
-      regenerationCount > 0
-        ? `http://localhost:8080/stocks/reporting/${activeChecklist.toLowerCase()}/${symbol}?recreateReport=true`
-        : `http://localhost:8080/stocks/reporting/${activeChecklist.toLowerCase()}/${symbol}`;
+    const url = `http://localhost:8080/stocks/reporting/checklist/${symbol}?reportType=${activeChecklist}${
+      regenerationCount > 0 ? '&recreateReport=true' : ''
+    }`;
 
     const eventSource = new EventSource(url);
 
@@ -234,7 +233,7 @@ const ChecklistTab: React.FC<ChecklistTabProps> = ({ symbol }) => {
         explanation: editableScores[key].explanation,
       }));
 
-      const response = await fetch(`http://localhost:8080/stocks/reporting/${activeChecklist.toLowerCase()}/${symbol}`, {
+      const response = await fetch(`http://localhost:8080/stocks/reporting/checklist/${symbol}?reportType=${activeChecklist}`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
