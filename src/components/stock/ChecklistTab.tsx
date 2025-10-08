@@ -125,7 +125,8 @@ const ChecklistTab: React.FC<ChecklistTabProps> = ({ symbol }) => {
       setElapsedTime(prev => prev + 1);
     }, 1000);
 
-    const url = `http://localhost:8080/stocks/reporting/checklist/${symbol}?reportType=${activeChecklist}${
+    const reportType = activeChecklist === '100 Bagger' ? 'ONE_HUNDRED_BAGGER' : activeChecklist;
+    const url = `http://localhost:8080/stocks/reporting/checklist/${symbol}?reportType=${reportType}${
       regenerationCount > 0 ? '&recreateReport=true' : ''
     }`;
 
@@ -416,7 +417,10 @@ const ChecklistTab: React.FC<ChecklistTabProps> = ({ symbol }) => {
         {Object.keys(checklists).map(name => (
           <button
             key={name}
-            onClick={() => setActiveChecklist(name)}
+            onClick={() => {
+              setActiveChecklist(name);
+              setRegenerationCount(0);
+            }}
             className={`py-2 px-4 text-sm font-medium ${
               activeChecklist === name
                 ? 'border-b-2 border-blue-500 text-blue-600'

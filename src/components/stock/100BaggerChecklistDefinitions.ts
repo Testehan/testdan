@@ -14,7 +14,7 @@ export const reinvestmentEngineItems = [
 ];
 
 export const managementItems = [
-  { key: 'skinInTheGame', label: 'Skin in the game: (<5% = 0 / 5–15% = 7 / Founder-led or insiders own 15–30%+ = 15) (0-15)' },
+  { key: 'insideOwnership', label: 'Skin in the game: (<5% = 0 / 5–15% = 7 / Founder-led or insiders own 15–30%+ = 15) (0-15)' },
   { key: 'capitalAllocationSkill', label: 'Capital allocation skill: (value-destructive M&A, chronic dilution = 0 / Mixed record, improving = 5 / Disciplined reinvestment, min dilution, rational buybacks = 10) (0-10)' },
 ];
 
@@ -36,14 +36,8 @@ export const businessQualityItems = [
 ];
 
 export const valuationItems = [
-  {
-    key: 'marketCapSize',
-    label: 'Starting Market Cap: (> $50B = 0 / $5–50B = 3 / < $5B (preferably <$1–2B) = 5) (0-5)'
-  },
-  {
-    key: 'valuationContext',
-    label: 'Valuation & Multiple Expansion: (Overvalued/Hype priced = 0 / Fair Price = 3 / Bargain price allowing for "Twin Engine" (EPS growth + Multiple expansion) = 5) (0-5)'
-  }
+  { key: 'marketCapSize', label: 'Starting Market Cap: (> $5B = 0 / < $5B = 3 / < $2B = 5) (0-5)'},
+  { key: 'valuationContext', label: 'Valuation & Multiple Expansion: (Overvalued/Hype priced = 0 / Fair Price = 3 / Bargain price allowing for "Twin Engine" (EPS growth + Multiple expansion) = 5) (0-5)'}
 ];
 
 export const shareholderImpactItems = [
@@ -58,6 +52,7 @@ export const negativeItems100Bagger = [
   { key: 'noReinvestmentCapacity', label: 'Cannot reinvest most earnings at high returns? (No meaningful compounding engine) (0/-25)' },
   { key: 'shortReinvestmentRunway', label: 'Growth runway too short? (<5 years organic or reliant on acquisitions) (0/-25)' },
   { key: 'noOwnerOperator', label: 'No real owner-operator? (Insiders own <5% of the company) (0/-20)' },
+  {key: 'questionableManagementIntegrity', label: 'Questionable management integrity? (Governance issues, scandals, misaligned incentives) (0/-25)'},
   { key: 'noDurableMoat', label: 'No durable moat? (Easy for others to copy or compete away profits) (0/-20)' },
   { key: 'poorCapitalAllocation', label: 'Bad capital allocation history? (Wasteful acquisitions or constant heavy dilution) (0/-15)' },
   { key: 'financialFragility', label: 'Existential Financial Risk? (Net Debt/EBITDA > 5x OR Interest Coverage < 2x OR <12 months cash runway) (0/-20)'}
