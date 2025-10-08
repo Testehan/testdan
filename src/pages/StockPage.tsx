@@ -6,6 +6,7 @@ import FinancialsTab from '../components/stock/FinancialsTab';
 import ChecklistTab from '../components/stock/ChecklistTab';
 import ValuationTab from '../components/stock/ValuationTab';
 import { useGlobalQuote } from '../components/stock/hooks/useFinancialReports';
+import FinancialDataStatus from '../components/stock/FinancialDataStatus';
 import StockSummaryTable from '../components/stock/StockSummaryTable';
 
 const StockPage: React.FC = () => {
@@ -121,8 +122,7 @@ const StockPage: React.FC = () => {
           substitute for thought rather than an aid to thinking, it is dangerous and should be discarded.” </i>
         <br />
         Stock Details for {symbol.toUpperCase()}
-        {quoteLoading && <span className="ml-4 text-sm">Loading quote...</span>}
-        {quoteError && <span className="ml-4 text-sm text-red-500">Error loading quote</span>}
+        {!dataLoading && !quoteLoading && symbol && <FinancialDataStatus symbol={symbol} />}
         {quote && (
           <span className={`ml-4 ${priceColor}`}>
             {quote.adjClose} {currencySymbol[stockData.currency] || stockData.currency}{' '}
