@@ -65,6 +65,10 @@ const DcfCalculator: React.FC<DcfCalculatorProps> = ({ symbol }) => {
   const [terminalValue, setTerminalValue] = useState<number | null>(null);
   const [intrinsicValue, setIntrinsicValue] = useState<number | null>(null);
   const [intrinsicValuePerShare, setIntrinsicValuePerShare] = useState<number | null>(null);
+  // States for saving DCF
+  const [isSaving, setIsSaving] = useState<boolean>(false);
+  const [saveError, setSaveError] = useState<string | null>(null);
+  const [saveSuccess, setSaveSuccess] = useState<boolean>(false);
 
   // States for editable assumptions, initialized to 0 and updated when dcfData arrives
   const [inputBeta, setInputBeta] = useState<number>(0);
@@ -80,6 +84,7 @@ const DcfCalculator: React.FC<DcfCalculatorProps> = ({ symbol }) => {
   const [historicalRevenueGrowthCagr3Year, setHistoricalRevenueGrowthCagr3Year] = useState<number>(0);
   const [historicalAverageEbitMargin3Year, setHistoricalAverageEbitMargin3Year] = useState<number>(0);
   const [inputPerpetualGrowthRate, setInputPerpetualGrowthRate] = useState<number>(0.02);
+  const [userComments, setUserComments] = useState<string>('');
 
   // Remaining editable inputs (debt, cash, D&A, CapEx)
   // These are not displayed as inputs anymore based on the previous request, but their state is kept
@@ -262,6 +267,77 @@ const DcfCalculator: React.FC<DcfCalculatorProps> = ({ symbol }) => {
     }
   }, [dcfData, performCalculations]);
 
+  const handleSaveDcf = async () => {
+    if (!dcfData || intrinsicValuePerShare === null || wacc === null || intrinsicValue === null) {
+      setSaveError("Cannot save DCF before a calculation is performed.");
+      return;
+    }
+
+    setIsSaving(true);
+    setSaveError(null);
+    setSaveSuccess(false);
+
+    // Re-calculate verdict to ensure it's up-to-date
+    const currentPrice = dcfData.meta.currentSharePrice;
+    const intrinsicPrice = intrinsicValuePerShare;
+    const percentageDifference = (intrinsicPrice - currentPrice) / currentPrice;
+    let verdictText = '';
+    if (percentageDifference > 0.20) {
+      verdictText = 'Undervalued';
+    } else if (percentageDifference < -0.20) {
+      verdictText = 'Overvalued';
+    } else {
+      verdictText = 'Neutral';
+    }
+
+    const dcfUserInput = {
+      beta: inputBeta,
+      riskFreeRate: inputRiskFreeRate,
+      marketRiskPremium: inputMarketRiskPremium,
+      effectiveTaxRate: inputEffectiveTaxRate,
+      projectedRevenueGrowthRate: projectedRevenueGrowthRate,
+      projectedEbitMargin: projectedAverageEbitMargin,
+      perpetualGrowthRate: inputPerpetualGrowthRate,
+      userComments: userComments,
+    };
+
+    const dcfOutput = {
+      equityValue: intrinsicValue,
+      intrinsicValuePerShare: intrinsicValuePerShare,
+      wacc: wacc,
+      verdict: verdictText,
+    };
+
+    const dcfValuation = {
+      dcfCalculationData: dcfData,
+      dcfUserInput: dcfUserInput,
+      dcfOutput: dcfOutput,
+    };
+
+    try {
+      const response = await fetch('http://localhost:8080/stock/valuation/dcf', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(dcfValuation),
+      });
+
+      if (!response.ok) {
+        throw new Error(`HTTP error! status: ${response.status}`);
+      }
+
+      setSaveSuccess(true);
+      // Hide success message after 3 seconds
+      setTimeout(() => setSaveSuccess(false), 3000);
+
+    } catch (e: unknown) {
+      setSaveError((e as Error).message);
+    } finally {
+      setIsSaving(false);
+    }
+  };
+
 
   if (loading) {
     return <div className="text-center p-4">Loading DCF data...</div>;
@@ -421,6 +497,18 @@ const DcfCalculator: React.FC<DcfCalculatorProps> = ({ symbol }) => {
               className="mt-1 block w-24 rounded-md border-gray-300 shadow-sm focus:border-indigo-300 focus:ring focus:ring-indigo-200 focus:ring-opacity-50 bg-blue-100"
             />
           </label>
+          <div className="col-span-2 mt-2">
+              <label>
+                  <span className="text-gray-700">Comments:</span>
+                  <textarea
+                      value={userComments}
+                      onChange={(e) => setUserComments(e.target.value)}
+                      className="mt-1 block w-1/2 rounded-md border-gray-300 shadow-sm focus:border-indigo-300 focus:ring focus:ring-indigo-200 focus:ring-opacity-50 bg-blue-100"
+                      rows={3}
+                      placeholder="Enter any comments or notes about this valuation..."
+                  />
+              </label>
+          </div>
         </div>
         <button
           onClick={performCalculations}
@@ -428,6 +516,15 @@ const DcfCalculator: React.FC<DcfCalculatorProps> = ({ symbol }) => {
         >
           Calculate DCF
         </button>
+        <button
+            onClick={handleSaveDcf}
+            className="mt-4 ml-4 px-4 py-2 bg-green-500 text-white rounded-md hover:bg-green-600 focus:outline-none focus:ring-2 focus:ring-green-500 focus:ring-opacity-50 disabled:bg-gray-400"
+            disabled={isSaving || intrinsicValuePerShare === null}
+        >
+          {isSaving ? 'Saving...' : 'Save DCF'}
+        </button>
+        {saveSuccess && <span className="ml-4 text-green-500">Saved successfully!</span>}
+        {saveError && <span className="ml-4 text-red-500">Error: {saveError}</span>}
       </div>
 
       <div className="mt-6">
