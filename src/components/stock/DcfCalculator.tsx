@@ -115,6 +115,7 @@ const DcfCalculator: React.FC<DcfCalculatorProps> = ({ symbol }) => {
   const [isSaving, setIsSaving] = useState<boolean>(false);
   const [saveError, setSaveError] = useState<string | null>(null);
   const [saveSuccess, setSaveSuccess] = useState<boolean>(false);
+  const [originalDcfData, setOriginalDcfData] = useState<DcfData | null>(null);
 
   // States for editable assumptions, initialized to 0 and updated when dcfData arrives
   const [inputBeta, setInputBeta] = useState<number>(0);
@@ -168,6 +169,7 @@ const DcfCalculator: React.FC<DcfCalculatorProps> = ({ symbol }) => {
         const historyData: DcfHistoryEntry[] = historyResponse.status === 404 ? [] : await historyResponse.json();
 
         setDcfData(dcfData);
+        setOriginalDcfData(dcfData);
         // Initialize editable states with fetched data
         setInputBeta(dcfData.assumptions.beta);
         setInputRiskFreeRate(dcfData.assumptions.riskFreeRate);
@@ -329,6 +331,94 @@ const DcfCalculator: React.FC<DcfCalculatorProps> = ({ symbol }) => {
       performCalculations();
     }
   }, [dcfData, performCalculations]);
+
+  const resetCalculator = useCallback(() => {
+    if (!originalDcfData) return;
+
+    // Reset dcfData to its original fetched state
+    setDcfData(originalDcfData);
+
+    // Reset editable states with original fetched data
+    setInputBeta(originalDcfData.assumptions.beta);
+    setInputRiskFreeRate(originalDcfData.assumptions.riskFreeRate);
+    setInputMarketRiskPremium(originalDcfData.assumptions.marketRiskPremium);
+    setInputEffectiveTaxRate(originalDcfData.assumptions.effectiveTaxRate);
+    
+    setProjectedRevenueGrowthRate(originalDcfData.assumptions.revenueGrowthCagr3Year);
+    setProjectedAverageEbitMargin(originalDcfData.assumptions.averageEbitMargin3Year);
+
+    // Reset original historical metrics (display-only)
+    setHistoricalRevenueGrowthCagr3Year(originalDcfData.assumptions.revenueGrowthCagr3Year);
+    setHistoricalAverageEbitMargin3Year(originalDcfData.assumptions.averageEbitMargin3Year);
+    
+    setInputPerpetualGrowthRate(0.02); // Assuming a default for this, or originalDcfData.assumptions.perpetualGrowthRate if it exists
+    setUserComments('');
+
+    setInputTotalCashAndEquivalents(originalDcfData.balanceSheet.totalCashAndEquivalents);
+    setInputTotalShortTermDebt(originalDcfData.balanceSheet.totalShortTermDebt);
+    setInputTotalLongTermDebt(originalDcfData.balanceSheet.totalLongTermDebt);
+    setInputInterestExpense(originalDcfData.income.interestExpense);
+    setInputDepreciationAndAmortization(originalDcfData.cashFlow.depreciationAndAmortization);
+    setInputCapitalExpenditure(originalDcfData.cashFlow.capitalExpenditure);
+
+    // Reset calculated values
+    setWacc(null);
+    setProjectedFcfs([]);
+    setTerminalValue(null);
+    setIntrinsicValue(null);
+    setIntrinsicValuePerShare(null);
+
+    // No need to explicitly call performCalculations here, as updating dcfData and input states
+    // will trigger the useEffect that calls performCalculations.
+  }, [
+    originalDcfData,
+    // Add all setters to the dependency array
+    setDcfData, setInputBeta, setInputRiskFreeRate, setInputMarketRiskPremium,
+    setInputEffectiveTaxRate, setProjectedRevenueGrowthRate,
+    setProjectedAverageEbitMargin, setHistoricalRevenueGrowthCagr3Year,
+    setHistoricalAverageEbitMargin3Year, setInputPerpetualGrowthRate,
+    setUserComments, setInputTotalCashAndEquivalents,
+    setInputTotalShortTermDebt, setInputTotalLongTermDebt,
+    setInputInterestExpense, setInputDepreciationAndAmortization,
+    setInputCapitalExpenditure, setWacc, setProjectedFcfs,
+    setTerminalValue, setIntrinsicValue, setIntrinsicValuePerShare
+  ]);
+
+  const loadHistoricalValuation = useCallback((entry: DcfHistoryEntry) => {
+    // Update input states with historical data
+    setInputBeta(entry.dcfUserInput.beta);
+    setInputRiskFreeRate(entry.dcfUserInput.riskFreeRate);
+    setInputMarketRiskPremium(entry.dcfUserInput.marketRiskPremium);
+    setInputEffectiveTaxRate(entry.dcfUserInput.effectiveTaxRate);
+    setProjectedRevenueGrowthRate(entry.dcfUserInput.projectedRevenueGrowthRate);
+    setProjectedAverageEbitMargin(entry.dcfUserInput.projectedEbitMargin);
+    setInputPerpetualGrowthRate(entry.dcfUserInput.perpetualGrowthRate);
+    setUserComments(entry.dcfUserInput.userComments);
+
+    setDcfData(entry.dcfCalculationData);
+
+    // Update display-only historical metrics
+    setHistoricalRevenueGrowthCagr3Year(entry.dcfCalculationData.assumptions.revenueGrowthCagr3Year);
+    setHistoricalAverageEbitMargin3Year(entry.dcfCalculationData.assumptions.averageEbitMargin3Year);
+
+    // Also update the input states for other financial data that is used in calculations
+    setInputTotalCashAndEquivalents(entry.dcfCalculationData.balanceSheet.totalCashAndEquivalents);
+    setInputTotalShortTermDebt(entry.dcfCalculationData.balanceSheet.totalShortTermDebt);
+    setInputTotalLongTermDebt(entry.dcfCalculationData.balanceSheet.totalLongTermDebt);
+    setInputInterestExpense(entry.dcfCalculationData.income.interestExpense);
+    setInputDepreciationAndAmortization(entry.dcfCalculationData.cashFlow.depreciationAndAmortization);
+    setInputCapitalExpenditure(entry.dcfCalculationData.cashFlow.capitalExpenditure);
+
+    // Explicitly re-run calculations with the loaded historical data
+    // This ensures immediate update of derived values
+    performCalculations();
+  }, [
+    performCalculations, // Add performCalculations to dependency array
+    setInputBeta, setInputRiskFreeRate, setInputMarketRiskPremium,
+    setInputEffectiveTaxRate, setProjectedRevenueGrowthRate,
+    setProjectedAverageEbitMargin, setInputPerpetualGrowthRate,
+    setUserComments, setDcfData
+  ]);
 
   const handleSaveDcf = async () => {
     if (!dcfData || intrinsicValuePerShare === null || wacc === null || intrinsicValue === null) {
@@ -572,6 +662,13 @@ const DcfCalculator: React.FC<DcfCalculatorProps> = ({ symbol }) => {
           Calculate DCF
         </button>
         <button
+          onClick={resetCalculator}
+          className="mt-4 ml-4 px-4 py-2 bg-gray-500 text-white rounded-md hover:bg-gray-600 focus:outline-none focus:ring-2 focus:ring-gray-500 focus:ring-opacity-50"
+          disabled={!originalDcfData}
+        >
+          Reset Calculator
+        </button>
+        <button
             onClick={handleSaveDcf}
             className="mt-4 ml-4 px-4 py-2 bg-green-500 text-white rounded-md hover:bg-green-600 focus:outline-none focus:ring-2 focus:ring-green-500 focus:ring-opacity-50 disabled:bg-gray-400"
             disabled={isSaving || intrinsicValuePerShare === null}
@@ -679,7 +776,7 @@ const DcfCalculator: React.FC<DcfCalculatorProps> = ({ symbol }) => {
               <tbody className="bg-white divide-y divide-gray-200">
                 {valuationHistory.length > 0 ? (
                   valuationHistory.map((entry, index) => (
-                    <tr key={index}>
+                    <tr key={index} onClick={() => loadHistoricalValuation(entry)} className="cursor-pointer hover:bg-gray-100">
                       <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">{new Date(entry.valuationDate).toLocaleDateString()}</td>
                       <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">{entry.dcfCalculationData.meta.currency} {entry.dcfOutput.intrinsicValuePerShare.toFixed(2)}</td>
                       <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">{entry.dcfCalculationData.meta.currency} {entry.dcfCalculationData.meta.currentSharePrice.toFixed(2)}</td>
