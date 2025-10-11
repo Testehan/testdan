@@ -47,8 +47,27 @@ interface ReverseDcfCalculatorProps {
     symbol: string;
 }
 
+interface ReverseDcfUserInput {
+    discountRate: number;
+    perpetualGrowthRate: number;
+    projectionYears: number;
+    userComments: string;
+}
+
+interface ReverseDcfOutput {
+    impliedFCFGrowthRate: number;
+}
+
+interface ReverseDcfHistoryEntry {
+    valuationDate: string;
+    dcfCalculationData: DcfData;
+    reverseDcfUserInput: ReverseDcfUserInput;
+    reverseDcfOutput: ReverseDcfOutput;
+}
+
 const ReverseDcfCalculator: React.FC<ReverseDcfCalculatorProps> = ({ symbol }) => {
     const [data, setData] = useState<DcfData | null>(null);
+    const [originalData, setOriginalData] = useState<DcfData | null>(null);
     const [loading, setLoading] = useState<boolean>(true);
     const [error, setError] = useState<string | null>(null);
 
@@ -56,9 +75,19 @@ const ReverseDcfCalculator: React.FC<ReverseDcfCalculatorProps> = ({ symbol }) =
     const [wacc, setWacc] = useState(0);
     const [perpetualGrowthRate, setPerpetualGrowthRate] = useState(0.02); // Default consistent rate
     const [projectionYears, setProjectionYears] = useState(5);
+    const [userComments, setUserComments] = useState<string>('');
 
     // State for the calculated implied growth rate
     const [impliedGrowthRate, setImpliedGrowthRate] = useState<number | null>(null);
+
+    // States for saving Reverse DCF
+    const [isSaving, setIsSaving] = useState<boolean>(false);
+    const [saveError, setSaveError] = useState<string | null>(null);
+    const [saveSuccess, setSaveSuccess] = useState<boolean>(false);
+
+    const [reverseDcfValuationHistory, setReverseDcfValuationHistory] = useState<ReverseDcfHistoryEntry[]>([]);
+    const [historyLoading, setHistoryLoading] = useState<boolean>(true);
+    const [historyError, setHistoryError] = useState<string | null>(null);
 
     const calculateWacc = useCallback((dcfData: DcfData) => {
         const { assumptions, income, balanceSheet, meta } = dcfData;
@@ -86,6 +115,29 @@ const ReverseDcfCalculator: React.FC<ReverseDcfCalculatorProps> = ({ symbol }) =
         }
     }, []);
 
+    const fetchReverseDcfHistory = useCallback(async (currentSymbol: string) => {
+        setHistoryLoading(true);
+        setHistoryError(null);
+        try {
+            const historyResponse = await fetch(`http://localhost:8080/stock/valuation/reverse-dcf/history/${currentSymbol}`);
+            if (!historyResponse.ok && historyResponse.status !== 404) {
+                throw new Error(`History data HTTP error! status: ${historyResponse.status}`);
+            }
+            const historyData: ReverseDcfHistoryEntry[] = historyResponse.status === 404 ? [] : await historyResponse.json();
+            // Sort historyData by valuationDate in descending order
+            const sortedHistoryData = historyData.sort((a, b) => {
+                const dateA = new Date(a.valuationDate);
+                const dateB = new Date(b.valuationDate);
+                return dateB.getTime() - dateA.getTime();
+            });
+            setReverseDcfValuationHistory(sortedHistoryData);
+        } catch (e: unknown) {
+            setHistoryError((e as Error).message);
+        } finally {
+            setHistoryLoading(false);
+        }
+    }, []);
+
     useEffect(() => {
         const fetchData = async () => {
             setLoading(true);
@@ -97,14 +149,19 @@ const ReverseDcfCalculator: React.FC<ReverseDcfCalculatorProps> = ({ symbol }) =
                 }
                 const fetchedData: DcfData = await response.json();
                 setData(fetchedData);
+                setOriginalData(fetchedData); // Set originalData here
                 
                 // Calculate WACC from the fetched data and pre-fill the input
                 calculateWacc(fetchedData);
                 // Keep the perpetual growth rate at a normal default, as requested
                 setPerpetualGrowthRate(0.02);
 
+                // Fetch history
+                await fetchReverseDcfHistory(fetchedData.meta.ticker);
+
             } catch (e: unknown) {
                 setError((e as Error).message);
+                setHistoryError((e as Error).message); // Also set history error if main fetch fails
             } finally {
                 setLoading(false);
             }
@@ -113,7 +170,7 @@ const ReverseDcfCalculator: React.FC<ReverseDcfCalculatorProps> = ({ symbol }) =
         if (symbol) {
             fetchData();
         }
-    }, [symbol, calculateWacc]);
+    }, [symbol, calculateWacc, fetchReverseDcfHistory]);
 
     const calculateImpliedGrowth = useCallback(() => {
         if (!data) return;
@@ -171,6 +228,94 @@ const ReverseDcfCalculator: React.FC<ReverseDcfCalculatorProps> = ({ symbol }) =
         setImpliedGrowthRate(mid);
 
     }, [data, wacc, perpetualGrowthRate, projectionYears]);
+
+    const loadHistoricalReverseDcfValuation = useCallback((entry: ReverseDcfHistoryEntry) => {
+        // Update input states with historical data
+        setWacc(entry.reverseDcfUserInput.discountRate);
+        setPerpetualGrowthRate(entry.reverseDcfUserInput.perpetualGrowthRate);
+        setProjectionYears(entry.reverseDcfUserInput.projectionYears);
+        setUserComments(entry.reverseDcfUserInput.userComments);
+        setData(entry.dcfCalculationData); // Update the main data state
+
+        // Explicitly re-run calculations with the loaded historical data
+        // No need to call calculateImpliedGrowth directly here as updating
+        // 'data' and other states will trigger the useEffect that calls it.
+    }, [setData, setWacc, setPerpetualGrowthRate, setProjectionYears, setUserComments]);
+
+    const resetCalculator = useCallback(() => {
+        if (!originalData) return;
+
+        // Reset editable states with original fetched data or defaults
+        // WACC is calculated, so re-calculate from originalData
+        calculateWacc(originalData);
+        setPerpetualGrowthRate(0.02); // Default
+        setProjectionYears(5); // Default
+        setUserComments(''); // Default
+
+        setData(originalData); // Reset the main data state
+
+        // Reset calculated values
+        setImpliedGrowthRate(null);
+
+        // Reset save messages
+        setSaveError(null);
+        setSaveSuccess(false);
+
+    }, [originalData, calculateWacc, setData, setImpliedGrowthRate, setPerpetualGrowthRate, setProjectionYears, setSaveError, setSaveSuccess, setUserComments]); // Removed calculateImpliedGrowth as a direct dependency for now.
+
+    const handleSaveReverseDcf = async () => {
+        if (!data || impliedGrowthRate === null) {
+            setSaveError("Cannot save Reverse DCF before implied growth rate is calculated.");
+            return;
+        }
+
+        setIsSaving(true);
+        setSaveError(null);
+        setSaveSuccess(false);
+
+        const reverseDcfUserInput = {
+            discountRate: wacc,
+            perpetualGrowthRate: perpetualGrowthRate,
+            projectionYears: projectionYears,
+            userComments: userComments,
+        };
+
+        const reverseDcfOutput = {
+            impliedFCFGrowthRate: impliedGrowthRate,
+        };
+
+        const reverseDcfValuation = {
+            dcfCalculationData: data, // dcfCalculationData is the `data` state
+            reverseDcfUserInput: reverseDcfUserInput,
+            reverseDcfOutput: reverseDcfOutput,
+        };
+
+        try {
+            const response = await fetch('http://localhost:8080/stock/valuation/reverse-dcf', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify(reverseDcfValuation),
+            });
+
+            if (!response.ok) {
+                throw new Error(`HTTP error! status: ${response.status}`);
+            }
+
+            setSaveSuccess(true);
+            setTimeout(() => setSaveSuccess(false), 3000); // Hide success message after 3 seconds
+
+            // Reload history table
+            await fetchReverseDcfHistory(data.meta.ticker);
+
+        } catch (e: unknown) {
+            setSaveError((e as Error).message);
+        } finally {
+            setIsSaving(false);
+        }
+    };
+
 
     useEffect(() => {
         if (data) {
@@ -231,12 +376,40 @@ const ReverseDcfCalculator: React.FC<ReverseDcfCalculatorProps> = ({ symbol }) =
                             />
                         </label>
                     </div>
+                     <div className="col-span-2 mt-2">
+                        <label>
+                            <span className="text-gray-700">Comments:</span>
+                            <textarea
+                                value={userComments}
+                                onChange={(e) => setUserComments(e.target.value)}
+                                className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-300 focus:ring focus:ring-indigo-200 focus:ring-opacity-50 bg-blue-100"
+                                rows={3}
+                                placeholder="Enter any comments or notes about this valuation..."
+                            />
+                        </label>
+                    </div>
                      <button
                         onClick={calculateImpliedGrowth}
                         className="mt-4 px-4 py-2 bg-blue-500 text-white rounded-md hover:bg-blue-600"
                     >
-                        Recalculate
+                        Calculate
                     </button>
+                    <button
+                        onClick={resetCalculator}
+                        className="mt-4 ml-4 px-4 py-2 bg-gray-500 text-white rounded-md hover:bg-gray-600 focus:outline-none focus:ring-2 focus:ring-gray-500 focus:ring-opacity-50"
+                        disabled={!originalData}
+                    >
+                        Reset calculator
+                    </button>
+                    <button
+                        onClick={handleSaveReverseDcf}
+                        className="mt-4 ml-4 px-4 py-2 bg-green-500 text-white rounded-md hover:bg-green-600 focus:outline-none focus:ring-2 focus:ring-green-500 focus:ring-opacity-50 disabled:bg-gray-400"
+                        disabled={isSaving || impliedGrowthRate === null}
+                    >
+                        {isSaving ? 'Saving...' : 'Save'}
+                    </button>
+                    {saveSuccess && <span className="ml-4 text-green-500">Saved successfully!</span>}
+                    {saveError && <span className="ml-4 text-red-500">Error: {saveError}</span>}
                 </div>
 
                 {/* Results */}
@@ -264,6 +437,58 @@ const ReverseDcfCalculator: React.FC<ReverseDcfCalculatorProps> = ({ symbol }) =
                         </div>
                     </div>
                 </div>
+            </div>
+
+            {/* History Table */}
+            <div className="mt-8">
+                <h5 className="text-lg font-medium mb-2">History of valuations</h5>
+                {historyLoading ? (
+                    <p>Loading valuation history...</p>
+                ) : historyError ? (
+                    <p className="text-red-500">Could not load valuation history.</p>
+                ) : (
+                    <div className="overflow-x-auto">
+                        <table className="min-w-full divide-y divide-gray-200">
+                            <thead className="bg-gray-50">
+                                <tr>
+                                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Date of Valuation</th>
+                                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Share Price at Valuation</th>
+                                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Discount Rate</th>
+                                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Implied FCF Growth Rate</th>
+                                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Comments</th>
+                                </tr>
+                            </thead>
+                            <tbody className="bg-white divide-y divide-gray-200">
+                                {reverseDcfValuationHistory.length > 0 ? (
+                                    reverseDcfValuationHistory.map((entry, index) => (
+                                        <tr key={index} onClick={() => loadHistoricalReverseDcfValuation(entry)} className="cursor-pointer hover:bg-gray-100">
+                                            <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">{new Date(entry.valuationDate).toLocaleString()}</td>
+                                            <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">{entry.dcfCalculationData.meta.currency} {entry.dcfCalculationData.meta.currentSharePrice.toFixed(2)}</td>
+                                            <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                                                <NumericFormat
+                                                    value={entry.reverseDcfUserInput.discountRate * 100}
+                                                    displayType="text"
+                                                    thousandSeparator={true}
+                                                    decimalScale={2}
+                                                    fixedDecimalScale={true}
+                                                    suffix="%"
+                                                />
+                                            </td>
+                                            <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">{(entry.reverseDcfOutput.impliedFCFGrowthRate * 100).toFixed(2)}%</td>
+                                            <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500" title={entry.reverseDcfUserInput.userComments}>
+                                                {entry.reverseDcfUserInput.userComments ? entry.reverseDcfUserInput.userComments.substring(0, 50) + (entry.reverseDcfUserInput.userComments.length > 50 ? '...' : '') : ''}
+                                            </td>
+                                        </tr>
+                                    ))
+                                ) : (
+                                    <tr>
+                                        <td colSpan={4} className="text-center py-4">No reverse DCF valuation history found for this stock.</td>
+                                    </tr>
+                                )}
+                            </tbody>
+                        </table>
+                    </div>
+                )}
             </div>
         </div>
     );
