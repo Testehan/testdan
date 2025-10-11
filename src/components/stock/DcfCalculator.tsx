@@ -145,28 +145,42 @@ const DcfCalculator: React.FC<DcfCalculatorProps> = ({ symbol }) => {
   const [inputDepreciationAndAmortization, setInputDepreciationAndAmortization] = useState<number>(0);
   const [inputCapitalExpenditure, setInputCapitalExpenditure] = useState<number>(0);
 
+  const fetchValuationHistory = useCallback(async (currentSymbol: string) => {
+    setHistoryLoading(true);
+    setHistoryError(null);
+    try {
+      const historyResponse = await fetch(`http://localhost:8080/stock/valuation/dcf/history/${currentSymbol}`);
+      if (!historyResponse.ok && historyResponse.status !== 404) {
+        throw new Error(`History data HTTP error! status: ${historyResponse.status}`);
+      }
+      const historyData: DcfHistoryEntry[] = historyResponse.status === 404 ? [] : await historyResponse.json();
+      // Sort historyData by valuationDate in descending order
+      const sortedHistoryData = historyData.sort((a, b) => {
+        const dateA = new Date(a.valuationDate);
+        const dateB = new Date(b.valuationDate);
+        return dateB.getTime() - dateA.getTime();
+      });
+      setValuationHistory(sortedHistoryData);
+    } catch (e: unknown) {
+      setHistoryError((e as Error).message);
+    } finally {
+      setHistoryLoading(false);
+    }
+  }, []);
+
   // Effect for fetching DCF data
   useEffect(() => {
     const fetchAllData = async () => {
       setLoading(true);
-      setHistoryLoading(true);
       setError(null);
-      setHistoryError(null);
       try {
-        const [dcfResponse, historyResponse] = await Promise.all([
-          fetch(`http://localhost:8080/stock/valuation/dcf/${symbol}`),
-          fetch(`http://localhost:8080/stock/valuation/dcf/history/${symbol}`)
-        ]);
+        const dcfResponse = await fetch(`http://localhost:8080/stock/valuation/dcf/${symbol}`);
 
         if (!dcfResponse.ok) {
           throw new Error(`DCF data HTTP error! status: ${dcfResponse.status}`);
         }
-        if (!historyResponse.ok && historyResponse.status !== 404) {
-          throw new Error(`History data HTTP error! status: ${historyResponse.status}`);
-        }
 
         const dcfData: DcfData = await dcfResponse.json();
-        const historyData: DcfHistoryEntry[] = historyResponse.status === 404 ? [] : await historyResponse.json();
 
         setDcfData(dcfData);
         setOriginalDcfData(dcfData);
@@ -189,22 +203,22 @@ const DcfCalculator: React.FC<DcfCalculatorProps> = ({ symbol }) => {
         setInputDepreciationAndAmortization(dcfData.cashFlow.depreciationAndAmortization);
         setInputCapitalExpenditure(dcfData.cashFlow.capitalExpenditure);
 
-        setValuationHistory(historyData);
+        // Fetch history using the new function
+        await fetchValuationHistory(symbol);
 
       } catch (e: unknown) {
         const errorMessage = (e as Error).message;
         setError(errorMessage);
-        setHistoryError(errorMessage);
+        setHistoryError(errorMessage); // Set history error if main fetch fails
       } finally {
         setLoading(false);
-        setHistoryLoading(false);
       }
     };
 
     if (symbol) {
       fetchAllData();
     }
-  }, [symbol]);
+  }, [symbol, fetchValuationHistory]);
 
   // Calculations are now wrapped in a useCallback so they can be triggered by input changes
   const performCalculations = useCallback(() => {
@@ -475,6 +489,9 @@ const DcfCalculator: React.FC<DcfCalculatorProps> = ({ symbol }) => {
       setSaveSuccess(true);
       // Hide success message after 3 seconds
       setTimeout(() => setSaveSuccess(false), 3000);
+
+      // Reload history table
+      await fetchValuationHistory(symbol);
 
     } catch (e: unknown) {
       setSaveError((e as Error).message);
@@ -777,7 +794,7 @@ const DcfCalculator: React.FC<DcfCalculatorProps> = ({ symbol }) => {
                 {valuationHistory.length > 0 ? (
                   valuationHistory.map((entry, index) => (
                     <tr key={index} onClick={() => loadHistoricalValuation(entry)} className="cursor-pointer hover:bg-gray-100">
-                      <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">{new Date(entry.valuationDate).toLocaleDateString()}</td>
+                      <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">{new Date(entry.valuationDate).toLocaleString()}</td>
                       <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">{entry.dcfCalculationData.meta.currency} {entry.dcfOutput.intrinsicValuePerShare.toFixed(2)}</td>
                       <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">{entry.dcfCalculationData.meta.currency} {entry.dcfCalculationData.meta.currentSharePrice.toFixed(2)}</td>
                       <td className={`px-6 py-4 whitespace-nowrap text-sm ${getVerdictStyling(entry.dcfOutput.intrinsicValuePerShare, entry.dcfCalculationData.meta.currentSharePrice).bgColorClass}`}>
