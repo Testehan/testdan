@@ -50,9 +50,55 @@ interface ProjectedFcf {
   fcf: number;
 }
 
+interface DcfHistoryEntry {
+  valuationDate: string;
+  dcfCalculationData: DcfData;
+  dcfUserInput: {
+    beta: number;
+    riskFreeRate: number;
+    marketRiskPremium: number;
+    effectiveTaxRate: number;
+    projectedRevenueGrowthRate: number;
+    projectedEbitMargin: number;
+    perpetualGrowthRate: number;
+    userComments: string;
+  };
+  dcfOutput: {
+    equityValue: number;
+    intrinsicValuePerShare: number;
+    wacc: number;
+    verdict: string;
+  };
+}
+
 interface DcfCalculatorProps {
   symbol: string;
 }
+
+
+interface VerdictStyling {
+  verdictText: string;
+  bgColorClass: string;
+}
+
+const getVerdictStyling = (intrinsicPrice: number, currentPrice: number): VerdictStyling => {
+  const percentageDifference = (intrinsicPrice - currentPrice) / currentPrice;
+
+  let verdictText = '';
+  let bgColorClass = '';
+
+  if (percentageDifference > 0.20) { // More than 20% undervalued
+    verdictText = 'Undervalued';
+    bgColorClass = 'bg-green-200 text-green-800'; // Green for undervalued
+  } else if (percentageDifference < -0.20) { // More than 20% overvalued
+    verdictText = 'Overvalued';
+    bgColorClass = 'bg-red-200 text-red-800'; // Red for overvalued
+  } else {
+    verdictText = 'Neutral'; // Within +/- 20%
+    bgColorClass = 'bg-yellow-200 text-yellow-800'; // Yellow for neutral
+  }
+  return { verdictText, bgColorClass };
+};
 
 const DcfCalculator: React.FC<DcfCalculatorProps> = ({ symbol }) => {
   const [dcfData, setDcfData] = useState<DcfData | null>(null);
@@ -85,6 +131,9 @@ const DcfCalculator: React.FC<DcfCalculatorProps> = ({ symbol }) => {
   const [historicalAverageEbitMargin3Year, setHistoricalAverageEbitMargin3Year] = useState<number>(0);
   const [inputPerpetualGrowthRate, setInputPerpetualGrowthRate] = useState<number>(0.02);
   const [userComments, setUserComments] = useState<string>('');
+  const [valuationHistory, setValuationHistory] = useState<DcfHistoryEntry[]>([]);
+  const [historyLoading, setHistoryLoading] = useState<boolean>(true);
+  const [historyError, setHistoryError] = useState<string | null>(null);
 
   // Remaining editable inputs (debt, cash, D&A, CapEx)
   // These are not displayed as inputs anymore based on the previous request, but their state is kept
@@ -97,47 +146,61 @@ const DcfCalculator: React.FC<DcfCalculatorProps> = ({ symbol }) => {
 
   // Effect for fetching DCF data
   useEffect(() => {
-    const fetchDcfData = async () => {
+    const fetchAllData = async () => {
       setLoading(true);
+      setHistoryLoading(true);
       setError(null);
+      setHistoryError(null);
       try {
-        const response = await fetch(`http://localhost:8080/stock/valuation/dcf/${symbol}`);
-        if (!response.ok) {
-          throw new Error(`HTTP error! status: ${response.status}`);
+        const [dcfResponse, historyResponse] = await Promise.all([
+          fetch(`http://localhost:8080/stock/valuation/dcf/${symbol}`),
+          fetch(`http://localhost:8080/stock/valuation/dcf/history/${symbol}`)
+        ]);
+
+        if (!dcfResponse.ok) {
+          throw new Error(`DCF data HTTP error! status: ${dcfResponse.status}`);
         }
-        const data: DcfData = await response.json();
-        setDcfData(data);
+        if (!historyResponse.ok && historyResponse.status !== 404) {
+          throw new Error(`History data HTTP error! status: ${historyResponse.status}`);
+        }
+
+        const dcfData: DcfData = await dcfResponse.json();
+        const historyData: DcfHistoryEntry[] = historyResponse.status === 404 ? [] : await historyResponse.json();
+
+        setDcfData(dcfData);
         // Initialize editable states with fetched data
-        setInputBeta(data.assumptions.beta);
-        setInputRiskFreeRate(data.assumptions.riskFreeRate);
-        setInputMarketRiskPremium(data.assumptions.marketRiskPremium);
-        setInputEffectiveTaxRate(data.assumptions.effectiveTaxRate);
+        setInputBeta(dcfData.assumptions.beta);
+        setInputRiskFreeRate(dcfData.assumptions.riskFreeRate);
+        setInputMarketRiskPremium(dcfData.assumptions.marketRiskPremium);
+        setInputEffectiveTaxRate(dcfData.assumptions.effectiveTaxRate);
         
-        // Initialize new projected states from historicals
-        setProjectedRevenueGrowthRate(data.assumptions.revenueGrowthCagr3Year);
-        setProjectedAverageEbitMargin(data.assumptions.averageEbitMargin3Year);
+        setProjectedRevenueGrowthRate(dcfData.assumptions.revenueGrowthCagr3Year);
+        setProjectedAverageEbitMargin(dcfData.assumptions.averageEbitMargin3Year);
 
-        // Set historical display-only fields
-        setHistoricalRevenueGrowthCagr3Year(data.assumptions.revenueGrowthCagr3Year);
-        setHistoricalAverageEbitMargin3Year(data.assumptions.averageEbitMargin3Year);
+        setHistoricalRevenueGrowthCagr3Year(dcfData.assumptions.revenueGrowthCagr3Year);
+        setHistoricalAverageEbitMargin3Year(dcfData.assumptions.averageEbitMargin3Year);
 
-        // Initialize non-displayed input states
-        setInputTotalCashAndEquivalents(data.balanceSheet.totalCashAndEquivalents);
-        setInputTotalShortTermDebt(data.balanceSheet.totalShortTermDebt);
-        setInputTotalLongTermDebt(data.balanceSheet.totalLongTermDebt);
-        setInputInterestExpense(data.income.interestExpense);
-        setInputDepreciationAndAmortization(data.cashFlow.depreciationAndAmortization);
-        setInputCapitalExpenditure(data.cashFlow.capitalExpenditure);
+        setInputTotalCashAndEquivalents(dcfData.balanceSheet.totalCashAndEquivalents);
+        setInputTotalShortTermDebt(dcfData.balanceSheet.totalShortTermDebt);
+        setInputTotalLongTermDebt(dcfData.balanceSheet.totalLongTermDebt);
+        setInputInterestExpense(dcfData.income.interestExpense);
+        setInputDepreciationAndAmortization(dcfData.cashFlow.depreciationAndAmortization);
+        setInputCapitalExpenditure(dcfData.cashFlow.capitalExpenditure);
+
+        setValuationHistory(historyData);
 
       } catch (e: unknown) {
-        setError((e as Error).message);
+        const errorMessage = (e as Error).message;
+        setError(errorMessage);
+        setHistoryError(errorMessage);
       } finally {
         setLoading(false);
+        setHistoryLoading(false);
       }
     };
 
     if (symbol) {
-      fetchDcfData();
+      fetchAllData();
     }
   }, [symbol]);
 
@@ -280,15 +343,7 @@ const DcfCalculator: React.FC<DcfCalculatorProps> = ({ symbol }) => {
     // Re-calculate verdict to ensure it's up-to-date
     const currentPrice = dcfData.meta.currentSharePrice;
     const intrinsicPrice = intrinsicValuePerShare;
-    const percentageDifference = (intrinsicPrice - currentPrice) / currentPrice;
-    let verdictText = '';
-    if (percentageDifference > 0.20) {
-      verdictText = 'Undervalued';
-    } else if (percentageDifference < -0.20) {
-      verdictText = 'Overvalued';
-    } else {
-      verdictText = 'Neutral';
-    }
+    const { verdictText } = getVerdictStyling(intrinsicPrice, currentPrice);
 
     const dcfUserInput = {
       beta: inputBeta,
@@ -591,23 +646,7 @@ const DcfCalculator: React.FC<DcfCalculatorProps> = ({ symbol }) => {
         )}
         {intrinsicValuePerShare !== null && dcfData.meta.currentSharePrice !== null && (
           (() => {
-            const currentPrice = dcfData.meta.currentSharePrice;
-            const intrinsicPrice = intrinsicValuePerShare;
-            const percentageDifference = (intrinsicPrice - currentPrice) / currentPrice;
-
-            let verdictText = '';
-            let bgColorClass = '';
-
-            if (percentageDifference > 0.20) { // More than 20% undervalued
-              verdictText = 'Undervalued';
-              bgColorClass = 'bg-green-200 text-green-800'; // Green for undervalued
-            } else if (percentageDifference < -0.20) { // More than 20% overvalued
-              verdictText = 'Overvalued';
-              bgColorClass = 'bg-red-200 text-red-800'; // Red for overvalued
-            } else {
-              verdictText = 'Neutral'; // Within +/- 20%
-              bgColorClass = 'bg-yellow-200 text-yellow-800'; // Yellow for neutral
-            }
+            const { verdictText, bgColorClass } = getVerdictStyling(intrinsicValuePerShare, dcfData.meta.currentSharePrice);
 
             return (
               <p className={`p-2 rounded-md inline-block ${bgColorClass}`}>
@@ -615,6 +654,51 @@ const DcfCalculator: React.FC<DcfCalculatorProps> = ({ symbol }) => {
               </p>
             );
           })()
+        )}
+      </div>
+
+      {/* History Table */}
+      <div className="mt-8">
+        <h5 className="text-lg font-medium mb-2">History of valuations</h5>
+        {historyLoading ? (
+          <p>Loading valuation history...</p>
+        ) : historyError ? (
+          <p className="text-red-500">Could not load valuation history.</p>
+        ) : (
+          <div className="overflow-x-auto">
+            <table className="min-w-full divide-y divide-gray-200">
+              <thead className="bg-gray-50">
+                <tr>
+                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Date of Valuation</th>
+                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Intrinsic Value Per Share</th>
+                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Share Price at Valuation</th>
+                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Verdict</th>
+                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Comments</th>
+                </tr>
+              </thead>
+              <tbody className="bg-white divide-y divide-gray-200">
+                {valuationHistory.length > 0 ? (
+                  valuationHistory.map((entry, index) => (
+                    <tr key={index}>
+                      <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">{new Date(entry.valuationDate).toLocaleDateString()}</td>
+                      <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">{entry.dcfCalculationData.meta.currency} {entry.dcfOutput.intrinsicValuePerShare.toFixed(2)}</td>
+                      <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">{entry.dcfCalculationData.meta.currency} {entry.dcfCalculationData.meta.currentSharePrice.toFixed(2)}</td>
+                      <td className={`px-6 py-4 whitespace-nowrap text-sm ${getVerdictStyling(entry.dcfOutput.intrinsicValuePerShare, entry.dcfCalculationData.meta.currentSharePrice).bgColorClass}`}>
+                        {entry.dcfOutput.verdict}
+                      </td>
+                      <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500" title={entry.dcfUserInput.userComments}>
+                        {entry.dcfUserInput.userComments ? entry.dcfUserInput.userComments.substring(0, 50) + (entry.dcfUserInput.userComments.length > 50 ? '...' : '') : ''}
+                      </td>
+                    </tr>
+                  ))
+                ) : (
+                  <tr>
+                    <td colSpan={5} className="text-center py-4">No valuation history found for this stock.</td>
+                  </tr>
+                )}
+              </tbody>
+            </table>
+          </div>
         )}
       </div>
     </div>
