@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
+import ConfirmDialog from './common/ConfirmDialog';
 
 interface StockSummary {
   ticker: string;
@@ -19,6 +20,8 @@ const StockSummaryTable: React.FC = () => {
   const [sortColumn, setSortColumn] = useState<SortColumn>('ticker');
   const [sortDirection, setSortDirection] = useState<SortDirection>('asc');
   const navigate = useNavigate();
+  const [isConfirmOpen, setIsConfirmOpen] = useState(false);
+  const [stockToDelete, setStockToDelete] = useState<string | null>(null);
 
   useEffect(() => {
     const fetchSummaryData = async () => {
@@ -38,6 +41,36 @@ const StockSummaryTable: React.FC = () => {
 
     fetchSummaryData();
   }, []);
+
+  const handleDeleteClick = (symbol: string, e: React.MouseEvent) => {
+    e.stopPropagation();
+    setStockToDelete(symbol);
+    setIsConfirmOpen(true);
+  };
+
+  const handleConfirmDelete = async () => {
+    if (stockToDelete) {
+      try {
+        const response = await fetch(`http://localhost:8080/stocks/delete/${stockToDelete}`, {
+          method: 'DELETE',
+        });
+        if (!response.ok) {
+          throw new Error(`HTTP error! status: ${response.status}`);
+        }
+        window.location.reload();
+      } catch (e: any) {
+        setError(e.message);
+      } finally {
+        setIsConfirmOpen(false);
+        setStockToDelete(null);
+      }
+    }
+  };
+
+  const handleCancelDelete = () => {
+    setIsConfirmOpen(false);
+    setStockToDelete(null);
+  };
 
   const handleSort = (column: SortColumn) => {
     if (sortColumn === column) {
@@ -110,6 +143,9 @@ const StockSummaryTable: React.FC = () => {
             >
               100Bagger Date {sortColumn === 'generation100BaggerDate' ? (sortDirection === 'asc' ? '▲' : '▼') : ''}
             </th>
+            <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+              Actions
+            </th>
           </tr>
         </thead>
         <tbody className="bg-white divide-y divide-gray-200">
@@ -134,10 +170,25 @@ const StockSummaryTable: React.FC = () => {
               <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
                 {new Date(summary.generation100BaggerDate).toLocaleString()}
               </td>
+              <td className="px-6 py-4 whitespace-nowrap text-sm font-medium">
+                <button
+                  onClick={(e) => handleDeleteClick(summary.ticker, e)}
+                  className="bg-red-500 hover:bg-red-700 text-white font-bold py-2 px-4 rounded"
+                >
+                  Delete
+                </button>
+              </td>
             </tr>
           ))}
         </tbody>
       </table>
+      <ConfirmDialog
+        isOpen={isConfirmOpen}
+        title="Confirm Deletion"
+        message={`Are you sure you want to delete all financial data for ${stockToDelete}?`}
+        onConfirm={handleConfirmDelete}
+        onCancel={handleCancelDelete}
+      />
     </div>
   );
 };
