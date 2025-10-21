@@ -75,19 +75,53 @@ const checklists = {
   },
 };
 
+const NotesDialog: React.FC<{
+  isOpen: boolean;
+  onClose: () => void;
+  onSave: () => void;
+  notes: string;
+  onNotesChange: (notes: string) => void;
+}> = ({ isOpen, onClose, onSave, notes, onNotesChange }) => {
+  if (!isOpen) return null;
+
+  return (
+      <div className="fixed inset-0 bg-opacity-50 flex items-center justify-center z-50">
+          <div className="bg-white p-6 rounded-lg shadow-xl w-full max-w-lg">
+              <h3 className="text-lg font-semibold mb-4">Personal Notes</h3>
+              <textarea
+                  value={notes}
+                  onChange={(e) => onNotesChange(e.target.value)}
+                  className="w-full p-2 border rounded-md"
+                  rows={10}
+              />
+              <div className="mt-4 flex justify-end space-x-2">
+                  <button onClick={onClose} className="bg-gray-300 hover:bg-gray-400 text-gray-800 font-bold py-2 px-4 rounded">
+                      Cancel
+                  </button>
+                  <button onClick={onSave} className="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded">
+                      Save
+                  </button>
+              </div>
+          </div>
+      </div>
+  );
+};
+
 const ChecklistTab: React.FC<ChecklistTabProps> = ({ symbol, activeSubTab, onSubTabClick }) => {
   const [logMessages, setLogMessages] = useState<string[]>([]);
   const [reportData, setReportData] = useState<Partial<ReportData>>({});
   const [editableScores, setEditableScores] = useState<Record<string, ChecklistItem>>({});
   const [hasScoresChanged, setHasScoresChanged] = useState<boolean>(false);
   const [tooltip, setTooltip] = useState<Tooltip>({ visible: false, content: '', x: 0, y: 0 });
+  const [editingNotesFor, setEditingNotesFor] = useState<string | null>(null);
+  const [currentNotes, setCurrentNotes] = useState('');
   const [error, setError] = useState<string | null>(null);
   const [isLogVisible, setIsLogVisible] = useState(true);
   const [regenerationCount, setRegenerationCount] = useState(0);
   const [loading, setLoading] = useState(false);
   const [elapsedTime, setElapsedTime] = useState(0);
   const hasReceivedMessages = useRef(false);
-  const hideTimeoutId = useRef<NodeJS.Timeout | null>(null);
+  const hideTimeoutId = useRef<number | null>(null);
   const isLoadedFromDbRef = useRef(false);
 
   useEffect(() => {
@@ -224,15 +258,16 @@ const ChecklistTab: React.FC<ChecklistTabProps> = ({ symbol, activeSubTab, onSub
     setHasScoresChanged(true);
   };
 
-  const handleSave = async () => {
+  const handleSave = async (scoresToSave: Record<string, ChecklistItem> | null = null) => {
+    const scores = scoresToSave || editableScores;
     try {
       setLoading(true);
       setError(null);
-      const itemsArray = Object.keys(editableScores).map(key => ({
+      const itemsArray = Object.keys(scores).map(key => ({
         name: key,
-        score: editableScores[key].score,
-        explanation: editableScores[key].explanation,
-        personalNotes: editableScores[key].personalNotes,
+        score: scores[key].score,
+        explanation: scores[key].explanation,
+        personalNotes: scores[key].personalNotes,
       }));
 
       const reportType = activeSubTab === '100 Bagger' ? 'ONE_HUNDRED_BAGGER' : activeSubTab;
@@ -251,7 +286,11 @@ const ChecklistTab: React.FC<ChecklistTabProps> = ({ symbol, activeSubTab, onSub
       setHasScoresChanged(false);
       setLogMessages(prev => [`Scores saved successfully at ${new Date().toLocaleString()}`, ...prev]);
 
-      const newFinalScore = Object.values(editableScores).reduce((sum, item) => sum + item.score, 0);
+      if (scoresToSave) {
+        setEditableScores(scoresToSave);
+      }
+
+      const newFinalScore = Object.values(scores).reduce((sum, item) => sum + (item.score || 0), 0);
       setReportData(prevReportData => ({
         ...prevReportData,
         finalScore: newFinalScore,
@@ -262,6 +301,35 @@ const ChecklistTab: React.FC<ChecklistTabProps> = ({ symbol, activeSubTab, onSub
     } finally {
       setLoading(false);
     }
+  };
+
+  useEffect(() => {
+    if (editingNotesFor && editableScores[editingNotesFor]) {
+      setCurrentNotes(editableScores[editingNotesFor].personalNotes || '');
+    }
+  }, [editingNotesFor, editableScores]);
+
+  const handleCloseDialog = () => {
+    setEditingNotesFor(null);
+  };
+
+  const handleDialogSave = () => {
+    if (!editingNotesFor) return;
+
+    const newScores = {
+      ...editableScores,
+      [editingNotesFor]: {
+        ...editableScores[editingNotesFor],
+        personalNotes: currentNotes,
+      },
+    };
+    handleSave(newScores);
+    setEditingNotesFor(null);
+  };
+
+  const onNotesChange = (notes: string) => {
+    setCurrentNotes(notes);
+    setHasScoresChanged(true);
   };
 
   const renderChecklistTable = () => {
@@ -303,7 +371,7 @@ const ChecklistTab: React.FC<ChecklistTabProps> = ({ symbol, activeSubTab, onSub
                   Regenerate
                 </button>
                 <button
-                  onClick={handleSave}
+                  onClick={() => handleSave()}
                   className={`font-bold py-1 px-3 rounded text-sm ${
                     hasScoresChanged && !loading
                       ? 'bg-green-500 hover:bg-green-700 text-white'
@@ -351,9 +419,7 @@ const ChecklistTab: React.FC<ChecklistTabProps> = ({ symbol, activeSubTab, onSub
                               className="w-20 p-1 border rounded-md text-gray-800 text-right"
                             />
                             <button
-                                onClick={() => {
-                                  /* TODO: Implement notes functionality */
-                                }}
+                                onClick={() => setEditingNotesFor(key)}
                                 onMouseOver={(e) => {
                                   e.stopPropagation();
                                   if (item?.personalNotes) {
@@ -394,6 +460,13 @@ const ChecklistTab: React.FC<ChecklistTabProps> = ({ symbol, activeSubTab, onSub
             </table>
           </div>
         )}
+        <NotesDialog
+          isOpen={editingNotesFor !== null}
+          onClose={handleCloseDialog}
+          onSave={handleDialogSave}
+          notes={currentNotes}
+          onNotesChange={onNotesChange}
+        />
       </div>
     );
   };
