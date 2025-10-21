@@ -8,6 +8,10 @@ import { incomeStatementFieldOrder } from './types/financialFieldOrders';
 
 const IncomeStatementTab: React.FC<{ symbol: string }> = ({ symbol }) => {
     const [numberScale, setNumberScale] = useState<'millions' | 'billions'>('billions');
+    const [revenueSegmentation, setRevenueSegmentation] = useState<any | null>(null);
+    const [revenueGeography, setRevenueGeography] = useState<any | null>(null);
+    const [isRevenueDetailVisible, setIsRevenueDetailVisible] = useState<boolean>(false);
+    const [revenueDetailLoading, setRevenueDetailLoading] = useState<boolean>(false);
 
     const {
         reportType,
@@ -29,6 +33,44 @@ const IncomeStatementTab: React.FC<{ symbol: string }> = ({ symbol }) => {
 
     const handleNumberScaleChange = (scale: 'millions' | 'billions') => {
         setNumberScale(scale);
+    };
+
+    const handleRevenueDetailToggle = async () => {
+        if (isRevenueDetailVisible) {
+            setIsRevenueDetailVisible(false);
+            return;
+        }
+
+        if (revenueSegmentation && revenueGeography) {
+            setIsRevenueDetailVisible(true);
+            return;
+        }
+
+        try {
+            setRevenueDetailLoading(true);
+            const [segmentationResponse, geographyResponse] = await Promise.all([
+                fetch(`http://localhost:8080/stocks/revenue-segmentation/${symbol}`),
+                fetch(`http://localhost:8080/stocks/revenue-geography/${symbol}`)
+            ]);
+
+            if (!segmentationResponse.ok) {
+                throw new Error('Failed to fetch revenue segmentation');
+            }
+            if (!geographyResponse.ok) {
+                throw new Error('Failed to fetch revenue geography');
+            }
+
+            const segmentationData = await segmentationResponse.json();
+            const geographyData = await geographyResponse.json();
+
+            setRevenueSegmentation(segmentationData);
+            setRevenueGeography(geographyData);
+            setIsRevenueDetailVisible(true);
+        } catch (error) {
+            console.error(error);
+        } finally {
+            setRevenueDetailLoading(false);
+        }
     };
 
     if (loading) {
@@ -88,6 +130,12 @@ const IncomeStatementTab: React.FC<{ symbol: string }> = ({ symbol }) => {
                 allKeys={allKeys}
                 numberScale={numberScale}
                 tableName="Income Statement"
+                reportType={reportType}
+                onRevenueDetailToggle={handleRevenueDetailToggle}
+                isRevenueDetailVisible={isRevenueDetailVisible}
+                revenueSegmentation={revenueSegmentation}
+                revenueGeography={revenueGeography}
+                revenueDetailLoading={revenueDetailLoading}
             />
         </div>
     );
