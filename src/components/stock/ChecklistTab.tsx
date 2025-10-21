@@ -31,6 +31,7 @@ interface ChecklistItem {
   name: string;
   score: number;
   explanation: string;
+  personalNotes?: string;
 }
 
 interface ReportData {
@@ -231,6 +232,7 @@ const ChecklistTab: React.FC<ChecklistTabProps> = ({ symbol, activeSubTab, onSub
         name: key,
         score: editableScores[key].score,
         explanation: editableScores[key].explanation,
+        personalNotes: editableScores[key].personalNotes,
       }));
 
       const reportType = activeSubTab === '100 Bagger' ? 'ONE_HUNDRED_BAGGER' : activeSubTab;
@@ -338,17 +340,38 @@ const ChecklistTab: React.FC<ChecklistTabProps> = ({ symbol, activeSubTab, onSub
                         <tr
                           key={key}
                           className={!isLast ? 'border-b' : ''}
-                          onMouseEnter={(e) => item && handleMouseOver(e, item.explanation)}
                           onMouseLeave={handleMouseOut}
                         >
-                          <td className="py-2 font-medium text-gray-600">{label}</td>
-                          <td className="py-2 text-gray-800">
+                          <td className="py-2 font-medium text-gray-600" onMouseOver={(e) => item && handleMouseOver(e, item.explanation)}>{label}</td>
+                          <td className="py-2 text-gray-800" onMouseOver={(e) => item && handleMouseOver(e, item.explanation)}>
                             <input
                               type="number"
                               value={item?.score ?? ''}
                               onChange={(e) => handleChangeScore(key, e.target.value)}
                               className="w-20 p-1 border rounded-md text-gray-800 text-right"
                             />
+                            <button
+                                onClick={() => {
+                                  /* TODO: Implement notes functionality */
+                                }}
+                                onMouseOver={(e) => {
+                                  e.stopPropagation();
+                                  if (item?.personalNotes) {
+                                    handleMouseOver(e, item.personalNotes);
+                                  } else {
+                                    handleMouseOut();
+                                  }
+                                }}
+                                className={`ml-2 p-1 rounded-md inline-flex items-center ${
+                                  item?.personalNotes
+                                    ? 'text-blue-500 hover:text-blue-700'
+                                    : 'text-gray-500 hover:text-gray-700'
+                                }`}
+                              >
+                                <svg xmlns="http://www.w3.org/2000/svg" className="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" />
+                                </svg>
+                              </button>
                           </td>
                         </tr>
                       );
