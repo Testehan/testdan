@@ -17,7 +17,6 @@ import {
   marketAndScalabilityItems,
   businessQualityItems,
   valuationItems,
-  shareholderImpactItems,
   investorFitCoffeeCanItems,
   negativeItems100Bagger,
 } from './100BaggerChecklistDefinitions';
@@ -69,7 +68,6 @@ const checklists = {
       { title: 'Market & Scalability', items: marketAndScalabilityItems },
       { title: 'Business Quality', items: businessQualityItems },
       { title: 'Valuation', items: valuationItems },
-      { title: 'Shareholder Impact', items: shareholderImpactItems },
       { title: 'Investor Fit / Coffee Can', items: investorFitCoffeeCanItems },
       { title: 'The negatives :(', items: negativeItems100Bagger, scoreClass: 'bg-red-200' },
     ],

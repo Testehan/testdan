@@ -40,10 +40,6 @@ export const valuationItems = [
   { key: 'valuationContext', label: 'Valuation & Multiple Expansion: (Overvalued/Hype priced = 0 / Fair Price = 3 / Bargain price allowing for "Twin Engine" (EPS growth + Multiple expansion) = 5) (0-5)'}
 ];
 
-export const shareholderImpactItems = [
-  { key: 'dilution', label: 'Dilution: (>50% shares added over last 5 yrs = 0 / 10–50% = 3 / <10% = 5) (0/5)' },
-];
-
 export const investorFitCoffeeCanItems = [
   { key: 'holdabilityVolatility', label: 'Holdability / Volatility: (You cannot survive 50%+ drops or hold for 15+ years = 0 / Manageable = 3 / Can hold long-term = 5) (0-5)' },
 ];
