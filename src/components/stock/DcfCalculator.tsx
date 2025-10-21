@@ -113,7 +113,9 @@ const DcfCalculator: React.FC<DcfCalculatorProps> = ({ symbol }) => {
   
   // New editable projection fields
   const [fcfGrowthRate, setFcfGrowthRate] = useState<number>(0);
+  const [userInputFcfGrowthRate, setUserInputFcfGrowthRate] = useState<number>(0);
   const [inputTerminalMultiple, setInputTerminalMultiple] = useState<number>(15);
+  const [userInputTerminalMultiple, setUserInputTerminalMultiple] = useState<number>(15);
   const [sbcAdjustmentToggle, setSbcAdjustmentToggle] = useState<boolean>(false);
   const [userComments, setUserComments] = useState<string>('');
   const [valuationHistory, setValuationHistory] = useState<DcfHistoryEntry[]>([]);
@@ -166,7 +168,9 @@ const DcfCalculator: React.FC<DcfCalculatorProps> = ({ symbol }) => {
         setInputMarketRiskPremium(dcfData.assumptions.marketRiskPremium);
         
         setFcfGrowthRate(dcfData.assumptions.fcfGrowthRate); // Initialize with average from dcfData
+        setUserInputFcfGrowthRate(dcfData.assumptions.fcfGrowthRate);
         setInputTerminalMultiple(dcfData.assumptions.marketCapToFcfMultiple); // Initialize with a default, as it's a new input
+        setUserInputTerminalMultiple(dcfData.assumptions.marketCapToFcfMultiple);
         setSbcAdjustmentToggle(false); // Initialize with default
 
         // Fetch history using the new function
@@ -195,7 +199,7 @@ const DcfCalculator: React.FC<DcfCalculatorProps> = ({ symbol }) => {
     const riskFreeRate = inputRiskFreeRate;
     const marketRiskPremium = inputMarketRiskPremium;
 
-    const fcfGrowthRateUsed = fcfGrowthRate;
+    const fcfGrowthRateUsed = userInputFcfGrowthRate;
 
     // Destructure what we need from dcfData, primarily for current values
     const {
@@ -216,7 +220,7 @@ const DcfCalculator: React.FC<DcfCalculatorProps> = ({ symbol }) => {
     const marketValueOfDebt = totalDebt;
     const totalCapital = marketValueOfEquity + marketValueOfDebt;
     
-    const costOfDebt = (dcfData.income.interestExpense / totalDebt);
+    const costOfDebt = totalDebt > 0 ? (dcfData.income.interestExpense / totalDebt) : 0;
     const taxRate = 0.25; // Default tax rate as it's no longer a user input
     
     let calculatedWacc = 0;
@@ -254,7 +258,7 @@ const DcfCalculator: React.FC<DcfCalculatorProps> = ({ symbol }) => {
     let calculatedTerminalValue = 0;
     if (fcfProjections.length > 0) {
         const lastProjectedFcf = fcfProjections[fcfProjections.length - 1].fcf;
-        calculatedTerminalValue = lastProjectedFcf * inputTerminalMultiple;
+        calculatedTerminalValue = lastProjectedFcf * userInputTerminalMultiple;
     }
     setTerminalValue(calculatedTerminalValue);
 
@@ -282,8 +286,8 @@ const DcfCalculator: React.FC<DcfCalculatorProps> = ({ symbol }) => {
     inputBeta,
     inputRiskFreeRate,
     inputMarketRiskPremium,
-    fcfGrowthRate,
-    inputTerminalMultiple,
+    userInputFcfGrowthRate,
+    userInputTerminalMultiple,
     sbcAdjustmentToggle,
 ]);
 
@@ -306,7 +310,9 @@ const DcfCalculator: React.FC<DcfCalculatorProps> = ({ symbol }) => {
     setInputMarketRiskPremium(originalDcfData.assumptions.marketRiskPremium);
     
     setFcfGrowthRate(originalDcfData.assumptions.fcfGrowthRate); // Reset with average from original dcfData
-    setInputTerminalMultiple(15); // Reset to default
+    setUserInputFcfGrowthRate(originalDcfData.assumptions.fcfGrowthRate);
+    setInputTerminalMultiple(originalDcfData.assumptions.marketCapToFcfMultiple); // Reset to default
+    setUserInputTerminalMultiple(originalDcfData.assumptions.marketCapToFcfMultiple);
     setSbcAdjustmentToggle(false); // Reset to default
     setUserComments('');
 
@@ -324,7 +330,9 @@ const DcfCalculator: React.FC<DcfCalculatorProps> = ({ symbol }) => {
     // Add all setters to the dependency array
     setDcfData, setInputBeta, setInputRiskFreeRate, setInputMarketRiskPremium,
     setFcfGrowthRate,
+    setUserInputFcfGrowthRate,
     setInputTerminalMultiple,
+    setUserInputTerminalMultiple,
     setSbcAdjustmentToggle,
     setUserComments,
     setWacc, setProjectedFcfs,
@@ -337,7 +345,9 @@ const DcfCalculator: React.FC<DcfCalculatorProps> = ({ symbol }) => {
     setInputRiskFreeRate(entry.dcfUserInput.riskFreeRate);
     setInputMarketRiskPremium(entry.dcfUserInput.marketRiskPremium);
     setFcfGrowthRate(entry.dcfUserInput.fcfGrowthRate ?? 0); // Use 0 as default if undefined
+    setUserInputFcfGrowthRate(entry.dcfUserInput.fcfGrowthRate ?? 0);
     setInputTerminalMultiple(entry.dcfUserInput.terminalMultiple ?? 15); // Use 15 as default if undefined
+    setUserInputTerminalMultiple(entry.dcfUserInput.terminalMultiple ?? 15);
     setSbcAdjustmentToggle(entry.dcfUserInput.sbcAdjustmentToggle ?? false); // Use false as default if undefined
     setUserComments(entry.dcfUserInput.userComments);
 
@@ -352,7 +362,9 @@ const DcfCalculator: React.FC<DcfCalculatorProps> = ({ symbol }) => {
     performCalculations, // Add performCalculations to dependency array
     setInputBeta, setInputRiskFreeRate, setInputMarketRiskPremium,
     setFcfGrowthRate,
+    setUserInputFcfGrowthRate,
     setInputTerminalMultiple,
+    setUserInputTerminalMultiple,
     setSbcAdjustmentToggle,
     setUserComments, setDcfData,
   ]);
@@ -376,8 +388,8 @@ const DcfCalculator: React.FC<DcfCalculatorProps> = ({ symbol }) => {
       beta: inputBeta,
       riskFreeRate: inputRiskFreeRate,
       marketRiskPremium: inputMarketRiskPremium,
-      fcfGrowthRate: fcfGrowthRate,
-      terminalMultiple: inputTerminalMultiple, // Add terminal multiple
+      fcfGrowthRate: userInputFcfGrowthRate,
+      terminalMultiple: userInputTerminalMultiple, // Add terminal multiple
       sbcAdjustmentToggle: sbcAdjustmentToggle, // Add SBC adjustment toggle
       userComments: userComments,
     };
@@ -522,9 +534,9 @@ const DcfCalculator: React.FC<DcfCalculatorProps> = ({ symbol }) => {
               <InfoIcon description={metricDescriptions.dcfInputs.fcfGrowthRate} />
             </div>
             <NumericFormat
-              value={fcfGrowthRate * 100}
+              value={userInputFcfGrowthRate * 100}
               onValueChange={(values) => {
-                setFcfGrowthRate(values.floatValue ? values.floatValue / 100 : 0);
+                setUserInputFcfGrowthRate(values.floatValue ? values.floatValue / 100 : 0);
               }}
               suffix="%"
               decimalScale={3}
@@ -538,9 +550,9 @@ const DcfCalculator: React.FC<DcfCalculatorProps> = ({ symbol }) => {
               <InfoIcon description={metricDescriptions.dcfInputs.terminalMultiple} />
             </div>
             <NumericFormat
-              value={inputTerminalMultiple}
+              value={userInputTerminalMultiple}
               onValueChange={(values) => {
-                setInputTerminalMultiple(values.floatValue || 0);
+                setUserInputTerminalMultiple(values.floatValue || 0);
               }}
               decimalScale={2}
               fixedDecimalScale={false}
