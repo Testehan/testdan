@@ -14,39 +14,29 @@ interface DcfData {
   };
   income: {
     revenue: number;
-    ebit: number;
     interestExpense: number;
-    incomeTaxExpense: number;
   };
   balanceSheet: {
     totalCashAndEquivalents: number;
     totalShortTermDebt: number;
     totalLongTermDebt: number;
-    totalCurrentAssets: number;
-    totalCurrentLiabilities: number;
   };
   cashFlow: {
-    depreciationAndAmortization: number;
     capitalExpenditure: number;
+    operatingCashFlow: number;
     stockBasedCompensation: number;
   };
   assumptions: {
     beta: number;
     riskFreeRate: number;
     marketRiskPremium: number;
-    effectiveTaxRate: number;
-    revenueGrowthCagr3Year: number;
-    averageEbitMargin3Year: number;
+    fcfGrowthRate: number;
+    marketCapToFcfMultiple: number;
   };
 }
 
 interface ProjectedFcf {
   year: number;
-  revenue: number;
-  ebit: number;
-  nopat: number;
-  depreciationAndAmortization: number;
-  capitalExpenditure: number;
   fcf: number;
 }
 
@@ -57,10 +47,9 @@ interface DcfHistoryEntry {
     beta: number;
     riskFreeRate: number;
     marketRiskPremium: number;
-    effectiveTaxRate: number;
-    projectedRevenueGrowthRate: number;
-    projectedEbitMargin: number;
-    perpetualGrowthRate: number;
+    fcfGrowthRate: number;
+    terminalMultiple: number;
+    sbcAdjustmentToggle: boolean;
     userComments: string;
   };
   dcfOutput: {
@@ -121,29 +110,16 @@ const DcfCalculator: React.FC<DcfCalculatorProps> = ({ symbol }) => {
   const [inputBeta, setInputBeta] = useState<number>(0);
   const [inputRiskFreeRate, setInputRiskFreeRate] = useState<number>(0);
   const [inputMarketRiskPremium, setInputMarketRiskPremium] = useState<number>(0);
-  const [inputEffectiveTaxRate, setInputEffectiveTaxRate] = useState<number>(0);
   
   // New editable projection fields
-  const [projectedRevenueGrowthRate, setProjectedRevenueGrowthRate] = useState<number>(0);
-  const [projectedAverageEbitMargin, setProjectedAverageEbitMargin] = useState<number>(0);
-
-  // Original historical metrics (display-only now)
-  const [historicalRevenueGrowthCagr3Year, setHistoricalRevenueGrowthCagr3Year] = useState<number>(0);
-  const [historicalAverageEbitMargin3Year, setHistoricalAverageEbitMargin3Year] = useState<number>(0);
-  const [inputPerpetualGrowthRate, setInputPerpetualGrowthRate] = useState<number>(0.02);
+  const [fcfGrowthRate, setFcfGrowthRate] = useState<number>(0);
+  const [inputTerminalMultiple, setInputTerminalMultiple] = useState<number>(15);
+  const [sbcAdjustmentToggle, setSbcAdjustmentToggle] = useState<boolean>(false);
   const [userComments, setUserComments] = useState<string>('');
   const [valuationHistory, setValuationHistory] = useState<DcfHistoryEntry[]>([]);
   const [historyLoading, setHistoryLoading] = useState<boolean>(true);
   const [historyError, setHistoryError] = useState<string | null>(null);
 
-  // Remaining editable inputs (debt, cash, D&A, CapEx)
-  // These are not displayed as inputs anymore based on the previous request, but their state is kept
-  const [inputTotalCashAndEquivalents, setInputTotalCashAndEquivalents] = useState<number>(0);
-  const [inputTotalShortTermDebt, setInputTotalShortTermDebt] = useState<number>(0);
-  const [inputTotalLongTermDebt, setInputTotalLongTermDebt] = useState<number>(0);
-  const [inputInterestExpense, setInputInterestExpense] = useState<number>(0);
-  const [inputDepreciationAndAmortization, setInputDepreciationAndAmortization] = useState<number>(0);
-  const [inputCapitalExpenditure, setInputCapitalExpenditure] = useState<number>(0);
 
   const fetchValuationHistory = useCallback(async (currentSymbol: string) => {
     setHistoryLoading(true);
@@ -188,20 +164,10 @@ const DcfCalculator: React.FC<DcfCalculatorProps> = ({ symbol }) => {
         setInputBeta(dcfData.assumptions.beta);
         setInputRiskFreeRate(dcfData.assumptions.riskFreeRate);
         setInputMarketRiskPremium(dcfData.assumptions.marketRiskPremium);
-        setInputEffectiveTaxRate(dcfData.assumptions.effectiveTaxRate);
         
-        setProjectedRevenueGrowthRate(dcfData.assumptions.revenueGrowthCagr3Year);
-        setProjectedAverageEbitMargin(dcfData.assumptions.averageEbitMargin3Year);
-
-        setHistoricalRevenueGrowthCagr3Year(dcfData.assumptions.revenueGrowthCagr3Year);
-        setHistoricalAverageEbitMargin3Year(dcfData.assumptions.averageEbitMargin3Year);
-
-        setInputTotalCashAndEquivalents(dcfData.balanceSheet.totalCashAndEquivalents);
-        setInputTotalShortTermDebt(dcfData.balanceSheet.totalShortTermDebt);
-        setInputTotalLongTermDebt(dcfData.balanceSheet.totalLongTermDebt);
-        setInputInterestExpense(dcfData.income.interestExpense);
-        setInputDepreciationAndAmortization(dcfData.cashFlow.depreciationAndAmortization);
-        setInputCapitalExpenditure(dcfData.cashFlow.capitalExpenditure);
+        setFcfGrowthRate(dcfData.assumptions.fcfGrowthRate); // Initialize with average from dcfData
+        setInputTerminalMultiple(dcfData.assumptions.marketCapToFcfMultiple); // Initialize with a default, as it's a new input
+        setSbcAdjustmentToggle(false); // Initialize with default
 
         // Fetch history using the new function
         await fetchValuationHistory(symbol);
@@ -224,89 +190,78 @@ const DcfCalculator: React.FC<DcfCalculatorProps> = ({ symbol }) => {
   const performCalculations = useCallback(() => {
     if (!dcfData) return;
 
-    const {
-      meta: { currentSharePrice, sharesOutstanding },
-      income: { revenue, ebit }, // Initial revenue and ebit for projection base
-    } = dcfData;
-
     // Use input states for calculations
     const beta = inputBeta;
     const riskFreeRate = inputRiskFreeRate;
     const marketRiskPremium = inputMarketRiskPremium;
-    const effectiveTaxRate = inputEffectiveTaxRate;
-    
-    // Use projected rates for FCF projection
-    const revenueGrowthRateUsed = projectedRevenueGrowthRate;
-    const ebitMarginUsed = projectedAverageEbitMargin;
 
-    const totalCashAndEquivalents = inputTotalCashAndEquivalents;
-    const interestExpense = inputInterestExpense;
-    const depreciationAndAmortization = inputDepreciationAndAmortization;
-    const capitalExpenditure = inputCapitalExpenditure;
+    const fcfGrowthRateUsed = fcfGrowthRate;
 
+    // Destructure what we need from dcfData, primarily for current values
+    const {
+      meta: { sharesOutstanding, currentSharePrice },
+      cashFlow: { operatingCashFlow: initialOperatingCashFlowFetched, capitalExpenditure: initialCapitalExpenditure, stockBasedCompensation },
+      balanceSheet: { totalShortTermDebt, totalLongTermDebt, totalCashAndEquivalents }
+    } = dcfData;
+
+    let initialOperatingCashFlow = initialOperatingCashFlowFetched;
+    if (sbcAdjustmentToggle) {
+        initialOperatingCashFlow -= stockBasedCompensation;
+    }
 
     // --- WACC Calculation ---
     const costOfEquity = riskFreeRate + beta * marketRiskPremium;
-    const totalDebt = inputTotalShortTermDebt + inputTotalLongTermDebt;
-    const costOfDebt = totalDebt > 0 ? interestExpense / totalDebt : 0;
+    const totalDebt = totalShortTermDebt + totalLongTermDebt;
     const marketValueOfEquity = currentSharePrice * sharesOutstanding;
     const marketValueOfDebt = totalDebt;
     const totalCapital = marketValueOfEquity + marketValueOfDebt;
-
+    
+    const costOfDebt = (dcfData.income.interestExpense / totalDebt);
+    const taxRate = 0.25; // Default tax rate as it's no longer a user input
+    
     let calculatedWacc = 0;
     if (totalCapital > 0) {
-      const weightOfEquity = marketValueOfEquity / totalCapital;
-      const weightOfDebt = marketValueOfDebt / totalCapital;
-      calculatedWacc =
-        costOfEquity * weightOfEquity +
-        costOfDebt * weightOfDebt * (1 - effectiveTaxRate);
+        const weightOfEquity = marketValueOfEquity / totalCapital;
+        const weightOfDebt = marketValueOfDebt / totalCapital;
+        calculatedWacc = (weightOfEquity * costOfEquity) + (weightOfDebt * costOfDebt * (1 - taxRate));
     }
     setWacc(calculatedWacc);
+
 
     // --- FCF Projection ---
     const projectionYears = 5;
     const fcfProjections: ProjectedFcf[] = [];
 
-    let currentRevenue = revenue;
-    let currentEbit = ebit;
-    let currentDepreciationAndAmortizationVal = depreciationAndAmortization; // Use distinct variable name
-    let currentCapitalExpenditureVal = capitalExpenditure; // Use distinct variable name
+    // Initial values for the projection loop
+    let currentOperatingCashFlow = initialOperatingCashFlow;
+    let currentCapitalExpenditure = initialCapitalExpenditure;
 
     for (let i = 1; i <= projectionYears; i++) {
-      currentRevenue *= (1 + revenueGrowthRateUsed);
-      currentEbit = currentRevenue * ebitMarginUsed;
-      currentDepreciationAndAmortizationVal *= (1 + revenueGrowthRateUsed); // Assuming D&A grows with revenue
-      currentCapitalExpenditureVal *= (1 + revenueGrowthRateUsed); // Assuming CapEx grows with revenue
+        // Project OCF and CapEx based on the revenue growth rate assumption
+        currentOperatingCashFlow *= (1 + fcfGrowthRateUsed);
+        currentCapitalExpenditure *= (1 + fcfGrowthRateUsed);
 
-      const nopat = currentEbit * (1 - effectiveTaxRate);
-      const fcf = nopat + currentDepreciationAndAmortizationVal - currentCapitalExpenditureVal;
+        // FCFF = OCF - CapEx
+        const fcf = currentOperatingCashFlow - currentCapitalExpenditure;
 
-      fcfProjections.push({
-        year: i,
-        revenue: currentRevenue,
-        ebit: currentEbit,
-        nopat: nopat,
-        depreciationAndAmortization: currentDepreciationAndAmortizationVal,
-        capitalExpenditure: currentCapitalExpenditureVal,
-        fcf: fcf,
-      });
-    }
+                fcfProjections.push({
+                    year: i,
+                    fcf: fcf,
+                });    }
     setProjectedFcfs(fcfProjections);
 
     // --- Terminal Value Calculation ---
-    const perpetualGrowthRate = inputPerpetualGrowthRate; // Assuming 2% perpetual growth rate
     let calculatedTerminalValue = 0;
-    if (fcfProjections.length > 0 && calculatedWacc > perpetualGrowthRate) {
-      const lastProjectedFcf = fcfProjections[fcfProjections.length - 1].fcf;
-      calculatedTerminalValue =
-        (lastProjectedFcf * (1 + perpetualGrowthRate)) / (calculatedWacc - perpetualGrowthRate);
+    if (fcfProjections.length > 0) {
+        const lastProjectedFcf = fcfProjections[fcfProjections.length - 1].fcf;
+        calculatedTerminalValue = lastProjectedFcf * inputTerminalMultiple;
     }
     setTerminalValue(calculatedTerminalValue);
 
     // --- Discounting FCFs and Terminal Value ---
     let sumOfDiscountedFcfs = 0;
     fcfProjections.forEach((proj) => {
-      sumOfDiscountedFcfs += proj.fcf / Math.pow(1 + calculatedWacc, proj.year);
+        sumOfDiscountedFcfs += proj.fcf / Math.pow(1 + calculatedWacc, proj.year);
     });
 
     const discountedTerminalValue = calculatedTerminalValue / Math.pow(1 + calculatedWacc, projectionYears);
@@ -320,24 +275,17 @@ const DcfCalculator: React.FC<DcfCalculatorProps> = ({ symbol }) => {
 
     // Intrinsic Value Per Share
     if (sharesOutstanding > 0) {
-      setIntrinsicValuePerShare(equityValue / sharesOutstanding);
+        setIntrinsicValuePerShare(equityValue / sharesOutstanding);
     }
   }, [
-    dcfData, // dcfData is in the useCallback dependency
+    dcfData,
     inputBeta,
     inputRiskFreeRate,
     inputMarketRiskPremium,
-    inputEffectiveTaxRate,
-    projectedRevenueGrowthRate, // Use new projected state
-    projectedAverageEbitMargin, // Use new projected state
-    inputTotalCashAndEquivalents,
-    inputTotalShortTermDebt,
-    inputTotalLongTermDebt,
-    inputInterestExpense,
-    inputDepreciationAndAmortization,
-    inputCapitalExpenditure,
-    inputPerpetualGrowthRate,
-  ]);
+    fcfGrowthRate,
+    inputTerminalMultiple,
+    sbcAdjustmentToggle,
+]);
 
   // Effect to trigger calculations when dcfData changes (for initial load)
   useEffect(() => {
@@ -356,24 +304,11 @@ const DcfCalculator: React.FC<DcfCalculatorProps> = ({ symbol }) => {
     setInputBeta(originalDcfData.assumptions.beta);
     setInputRiskFreeRate(originalDcfData.assumptions.riskFreeRate);
     setInputMarketRiskPremium(originalDcfData.assumptions.marketRiskPremium);
-    setInputEffectiveTaxRate(originalDcfData.assumptions.effectiveTaxRate);
     
-    setProjectedRevenueGrowthRate(originalDcfData.assumptions.revenueGrowthCagr3Year);
-    setProjectedAverageEbitMargin(originalDcfData.assumptions.averageEbitMargin3Year);
-
-    // Reset original historical metrics (display-only)
-    setHistoricalRevenueGrowthCagr3Year(originalDcfData.assumptions.revenueGrowthCagr3Year);
-    setHistoricalAverageEbitMargin3Year(originalDcfData.assumptions.averageEbitMargin3Year);
-    
-    setInputPerpetualGrowthRate(0.02); // Assuming a default for this, or originalDcfData.assumptions.perpetualGrowthRate if it exists
+    setFcfGrowthRate(originalDcfData.assumptions.fcfGrowthRate); // Reset with average from original dcfData
+    setInputTerminalMultiple(15); // Reset to default
+    setSbcAdjustmentToggle(false); // Reset to default
     setUserComments('');
-
-    setInputTotalCashAndEquivalents(originalDcfData.balanceSheet.totalCashAndEquivalents);
-    setInputTotalShortTermDebt(originalDcfData.balanceSheet.totalShortTermDebt);
-    setInputTotalLongTermDebt(originalDcfData.balanceSheet.totalLongTermDebt);
-    setInputInterestExpense(originalDcfData.income.interestExpense);
-    setInputDepreciationAndAmortization(originalDcfData.cashFlow.depreciationAndAmortization);
-    setInputCapitalExpenditure(originalDcfData.cashFlow.capitalExpenditure);
 
     // Reset calculated values
     setWacc(null);
@@ -388,13 +323,11 @@ const DcfCalculator: React.FC<DcfCalculatorProps> = ({ symbol }) => {
     originalDcfData,
     // Add all setters to the dependency array
     setDcfData, setInputBeta, setInputRiskFreeRate, setInputMarketRiskPremium,
-    setInputEffectiveTaxRate, setProjectedRevenueGrowthRate,
-    setProjectedAverageEbitMargin, setHistoricalRevenueGrowthCagr3Year,
-    setHistoricalAverageEbitMargin3Year, setInputPerpetualGrowthRate,
-    setUserComments, setInputTotalCashAndEquivalents,
-    setInputTotalShortTermDebt, setInputTotalLongTermDebt,
-    setInputInterestExpense, setInputDepreciationAndAmortization,
-    setInputCapitalExpenditure, setWacc, setProjectedFcfs,
+    setFcfGrowthRate,
+    setInputTerminalMultiple,
+    setSbcAdjustmentToggle,
+    setUserComments,
+    setWacc, setProjectedFcfs,
     setTerminalValue, setIntrinsicValue, setIntrinsicValuePerShare
   ]);
 
@@ -403,25 +336,14 @@ const DcfCalculator: React.FC<DcfCalculatorProps> = ({ symbol }) => {
     setInputBeta(entry.dcfUserInput.beta);
     setInputRiskFreeRate(entry.dcfUserInput.riskFreeRate);
     setInputMarketRiskPremium(entry.dcfUserInput.marketRiskPremium);
-    setInputEffectiveTaxRate(entry.dcfUserInput.effectiveTaxRate);
-    setProjectedRevenueGrowthRate(entry.dcfUserInput.projectedRevenueGrowthRate);
-    setProjectedAverageEbitMargin(entry.dcfUserInput.projectedEbitMargin);
-    setInputPerpetualGrowthRate(entry.dcfUserInput.perpetualGrowthRate);
+    setFcfGrowthRate(entry.dcfUserInput.fcfGrowthRate ?? 0); // Use 0 as default if undefined
+    setInputTerminalMultiple(entry.dcfUserInput.terminalMultiple ?? 15); // Use 15 as default if undefined
+    setSbcAdjustmentToggle(entry.dcfUserInput.sbcAdjustmentToggle ?? false); // Use false as default if undefined
     setUserComments(entry.dcfUserInput.userComments);
 
     setDcfData(entry.dcfCalculationData);
 
-    // Update display-only historical metrics
-    setHistoricalRevenueGrowthCagr3Year(entry.dcfCalculationData.assumptions.revenueGrowthCagr3Year);
-    setHistoricalAverageEbitMargin3Year(entry.dcfCalculationData.assumptions.averageEbitMargin3Year);
 
-    // Also update the input states for other financial data that is used in calculations
-    setInputTotalCashAndEquivalents(entry.dcfCalculationData.balanceSheet.totalCashAndEquivalents);
-    setInputTotalShortTermDebt(entry.dcfCalculationData.balanceSheet.totalShortTermDebt);
-    setInputTotalLongTermDebt(entry.dcfCalculationData.balanceSheet.totalLongTermDebt);
-    setInputInterestExpense(entry.dcfCalculationData.income.interestExpense);
-    setInputDepreciationAndAmortization(entry.dcfCalculationData.cashFlow.depreciationAndAmortization);
-    setInputCapitalExpenditure(entry.dcfCalculationData.cashFlow.capitalExpenditure);
 
     // Explicitly re-run calculations with the loaded historical data
     // This ensures immediate update of derived values
@@ -429,9 +351,10 @@ const DcfCalculator: React.FC<DcfCalculatorProps> = ({ symbol }) => {
   }, [
     performCalculations, // Add performCalculations to dependency array
     setInputBeta, setInputRiskFreeRate, setInputMarketRiskPremium,
-    setInputEffectiveTaxRate, setProjectedRevenueGrowthRate,
-    setProjectedAverageEbitMargin, setInputPerpetualGrowthRate,
-    setUserComments, setDcfData
+    setFcfGrowthRate,
+    setInputTerminalMultiple,
+    setSbcAdjustmentToggle,
+    setUserComments, setDcfData,
   ]);
 
   const handleSaveDcf = async () => {
@@ -453,10 +376,9 @@ const DcfCalculator: React.FC<DcfCalculatorProps> = ({ symbol }) => {
       beta: inputBeta,
       riskFreeRate: inputRiskFreeRate,
       marketRiskPremium: inputMarketRiskPremium,
-      effectiveTaxRate: inputEffectiveTaxRate,
-      projectedRevenueGrowthRate: projectedRevenueGrowthRate,
-      projectedEbitMargin: projectedAverageEbitMargin,
-      perpetualGrowthRate: inputPerpetualGrowthRate,
+      fcfGrowthRate: fcfGrowthRate,
+      terminalMultiple: inputTerminalMultiple, // Add terminal multiple
+      sbcAdjustmentToggle: sbcAdjustmentToggle, // Add SBC adjustment toggle
       userComments: userComments,
     };
 
@@ -523,27 +445,24 @@ const DcfCalculator: React.FC<DcfCalculatorProps> = ({ symbol }) => {
           {/* Meta Data */}
           <div><strong>Current Share Price:</strong> {dcfData.meta.currentSharePrice} {dcfData.meta.currency}</div>
           <div><strong>Shares Outstanding:</strong> {dcfData.meta.sharesOutstanding.toLocaleString()}</div>
-          {/* Historical Metrics (Display-Only) */}
           <div>
-            <strong>Revenue Growth (3yr CAGR):</strong>
+            <strong>Free Cash flow Growth avg last 3 yrs:</strong>
             <NumericFormat
-              value={historicalRevenueGrowthCagr3Year * 100}
+              value={fcfGrowthRate * 100}
               displayType="text"
-              thousandSeparator={true}
               decimalScale={2}
               fixedDecimalScale={true}
               suffix="%"
             />
           </div>
           <div>
-            <strong>Avg EBIT Margin (3yr):</strong>
+            <strong>MarketCap / FCF (ttm):</strong>
             <NumericFormat
-              value={historicalAverageEbitMargin3Year * 100}
-              displayType="text"
-              thousandSeparator={true}
-              decimalScale={2}
-              fixedDecimalScale={true}
-              suffix="%"
+                value={inputTerminalMultiple}
+                displayType="text"
+                decimalScale={2}
+                fixedDecimalScale={true}
+                suffix=""
             />
           </div>
           {/* Assumptions */}
@@ -592,33 +511,20 @@ const DcfCalculator: React.FC<DcfCalculatorProps> = ({ symbol }) => {
               className="mt-1 block w-24 rounded-md border-gray-300 shadow-sm focus:border-indigo-300 focus:ring focus:ring-indigo-200 focus:ring-opacity-50 bg-blue-100"
             />
           </label>
-          <label className="block">
-            <div className="flex items-center">
-              <span className="text-gray-700">Effective Tax Rate:</span>
-              <InfoIcon description={metricDescriptions.dcfInputs.effectiveTaxRate} />
-            </div>
-            <NumericFormat
-              value={inputEffectiveTaxRate * 100}
-              onValueChange={(values) => {
-                setInputEffectiveTaxRate(values.floatValue ? values.floatValue / 100 : 0);
-              }}
-              suffix="%"
-              decimalScale={3}
-              fixedDecimalScale={true}
-              className="mt-1 block w-24 rounded-md border-gray-300 shadow-sm focus:border-indigo-300 focus:ring focus:ring-indigo-200 focus:ring-opacity-50 bg-blue-100"
-            />
-          </label>
+
+
+          {/* OCF-Based Inputs */}
 
           {/* Projected Editable Metrics */}
           <label className="block">
             <div className="flex items-center">
-              <span className="text-gray-700">Projected Revenue Growth Rate:</span>
-              <InfoIcon description={metricDescriptions.dcfInputs.projectedRevenueGrowthRate} />
+              <span className="text-gray-700">FCF Growth Rate (Years 1-5):</span>
+              <InfoIcon description={metricDescriptions.dcfInputs.fcfGrowthRate} />
             </div>
             <NumericFormat
-              value={projectedRevenueGrowthRate * 100}
+              value={fcfGrowthRate * 100}
               onValueChange={(values) => {
-                setProjectedRevenueGrowthRate(values.floatValue ? values.floatValue / 100 : 0);
+                setFcfGrowthRate(values.floatValue ? values.floatValue / 100 : 0);
               }}
               suffix="%"
               decimalScale={3}
@@ -628,37 +534,31 @@ const DcfCalculator: React.FC<DcfCalculatorProps> = ({ symbol }) => {
           </label>
           <label className="block">
             <div className="flex items-center">
-              <span className="text-gray-700">Projected EBIT Margin:</span>
-              <InfoIcon description={metricDescriptions.dcfInputs.projectedEbitMargin} />
+              <span className="text-gray-700">Terminal Multiple:</span>
+              <InfoIcon description={metricDescriptions.dcfInputs.terminalMultiple} />
             </div>
             <NumericFormat
-              value={projectedAverageEbitMargin * 100}
+              value={inputTerminalMultiple}
               onValueChange={(values) => {
-                setProjectedAverageEbitMargin(values.floatValue ? values.floatValue / 100 : 0);
+                setInputTerminalMultiple(values.floatValue || 0);
               }}
-              suffix="%"
-              decimalScale={3}
-              fixedDecimalScale={true}
-              className="mt-1 block w-24 rounded-md border-gray-300 shadow-sm focus:border-indigo-300 focus:ring focus:ring-ring-indigo-200 focus:ring-opacity-50 bg-blue-100"
+              decimalScale={2}
+              fixedDecimalScale={false}
+              className="mt-1 block w-24 rounded-md border-gray-300 shadow-sm focus:border-indigo-300 focus:ring focus:ring-indigo-200 focus:ring-opacity-50 bg-blue-100"
             />
+          </label>
+          <label className="flex items-center space-x-2 mt-2">
+            <input
+              type="checkbox"
+              checked={sbcAdjustmentToggle}
+              onChange={(e) => setSbcAdjustmentToggle(e.target.checked)}
+              className="form-checkbox h-4 w-4 text-blue-600"
+            />
+            <span className="text-gray-700">Adjust for Stock-Based Comp:</span>
+            <InfoIcon description={metricDescriptions.dcfInputs.sbcAdjustmentToggle} />
           </label>
 
-          <label className="block">
-            <div className="flex items-center">
-              <span className="text-gray-700">Perpetual Growth Rate:</span>
-              <InfoIcon description={metricDescriptions.dcfInputs.perpetualGrowthRate} />
-            </div>
-            <NumericFormat
-              value={inputPerpetualGrowthRate * 100}
-              onValueChange={(values) => {
-                setInputPerpetualGrowthRate(values.floatValue ? values.floatValue / 100 : 0);
-              }}
-              suffix="%"
-              decimalScale={3}
-              fixedDecimalScale={true}
-              className="mt-1 block w-24 rounded-md border-gray-300 shadow-sm focus:border-indigo-300 focus:ring focus:ring-indigo-200 focus:ring-opacity-50 bg-blue-100"
-            />
-          </label>
+
           <div className="col-span-2 mt-2">
               <label>
                   <span className="text-gray-700">Comments:</span>
@@ -719,11 +619,6 @@ const DcfCalculator: React.FC<DcfCalculatorProps> = ({ symbol }) => {
               <thead className="bg-gray-50">
                 <tr>
                   <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Year</th>
-                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Revenue</th>
-                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">EBIT</th>
-                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">NOPAT</th>
-                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">D&A</th>
-                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">CapEx</th>
                   <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">FCF</th>
                 </tr>
               </thead>
@@ -731,11 +626,6 @@ const DcfCalculator: React.FC<DcfCalculatorProps> = ({ symbol }) => {
                 {projectedFcfs.map((fcf) => (
                   <tr key={fcf.year}>
                     <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">{fcf.year}</td>
-                    <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">{fcf.revenue.toLocaleString()}</td>
-                    <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">{fcf.ebit.toLocaleString()}</td>
-                    <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">{fcf.nopat.toLocaleString()}</td>
-                    <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">{fcf.depreciationAndAmortization.toLocaleString()}</td>
-                    <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">{fcf.capitalExpenditure.toLocaleString()}</td>
                     <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">{fcf.fcf.toLocaleString()}</td>
                   </tr>
                 ))}

@@ -30,6 +30,7 @@ interface DcfData {
         depreciationAndAmortization: number;
         capitalExpenditure: number;
         stockBasedCompensation: number;
+        operatingCashFlow: number;
     };
     assumptions: {
         beta: number;
@@ -181,7 +182,8 @@ const ReverseDcfCalculator: React.FC<ReverseDcfCalculatorProps> = ({ symbol }) =
         const enterpriseValue = (targetPrice * meta.sharesOutstanding) - balanceSheet.totalCashAndEquivalents + totalDebt;
         
         const nopat = income.ebit * (1 - assumptions.effectiveTaxRate);
-        const baseFcf = nopat + cashFlow.depreciationAndAmortization - cashFlow.capitalExpenditure;
+        const freeCashFlow = cashFlow.operatingCashFlow - cashFlow.capitalExpenditure;
+        const baseFcf = freeCashFlow;
 
         let low = -1.0;
         let high = 2.0;
