@@ -8,6 +8,7 @@ interface StockSummary {
   total100BaggerScore: number;
   generationFerolDate: string;
   generation100BaggerDate: string;
+  status: string;
 }
 
 type SortColumn = keyof StockSummary;
@@ -19,14 +20,28 @@ const StockSummaryTable: React.FC = () => {
   const [error, setError] = useState<string | null>(null);
   const [sortColumn, setSortColumn] = useState<SortColumn>('ticker');
   const [sortDirection, setSortDirection] = useState<SortDirection>('asc');
+  const [statusFilter, setStatusFilter] = useState<string>('All');
   const navigate = useNavigate();
   const [isConfirmOpen, setIsConfirmOpen] = useState(false);
   const [stockToDelete, setStockToDelete] = useState<string | null>(null);
 
+  const statusOptions = [
+    'All',
+    'NEW',
+    'RESEARCHING',
+    'WATCHLIST',
+    'BUY_CANDIDATE',
+    'OWNED',
+    'TRIM',
+    'SELL',
+    'PASS',
+    'BLACKLIST',
+  ];
+
   useEffect(() => {
     const fetchSummaryData = async () => {
       try {
-        const response = await fetch('http://localhost:8080/stocks/reporting/checklist/summary?reportType=Ferol');
+        const response = await fetch('http://localhost:8080/stocks/reporting/checklist/summary/dante');
         if (!response.ok) {
           throw new Error(`HTTP error! status: ${response.status}`);
         }
@@ -81,23 +96,25 @@ const StockSummaryTable: React.FC = () => {
     }
   };
 
-  const sortedData = [...summaryData].sort((a, b) => {
-    const aValue = a[sortColumn];
-    const bValue = b[sortColumn];
+  const sortedData = [...summaryData]
+    .filter((summary) => statusFilter === 'All' || summary.status === statusFilter)
+    .sort((a, b) => {
+      const aValue = a[sortColumn];
+      const bValue = b[sortColumn];
 
-    if (sortColumn === 'totalFerolScore' || sortColumn === 'total100BaggerScore') {
-      return sortDirection === 'asc' ? (aValue as number) - (bValue as number) : (bValue as number) - (aValue as number);
-    } else if (sortColumn === 'generationFerolDate' || sortColumn === 'generation100BaggerDate') {
-      const dateA = new Date(aValue as string).getTime();
-      const dateB = new Date(bValue as string).getTime();
-      return sortDirection === 'asc' ? dateA - dateB : dateB - dateA;
-    } else {
-      // Default to string comparison for other columns like 'ticker'
-      if (aValue < bValue) return sortDirection === 'asc' ? -1 : 1;
-      if (aValue > bValue) return sortDirection === 'asc' ? 1 : -1;
-      return 0;
-    }
-  });
+      if (sortColumn === 'totalFerolScore' || sortColumn === 'total100BaggerScore') {
+        return sortDirection === 'asc' ? (aValue as number) - (bValue as number) : (bValue as number) - (aValue as number);
+      } else if (sortColumn === 'generationFerolDate' || sortColumn === 'generation100BaggerDate') {
+        const dateA = new Date(aValue as string).getTime();
+        const dateB = new Date(bValue as string).getTime();
+        return sortDirection === 'asc' ? dateA - dateB : dateB - dateA;
+      } else {
+        // Default to string comparison for other columns like 'ticker'
+        if (aValue < bValue) return sortDirection === 'asc' ? -1 : 1;
+        if (aValue > bValue) return sortDirection === 'asc' ? 1 : -1;
+        return 0;
+      }
+    });
 
   if (loading) {
     return <div className="text-center p-4">Loading stock summaries...</div>;
@@ -113,6 +130,9 @@ const StockSummaryTable: React.FC = () => {
       <table className="min-w-full divide-y divide-gray-200">
         <thead className="bg-gray-50">
           <tr>
+            <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+              No.
+            </th>
             <th
               className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider cursor-pointer"
               onClick={() => handleSort('ticker')}
@@ -144,17 +164,33 @@ const StockSummaryTable: React.FC = () => {
               100Bagger Date {sortColumn === 'generation100BaggerDate' ? (sortDirection === 'asc' ? '▲' : '▼') : ''}
             </th>
             <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+              <select
+                value={statusFilter}
+                onChange={(e) => setStatusFilter(e.target.value)}
+                className="bg-gray-50 border border-gray-300 text-gray-900 text-xs rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5"
+              >
+                {statusOptions.map((option) => (
+                  <option key={option} value={option}>
+                    {option}
+                  </option>
+                ))}
+              </select>
+            </th>
+            <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
               Actions
             </th>
           </tr>
         </thead>
         <tbody className="bg-white divide-y divide-gray-200">
-          {sortedData.map((summary) => (
+          {sortedData.map((summary, index) => (
             <tr
               key={summary.ticker}
-              onClick={() => navigate(`/stocks/${summary.ticker}`)}
+              onClick={() => navigate(`/stocks/${summary.ticker}#overview`)}
               className="cursor-pointer hover:bg-gray-100"
             >
+              <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">
+                {index + 1}
+              </td>
               <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">
                 {summary.ticker}
               </td>
@@ -169,6 +205,9 @@ const StockSummaryTable: React.FC = () => {
               </td>
               <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
                 {new Date(summary.generation100BaggerDate).toLocaleString()}
+              </td>
+              <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                {summary.status}
               </td>
               <td className="px-6 py-4 whitespace-nowrap text-sm font-medium">
                 <button
