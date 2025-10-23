@@ -16,6 +16,20 @@ const StockPage: React.FC = () => {
   const [dataError, setDataError] = useState<string | null>(null);
   const [activeTab, setActiveTab] = useState<string>('overview');
   const [activeSubTab, setActiveSubTab] = useState<string>('');
+  const [selectedStatus, setSelectedStatus] = useState<string>('');
+
+  const statusOptions = [
+    'NEW',
+    'RESEARCHING',
+    'WATCHLIST',
+    'BUY_CANDIDATE',
+    'OWNED',
+    'TRIM',
+    'SELL',
+    'PASS',
+    'BLACKLIST',
+  ];
+
 
   const { quote, loading: quoteLoading, error: quoteError } = useGlobalQuote({ symbol: symbol || '' });
 
@@ -51,6 +65,24 @@ const StockPage: React.FC = () => {
     window.location.hash = `${activeTab}/${encodeURIComponent(subTabName)}`;
   };
 
+  const handleStatusChange = async (newStatus: string) => {
+    if (!symbol) return;
+    try {
+      const response = await fetch(`http://localhost:8080/users/dante/stocks/${symbol}/status/${newStatus}`, {
+        method: 'PUT',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+      });
+      if (!response.ok) {
+        throw new Error(`HTTP error! status: ${response.status}`);
+      }
+      setSelectedStatus(newStatus);
+    } catch (e: any) {
+      setDataError(e.message);
+    }
+  };
+
   useEffect(() => {
     if (!symbol) {
       setDataLoading(false);
@@ -77,6 +109,21 @@ const StockPage: React.FC = () => {
     };
 
     fetchStockData();
+
+    const fetchStockStatus = async () => {
+      try {
+        const response = await fetch(`http://localhost:8080/users/dante/stocks/${symbol}/status`);
+        if (!response.ok) {
+          throw new Error(`HTTP error! status: ${response.status}`);
+        }
+        const status = await response.text();
+        setSelectedStatus(status);
+      } catch (e: any) {
+        setDataError(e.message);
+      }
+    };
+
+    fetchStockStatus();
   }, [symbol]);
 
   const isLoading = dataLoading || quoteLoading;
@@ -117,26 +164,43 @@ const StockPage: React.FC = () => {
 
   return (
     <div className="container mx-auto p-4">
-      <h2 className="text-2xl font-bold mb-4">
-        <i className=" text-red-500">“Let us fall back on the principle that when any rule or formula become a
-          substitute for thought rather than an aid to thinking, it is dangerous and should be discarded.” </i>
-        <div>
-          <Link to="/stocks">
-            <button className="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded">
-              Home
-            </button>
-          </Link>
-        </div>
-        <br />
-        Stock Details for {symbol.toUpperCase()}
-        {!dataLoading && !quoteLoading && symbol && <FinancialDataStatus symbol={symbol} />}
-        {quote && (
-          <span className={`ml-4 ${priceColor}`}>
-            {quote.adjClose} {currencySymbol[stockData.currency] || stockData.currency}{' '}
-            <span className="text-sm ml-2">({changePercent.toFixed(2)}%)</span>
-          </span>
-        )}
+      <h2 className="text-2xl font-bold text-center mb-4">
+        <i className="text-red-500">
+          “Let us fall back on the principle that when any rule or formula become a substitute for thought rather than an aid to thinking, it is dangerous and should be discarded.”
+        </i>
       </h2>
+      <div className="text-center mb-4">
+        <Link to="/stocks">
+          <button className="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded">
+            Home
+          </button>
+        </Link>
+      </div>
+      <div className="flex justify-between items-center mb-4">
+        <h2 className="text-2xl font-bold">
+          Stock Details for {symbol.toUpperCase()}
+          {!dataLoading && !quoteLoading && symbol && <FinancialDataStatus symbol={symbol} />}
+          {quote && (
+            <span className={`ml-4 ${priceColor}`}>
+              {quote.adjClose} {currencySymbol[stockData.currency] || stockData.currency}{' '}
+              <span className="text-sm ml-2">({changePercent.toFixed(2)}%)</span>
+            </span>
+          )}
+        </h2>
+        <div>
+          <select
+            value={selectedStatus}
+            onChange={(e) => handleStatusChange(e.target.value)}
+            className="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5"
+          >
+            {statusOptions.map((option) => (
+              <option key={option} value={option}>
+                {option}
+              </option>
+            ))}
+          </select>
+        </div>
+      </div>
       <div className="flex border-b border-gray-200 mb-4">
         <button
           className={`px-4 py-2 text-lg font-medium ${

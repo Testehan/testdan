@@ -14,6 +14,7 @@ export interface StockData {
     country: string;
     fullTimeEmployees: string;
     lastUpdated: string;
+    status: string;
 }
 
   export interface IncomeStatementReport {
