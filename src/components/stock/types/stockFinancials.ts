@@ -198,6 +198,15 @@ export interface StockData {
     operatingCashFlowRatio: number | null;
     cashFlowToDebtRatio: number | null;
     tangibleBookValuePerShare: number | null;
+    priceToEarningsGrowthRatio: number | null;
+    forwardPriceToEarningsGrowthRatio: number | null;
+    priceToFairValue: number | null;
+    enterpriseValueMultiple: number | null;
+    peRatio: number | null;
+    pbRatio: number | null;
+    pfcfRatio: number | null;
+    pocfratio: number | null;
+    priceToSalesRatio: number | null;
   }
   
   export interface AnnualEarnings {

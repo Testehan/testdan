@@ -82,7 +82,8 @@ export const FinancialStatementTable = <T extends { date: string }>(
         tableName === "Shareholder Returns" ||
         tableName === "Per Share Metrics" ||
         tableName === "Cash & Returns Per Share" ||
-        tableName === "Cash Flow" // This "Cash Flow" is for ratios
+        tableName === "Cash Flow" || // This "Cash Flow" is for ratios
+        tableName === "Valuation"
     ) {
         currentMetricDescriptions = (metricDescriptions as MetricDescriptionsStructure).financialRatios;
     }

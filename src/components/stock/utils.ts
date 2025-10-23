@@ -47,6 +47,7 @@ export const formatLargeNumber = (numStr: string, scale?: 'millions' | 'billions
 
   export const formatMonthYear = (dateStr: string): string => {
     if (!dateStr) return dateStr;
+    if (dateStr === 'TTM') return 'TTM';
     const date = new Date(dateStr);
     if (isNaN(date.getTime())) return dateStr;
     const month = date.toLocaleString('default', { month: 'short' });
@@ -67,6 +68,15 @@ export const formatMetricName = (key: string): string => {
         'incomeBeforeTax': 'Income Before Tax',
         'incomeTaxExpense': 'Income Tax Expense',
         'netIncomeFromContinuingOperations': 'Net Income From Continuing Operations',
+        'priceToEarningsGrowthRatio': 'P/EG',
+        'forwardPriceToEarningsGrowthRatio' : 'Forward P/EG',
+        'priceToFairValue' : 'P/FV',
+        'enterpriseValueMultiple' : 'EV/EBITDA',
+        'peRatio': 'P/E',
+        'pbRatio': 'P/B',
+        'pfcfRatio': 'P/FCF',
+        'pocfratio': 'P/OCF',
+        'priceToSalesRatio': 'P/S',
         // Add other specific mappings here
     };
 

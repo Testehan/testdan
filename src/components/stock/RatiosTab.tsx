@@ -71,6 +71,18 @@ const cashFlowKeys: (keyof FinancialRatioReport)[] = [
     'cashFlowToDebtRatio',
 ];
 
+const valuationKeys: (keyof FinancialRatioReport)[] = [
+    'priceToEarningsGrowthRatio',
+    'forwardPriceToEarningsGrowthRatio',
+    'priceToFairValue',
+    'enterpriseValueMultiple',
+    'peRatio',
+    'pbRatio',
+    'pfcfRatio',
+    'pocfratio',
+    'priceToSalesRatio'
+];
+
 // All keys that should be formatted as percentages
 const allPercentageKeys: (keyof FinancialRatioReport)[] = [
     'grossProfitMargin',
@@ -225,6 +237,14 @@ const RatiosTab: React.FC<{ symbol: string }> = ({ symbol }) => {
                 allKeys={cashFlowKeys}
                 numberScale={numberScale}
                 tableName="Cash Flow"
+                percentageKeys={allPercentageKeys} // Pass allPercentageKeys here
+            />
+            
+            <FinancialStatementTable<FinancialRatioReport>
+                reportsToDisplay={reportsToDisplay}
+                allKeys={valuationKeys}
+                numberScale={numberScale}
+                tableName="Valuation"
                 percentageKeys={allPercentageKeys} // Pass allPercentageKeys here
             />
         </div>

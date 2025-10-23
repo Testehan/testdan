@@ -30,6 +30,7 @@ export const useFinancialReports = <T extends { date: string }>(
 ): FinancialReportData<T> => {
     const [annualReports, setAnnualReports] = useState<T[]>([]);
     const [quarterlyReports, setQuarterlyReports] = useState<T[]>([]);
+    const [ttmReport, setTtmReport] = useState<T | null>(null);
     const [reportType, setReportType] = useState<'annual' | 'quarterly'>('annual');
     const [loading, setLoading] = useState<boolean>(true);
     const [error, setError] = useState<string | null>(null);
@@ -39,19 +40,24 @@ export const useFinancialReports = <T extends { date: string }>(
     const [selectedStartPeriod, setSelectedStartPeriod] = useState<string>('');
     const [selectedEndPeriod, setSelectedEndPeriod] = useState<string>('');
 
-    const currentReports = reportType === 'annual' ? annualReports : quarterlyReports;
-    const availablePeriods = reportType === 'annual' ? availableYears : availableQuarters;
     useEffect(() => {
-        (async () => { // Immediately Invoked Async Function Expression (IIAFE)
+        (async () => {
             setLoading(true);
             setError(null);
             try {
-                const upperCaseSymbol = symbol.toUpperCase(); // Convert symbol to uppercase
+                const upperCaseSymbol = symbol.toUpperCase();
                 const response = await fetch(`${baseURL}/${reportEndpoint}/${upperCaseSymbol}`);
                 if (!response.ok) {
                     throw new Error(`HTTP error! status: ${response.status}`);
                 }
                 const data = await response.json();
+
+                if (data.ttmReport) {
+                    // Assuming ttmReport is a single object, we give it a special 'date'
+                    data.ttmReport.date = 'TTM';
+                    setTtmReport(data.ttmReport);
+                }
+
                 setAnnualReports(data.annualReports);
                 setQuarterlyReports(data.quarterlyReports);
             } catch (e: any) {
@@ -62,15 +68,21 @@ export const useFinancialReports = <T extends { date: string }>(
         })();
     }, [symbol, reportEndpoint, baseURL]);
 
+    const annualReportsWithTTM = useMemo(() => {
+        return ttmReport ? [ttmReport, ...annualReports] : annualReports;
+    }, [ttmReport, annualReports]);
+
+    const currentReports = reportType === 'annual' ? annualReportsWithTTM : quarterlyReports;
+    const availablePeriods = reportType === 'annual' ? availableYears : availableQuarters;
+
     useEffect(() => {
-        if (annualReports.length > 0) {
-            const years = annualReports
-                .map(report => new Date(report.date).getFullYear().toString())
-                .sort((a, b) => parseInt(b) - parseInt(a));
-            setAvailableYears(Array.from(new Set(years)));
-        } else {
-            setAvailableYears([]);
-        }
+        const years = annualReports
+            .map(report => new Date(report.date).getFullYear().toString())
+            .sort((a, b) => parseInt(b) - parseInt(a));
+        const uniqueYears = Array.from(new Set(years));
+
+        const newAvailableYears = ttmReport ? ['TTM', ...uniqueYears] : uniqueYears;
+        setAvailableYears(newAvailableYears);
 
         if (quarterlyReports.length > 0) {
             const quarters = quarterlyReports
@@ -90,7 +102,7 @@ export const useFinancialReports = <T extends { date: string }>(
         } else {
             setAvailableQuarters([]);
         }
-    }, [annualReports, quarterlyReports]);
+    }, [annualReports, quarterlyReports, ttmReport]);
 
     useEffect(() => {
         if (reportType === 'annual' && availableYears.length > 0) {
@@ -116,14 +128,16 @@ export const useFinancialReports = <T extends { date: string }>(
         }
 
         return currentReports.filter(report => {
-            const reportDate = new Date(report.date);
             let reportPeriod: string;
 
-            if (reportType === 'annual') {
-                reportPeriod = reportDate.getFullYear().toString();
+            if (report.date === 'TTM') {
+                reportPeriod = 'TTM';
+            } else if (reportType === 'annual') {
+                reportPeriod = new Date(report.date).getFullYear().toString();
             } else {
-                const year = reportDate.getFullYear();
-                const quarter = Math.floor(reportDate.getMonth() / 3) + 1;
+                const date = new Date(report.date);
+                const year = date.getFullYear();
+                const quarter = Math.floor(date.getMonth() / 3) + 1;
                 reportPeriod = `${year}-Q${quarter}`;
             }
 
@@ -158,7 +172,7 @@ export const useFinancialReports = <T extends { date: string }>(
     }, [currentReports, fieldOrder]);
 
     return {
-        annualReports,
+        annualReports: annualReportsWithTTM, // Return combined reports
         quarterlyReports,
         currentReports,
         reportType,
