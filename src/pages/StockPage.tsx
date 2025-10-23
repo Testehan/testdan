@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { useParams } from 'react-router-dom';
+import { useParams, Link } from 'react-router-dom';
 import { StockData } from '../components/stock/types/stockFinancials';
 import OverviewTab from '../components/stock/OverviewTab';
 import FinancialsTab from '../components/stock/FinancialsTab';
@@ -33,7 +33,7 @@ const StockPage: React.FC = () => {
     return () => {
       window.removeEventListener('hashchange', handleHashChange);
     };
-  }, []);
+  }, [symbol]);
 
   const handleTabClick = (tabName: string) => {
     let newHash = tabName;
@@ -120,6 +120,13 @@ const StockPage: React.FC = () => {
       <h2 className="text-2xl font-bold mb-4">
         <i className=" text-red-500">“Let us fall back on the principle that when any rule or formula become a
           substitute for thought rather than an aid to thinking, it is dangerous and should be discarded.” </i>
+        <div>
+          <Link to="/stocks">
+            <button className="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded">
+              Home
+            </button>
+          </Link>
+        </div>
         <br />
         Stock Details for {symbol.toUpperCase()}
         {!dataLoading && !quoteLoading && symbol && <FinancialDataStatus symbol={symbol} />}
