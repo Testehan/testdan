@@ -246,7 +246,7 @@ const DcfCalculator: React.FC<DcfCalculatorProps> = ({ symbol }) => {
         currentCapitalExpenditure *= (1 + fcfGrowthRateUsed);
 
         // FCFF = OCF - CapEx
-        const fcf = currentOperatingCashFlow - currentCapitalExpenditure;
+        const fcf = currentOperatingCashFlow - Math.abs(currentCapitalExpenditure);
 
                 fcfProjections.push({
                     year: i,

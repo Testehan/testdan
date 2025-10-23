@@ -1,6 +1,6 @@
-import React, { useState, useEffect, useCallback } from 'react';
-import { NumericFormat } from 'react-number-format';
-import { metricDescriptions } from './metricDescriptions';
+import React, {useCallback, useEffect, useState} from 'react';
+import {NumericFormat} from 'react-number-format';
+import {metricDescriptions} from './metricDescriptions';
 import InfoIcon from './InfoIcon';
 
 // Using the full DcfData structure as confirmed by the user
@@ -181,9 +181,8 @@ const ReverseDcfCalculator: React.FC<ReverseDcfCalculatorProps> = ({ symbol }) =
         const totalDebt = balanceSheet.totalShortTermDebt + balanceSheet.totalLongTermDebt;
         const enterpriseValue = (targetPrice * meta.sharesOutstanding) - balanceSheet.totalCashAndEquivalents + totalDebt;
         
-        const nopat = income.ebit * (1 - assumptions.effectiveTaxRate);
-        const freeCashFlow = cashFlow.operatingCashFlow - cashFlow.capitalExpenditure;
-        const baseFcf = freeCashFlow;
+        // const nopat = income.ebit * (1 - assumptions.effectiveTaxRate);
+        const baseFcf = cashFlow.operatingCashFlow - Math.abs(cashFlow.capitalExpenditure);
 
         let low = -1.0;
         let high = 2.0;
