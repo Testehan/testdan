@@ -24,6 +24,12 @@ const StockSummaryTable: React.FC = () => {
   const navigate = useNavigate();
   const [isConfirmOpen, setIsConfirmOpen] = useState(false);
   const [stockToDelete, setStockToDelete] = useState<string | null>(null);
+  const [contextMenu, setContextMenu] = useState<{
+    visible: boolean;
+    x: number;
+    y: number;
+    ticker: string;
+  } | null>(null);
 
   const statusOptions = [
     'All',
@@ -56,6 +62,36 @@ const StockSummaryTable: React.FC = () => {
 
     fetchSummaryData();
   }, []);
+
+
+  const handleContextMenu = (event: React.MouseEvent, ticker: string) => {
+    event.preventDefault();
+    setContextMenu({
+      visible: true,
+      x: event.clientX + window.scrollX,
+      y: event.clientY + window.scrollY,
+      ticker: ticker,
+    });
+  };
+
+  const handleOpenInNewTab = () => {
+    if (contextMenu) {
+      window.open(`/stocks/${contextMenu.ticker}#overview`, '_blank');
+      setContextMenu(null);
+    }
+  };
+
+  useEffect(() => {
+    const handleClickOutside = () => {
+      if (contextMenu) {
+        setContextMenu(null);
+      }
+    };
+    document.addEventListener('click', handleClickOutside);
+    return () => {
+      document.removeEventListener('click', handleClickOutside);
+    };
+  }, [contextMenu]);
 
   const handleDeleteClick = (symbol: string, e: React.MouseEvent) => {
     e.stopPropagation();
@@ -125,7 +161,7 @@ const StockSummaryTable: React.FC = () => {
   }
 
   return (
-    <div className="p-4 bg-white shadow rounded-lg">
+    <div className="p-4 bg-white shadow rounded-lg relative">
       <h3 className="text-xl font-semibold mb-4">Stock Summaries</h3>
       <table className="min-w-full divide-y divide-gray-200">
         <thead className="bg-gray-50">
@@ -186,6 +222,7 @@ const StockSummaryTable: React.FC = () => {
             <tr
               key={summary.ticker}
               onClick={() => navigate(`/stocks/${summary.ticker}#overview`)}
+              onContextMenu={(e) => handleContextMenu(e, summary.ticker)}
               className="cursor-pointer hover:bg-gray-100"
             >
               <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">
@@ -228,6 +265,29 @@ const StockSummaryTable: React.FC = () => {
         onConfirm={handleConfirmDelete}
         onCancel={handleCancelDelete}
       />
+
+      {contextMenu && contextMenu.visible && (
+        <div
+          style={{
+            position: 'absolute',
+            top: contextMenu.y,
+            left: contextMenu.x,
+            backgroundColor: 'white',
+            border: '1px solid gray',
+            borderRadius: '4px',
+            boxShadow: '2px 2px 5px rgba(0,0,0,0.2)',
+            zIndex: 1000,
+          }}
+          className="py-1"
+        >
+          <div
+            className="px-4 py-2 hover:bg-gray-100 cursor-pointer text-sm"
+            onClick={handleOpenInNewTab}
+          >
+            Open in new tab
+          </div>
+        </div>
+      )}
     </div>
   );
 };
