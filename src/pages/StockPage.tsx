@@ -8,6 +8,7 @@ import ValuationTab from '../components/stock/ValuationTab';
 import { useGlobalQuote } from '../components/stock/hooks/useFinancialReports';
 import FinancialDataStatus from '../components/stock/FinancialDataStatus';
 import StockSummaryTable from '../components/stock/StockSummaryTable';
+import NotesDialog from '../components/stock/NotesDialog';
 
 const StockPage: React.FC = () => {
   const { symbol } = useParams<{ symbol?: string }>();
@@ -16,7 +17,10 @@ const StockPage: React.FC = () => {
   const [dataError, setDataError] = useState<string | null>(null);
   const [activeTab, setActiveTab] = useState<string>('overview');
   const [activeSubTab, setActiveSubTab] = useState<string>('');
-  const [selectedStatus, setSelectedStatus] = useState<string>('');
+  const [status, setStatus] = useState('');
+  const [isNotesDialogOpen, setIsNotesDialogOpen] = useState(false);
+  const [personalNotes, setPersonalNotes] = useState('');
+  const [tooltip, setTooltip] = useState({ visible: false, content: '', x: 0, y: 0 });
 
   const statusOptions = [
     'NEW',
@@ -65,6 +69,25 @@ const StockPage: React.FC = () => {
     window.location.hash = `${activeTab}/${encodeURIComponent(subTabName)}`;
   };
 
+  const handleSaveNotes = async () => {
+    if (!symbol) return;
+    try {
+      const response = await fetch(`http://localhost:8080/users/dante/stocks/${symbol}/personalnotes`, {
+        method: 'PUT',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: personalNotes,
+      });
+      if (!response.ok) {
+        throw new Error(`HTTP error! status: ${response.status}`);
+      }
+      setIsNotesDialogOpen(false);
+    } catch (e: any) {
+      setDataError(e.message);
+    }
+  };
+
   const handleStatusChange = async (newStatus: string) => {
     if (!symbol) return;
     try {
@@ -77,10 +100,23 @@ const StockPage: React.FC = () => {
       if (!response.ok) {
         throw new Error(`HTTP error! status: ${response.status}`);
       }
-      setSelectedStatus(newStatus);
+      setStatus(newStatus.toUpperCase());
     } catch (e: any) {
       setDataError(e.message);
     }
+  };
+
+  const handleMouseOver = (e: React.MouseEvent, content: string) => {
+    setTooltip({
+      visible: true,
+      content: content,
+      x: e.clientX,
+      y: e.clientY,
+    });
+  };
+
+  const handleMouseOut = () => {
+    setTooltip({ visible: false, content: '', x: 0, y: 0 });
   };
 
   useEffect(() => {
@@ -108,27 +144,43 @@ const StockPage: React.FC = () => {
       }
     };
 
-    fetchStockData();
-
     const fetchStockStatus = async () => {
+      if (!symbol) return;
       try {
         const response = await fetch(`http://localhost:8080/users/dante/stocks/${symbol}/status`);
-        if (!response.ok) {
-          throw new Error(`HTTP error! status: ${response.status}`);
+        if (response.ok) {
+          const status = await response.json();
+          setStatus(status.toUpperCase() || 'NEW');
+        } else {
+          // If the stock doesn't have a status, default to "New"
+          setStatus('NEW');
         }
-        const status = await response.text();
-        setSelectedStatus(status);
-      } catch (e: any) {
-        setDataError(e.message);
+      } catch (error) {
+        console.error('Failed to fetch stock status:', error);
+        setStatus('NEW'); // Default to "New" on error
       }
     };
 
+    const fetchPersonalNotes = async () => {
+      if (!symbol) return;
+      try {
+        const response = await fetch(`http://localhost:8080/users/dante/stocks/${symbol}/personalnotes`);
+        if (response.ok) {
+          const notes = await response.text();
+          setPersonalNotes(notes);
+        }
+      } catch (error) {
+        console.error('Failed to fetch personal notes:', error);
+      }
+    };
+
+    fetchStockData();
     fetchStockStatus();
+    fetchPersonalNotes();
   }, [symbol]);
 
   const isLoading = dataLoading || quoteLoading;
   const hasError = dataError || quoteError;
-
   if (!symbol) {
     return (
       <div className="container mx-auto p-4">
@@ -187,9 +239,9 @@ const StockPage: React.FC = () => {
             </span>
           )}
         </h2>
-        <div>
+        <div className="flex items-center">
           <select
-            value={selectedStatus}
+            value={status.toUpperCase()}
             onChange={(e) => handleStatusChange(e.target.value)}
             className="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5"
           >
@@ -199,6 +251,23 @@ const StockPage: React.FC = () => {
               </option>
             ))}
           </select>
+
+          <button
+              onClick={() => setIsNotesDialogOpen(true)}
+              onMouseOver={(e) => {
+                e.stopPropagation();
+                if (personalNotes) {
+                  handleMouseOver(e, personalNotes);
+                } else {
+                  handleMouseOut();
+                }
+              }}
+              className={`mr-4 p-2 rounded-md hover:bg-gray-200 ${personalNotes ? 'text-blue-500' : ''}`}
+          >
+            <svg xmlns="http://www.w3.org/2000/svg" className="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" />
+            </svg>
+          </button>
         </div>
       </div>
       <div className="flex border-b border-gray-200 mb-4">
@@ -245,8 +314,24 @@ const StockPage: React.FC = () => {
         {activeTab === 'checklist' && <ChecklistTab symbol={symbol} activeSubTab={activeSubTab} onSubTabClick={handleSubTabClick} />}
         {activeTab === 'valuation' && <ValuationTab symbol={symbol} activeSubTab={activeSubTab} onSubTabClick={handleSubTabClick} />}
       </div>
+      <NotesDialog
+        isOpen={isNotesDialogOpen}
+        onClose={() => setIsNotesDialogOpen(false)}
+        onSave={handleSaveNotes}
+        notes={personalNotes}
+        onNotesChange={setPersonalNotes}
+      />
+      {tooltip.visible && (
+        <div
+          className="fixed p-2 max-w-sm bg-black text-white text-sm rounded-md shadow-lg"
+          style={{ top: tooltip.y + 15, left: tooltip.x + 15 }}
+        >
+          {tooltip.content}
+        </div>
+      )}
     </div>
   );
 };
+
 
 export default StockPage;
