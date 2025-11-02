@@ -129,9 +129,9 @@ const ChecklistTab: React.FC<ChecklistTabProps> = ({ symbol, activeSubTab, onSub
     }, 1000);
 
     const reportType = activeSubTab === '100 Bagger' ? 'ONE_HUNDRED_BAGGER' : activeSubTab;
-    const url = `http://localhost:8080/stocks/reporting/checklist/${symbol}?reportType=${reportType}${
-      regenerationCount > 0 ? '&recreateReport=true' : ''
-    }`;
+    const url = `http://localhost:8080/stocks/reporting/checklist/${symbol}?reportType=${reportType}&recreateReport=${
+      regenerationCount > 0
+    }`
 
     const eventSource = new EventSource(url);
 

@@ -32,7 +32,7 @@ export const marketAndScalabilityItems = [
 
 export const businessQualityItems = [
   { key: 'competitiveAdvantageMoat', label: 'Moat: (None or easily replicable = 0 / Temporary advantage (e.g., early mover) or weak moat = 5 / Durable and widening moat = 10) (0-10)' },
-  { key: 'earlyGrowthCurveInflection', label: 'Growth Curve / Inflection Point: (Declining/stagnant business = 0 / Mature but steady growth = 3 / Entering hyper-growth phase (e.g., early adoption, market share gains) = 5) (0-5)' },
+  { key: 'earlyGrowthCurveInflection', label: 'Growth / Inflection Point: (Declining/stagnant business = 0 / Mature but steady growth = 3 / Entering hyper-growth phase (e.g., early adoption, market share gains) = 5) (0-5)' },
 ];
 
 export const valuationItems = [
