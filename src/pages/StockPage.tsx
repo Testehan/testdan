@@ -5,6 +5,7 @@ import OverviewTab from '../components/stock/OverviewTab';
 import FinancialsTab from '../components/stock/FinancialsTab';
 import ChecklistTab from '../components/stock/ChecklistTab';
 import ValuationTab from '../components/stock/ValuationTab';
+import BusinessAnalysisTab from '../components/stock/BusinessAnalysisTab';
 import { useGlobalQuote } from '../components/stock/hooks/useFinancialReports';
 import FinancialDataStatus from '../components/stock/FinancialDataStatus';
 import StockSummaryTable from '../components/stock/StockSummaryTable';
@@ -28,10 +29,7 @@ const StockPage: React.FC = () => {
     'WATCHLIST',
     'BUY_CANDIDATE',
     'OWNED',
-    'TRIM',
-    'SELL',
     'PASS',
-    'BLACKLIST',
   ];
 
 
@@ -61,6 +59,8 @@ const StockPage: React.FC = () => {
       newHash += '/Ferol';
     } else if (tabName === 'valuation') {
       newHash += '/dcf';
+    } else if (tabName === 'businessAnalysis') {
+      // No sub-tab for now, so just the tab name is fine
     }
     window.location.hash = newHash;
   };
@@ -281,6 +281,14 @@ const StockPage: React.FC = () => {
         </button>
         <button
           className={`px-4 py-2 text-lg font-medium ${
+            activeTab === 'businessAnalysis' ? 'border-b-2 border-blue-500 text-blue-600' : 'text-gray-600 hover:text-blue-600'
+          }`}
+          onClick={() => handleTabClick('businessAnalysis')}
+        >
+          Business Analysis
+        </button>
+        <button
+          className={`px-4 py-2 text-lg font-medium ${
             activeTab === 'financials' ? 'border-b-2 border-blue-500 text-blue-600' : 'text-gray-600 hover:text-blue-600'
           }`}
           onClick={() => handleTabClick('financials')}
@@ -310,6 +318,7 @@ const StockPage: React.FC = () => {
             stockData={stockData}
           />
         )}
+        {activeTab === 'businessAnalysis' && <BusinessAnalysisTab symbol={symbol} />}
         {activeTab === 'financials' && <FinancialsTab symbol={symbol} activeSubTab={activeSubTab} onSubTabClick={handleSubTabClick} />}
         {activeTab === 'checklist' && <ChecklistTab symbol={symbol} activeSubTab={activeSubTab} onSubTabClick={handleSubTabClick} />}
         {activeTab === 'valuation' && <ValuationTab symbol={symbol} activeSubTab={activeSubTab} onSubTabClick={handleSubTabClick} />}
