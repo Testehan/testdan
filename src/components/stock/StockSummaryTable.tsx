@@ -38,10 +38,7 @@ const StockSummaryTable: React.FC = () => {
     'WATCHLIST',
     'BUY_CANDIDATE',
     'OWNED',
-    'TRIM',
-    'SELL',
     'PASS',
-    'BLACKLIST',
   ];
 
   useEffect(() => {
