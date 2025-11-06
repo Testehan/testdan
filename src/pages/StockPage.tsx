@@ -1,4 +1,4 @@
-import React, { useState, useEffect, Suspense, lazy } from 'react';
+import React, { useState, useEffect, Suspense, lazy, useRef } from 'react';
 import { useParams, Link } from 'react-router-dom';
 import { StockData } from '../components/stock/types/stockFinancials';
 import { useGlobalQuote } from '../components/stock/hooks/useFinancialReports';
@@ -32,6 +32,17 @@ const StockPage: React.FC = () => {
   const [stockData, setStockData] = useState<StockData | null>(null);
   const [status, setStatus] = useState('');
   const [personalNotes, setPersonalNotes] = useState('');
+  
+  // Cache to avoid redundant API calls when switching tabs
+  const fetchedCache = useRef<{
+    overview: string | null;
+    status: string | null;
+    notes: string | null;
+  }>({
+    overview: null,
+    status: null,
+    notes: null,
+  });
   
   // Loading states per data type
   const [dataLoading, setDataLoading] = useState<{
@@ -138,28 +149,48 @@ const StockPage: React.FC = () => {
     setStatus('');
     setPersonalNotes('');
     setErrors({});
+    // Reset cache for new symbol
+    fetchedCache.current = { overview: null, status: null, notes: null };
   }, [symbol]);
 
-  // Smart data loading based on active tab
+  // Smart data loading based on active tab - only fetches once per symbol
   useEffect(() => {
     if (!symbol) return;
 
     const loadData = async () => {
-      // Fetch overview immediately for all tabs (needed by many)
-      setDataLoading(prev => ({ ...prev, overview: true }));
-      const overviewData = await fetchOverviewData();
-      if (overviewData) setStockData(overviewData);
-      setDataLoading(prev => ({ ...prev, overview: false }));
+      // Check cache to avoid redundant API calls when switching tabs
+      const needsOverview = fetchedCache.current.overview !== symbol;
+      const needsStatus = fetchedCache.current.status !== symbol;
+      const needsNotes = fetchedCache.current.notes !== symbol;
 
-      // Priority 2: Common data needed by all tabs
-      setDataLoading(prev => ({ ...prev, status: true, notes: true }));
-      const [statusData, notesData] = await Promise.all([
-        fetchStatusData(),
-        fetchNotesData()
-      ]);
-      setStatus(statusData);
-      setPersonalNotes(notesData);
-      setDataLoading(prev => ({ ...prev, status: false, notes: false }));
+      // Fetch overview if not cached
+      if (needsOverview) {
+        setDataLoading(prev => ({ ...prev, overview: true }));
+        const overviewData = await fetchOverviewData();
+        if (overviewData) {
+          setStockData(overviewData);
+          fetchedCache.current.overview = symbol;
+        }
+        setDataLoading(prev => ({ ...prev, overview: false }));
+      }
+
+      // Fetch status and notes if not cached
+      if (needsStatus || needsNotes) {
+        setDataLoading(prev => ({ ...prev, status: true, notes: true }));
+        const results = await Promise.all([
+          needsStatus ? fetchStatusData() : Promise.resolve(status),
+          needsNotes ? fetchNotesData() : Promise.resolve(personalNotes)
+        ]);
+        if (needsStatus) {
+          setStatus(results[0]);
+          fetchedCache.current.status = symbol;
+        }
+        if (needsNotes) {
+          setPersonalNotes(results[1]);
+          fetchedCache.current.notes = symbol;
+        }
+        setDataLoading(prev => ({ ...prev, status: false, notes: false }));
+      }
     };
 
     loadData();
