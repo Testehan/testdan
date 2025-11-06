@@ -14,7 +14,7 @@ interface StockSummary {
 type SortColumn = keyof StockSummary;
 type SortDirection = 'asc' | 'desc';
 
-const StockSummaryTable: React.FC = () => {
+const StockSummaryTable: React.FC = React.memo(() => {
   const [summaryData, setSummaryData] = useState<StockSummary[]>([]);
   const [loading, setLoading] = useState<boolean>(true);
   const [error, setError] = useState<string | null>(null);
@@ -287,6 +287,6 @@ const StockSummaryTable: React.FC = () => {
       )}
     </div>
   );
-};
+});
 
 export default StockSummaryTable;

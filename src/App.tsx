@@ -1,9 +1,12 @@
 import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
+import { Suspense, lazy } from 'react';
 import HomePage from './pages/homePage';
 import QuotesPage from './pages/quotesPage';
 import MentalModelsPage from './pages/mentalModelsPage.tsx';
-import MentalModelsList from "./components/mentalModelsList.tsx";
-import StockPage from './pages/StockPage'; // Import StockPage
+
+// Lazy load heavy components to reduce initial bundle size
+const MentalModelsList = lazy(() => import("./components/mentalModelsList.tsx"));
+const StockPage = lazy(() => import('./pages/StockPage'));
 
 function App() {
 
@@ -26,14 +29,16 @@ function App() {
         {/*</nav>*/}
 
         {/* Routes */}
-        <Routes>
-            <Route path="/" element={<HomePage />} />
-            <Route path="/quotes" element={<QuotesPage />} />
-            <Route path="/mental" element={<MentalModelsPage />} />
-            <Route path="/mental/:category" element={<MentalModelsList />} />
-            <Route path="/stocks" element={<StockPage />} />
-            <Route path="/stocks/:symbol" element={<StockPage />} />
-        </Routes>
+        <Suspense fallback={<div className="text-center p-4">Loading...</div>}>
+          <Routes>
+              <Route path="/" element={<HomePage />} />
+              <Route path="/quotes" element={<QuotesPage />} />
+              <Route path="/mental" element={<MentalModelsPage />} />
+              <Route path="/mental/:category" element={<MentalModelsList />} />
+              <Route path="/stocks" element={<StockPage />} />
+              <Route path="/stocks/:symbol" element={<StockPage />} />
+          </Routes>
+        </Suspense>
       </Router>
     </>
   )

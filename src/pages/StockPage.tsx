@@ -1,26 +1,69 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, Suspense, lazy } from 'react';
 import { useParams, Link } from 'react-router-dom';
 import { StockData } from '../components/stock/types/stockFinancials';
-import OverviewTab from '../components/stock/OverviewTab';
-import FinancialsTab from '../components/stock/FinancialsTab';
-import ChecklistTab from '../components/stock/ChecklistTab';
-import ValuationTab from '../components/stock/ValuationTab';
-import BusinessAnalysisTab from '../components/stock/BusinessAnalysisTab';
 import { useGlobalQuote } from '../components/stock/hooks/useFinancialReports';
 import FinancialDataStatus from '../components/stock/FinancialDataStatus';
 import StockSummaryTable from '../components/stock/StockSummaryTable';
 import NotesDialog from '../components/stock/NotesDialog';
 
+// Lazy load tab components for code splitting and progressive loading
+const OverviewTab = lazy(() => import('../components/stock/OverviewTab'));
+const FinancialsTab = lazy(() => import('../components/stock/FinancialsTab'));
+const ChecklistTab = lazy(() => import('../components/stock/ChecklistTab'));
+const ValuationTab = lazy(() => import('../components/stock/ValuationTab'));
+const BusinessAnalysisTab = lazy(() => import('../components/stock/BusinessAnalysisTab'));
+
+// Loading fallback for lazy components
+const TabLoader: React.FC<{ message?: string }> = ({ message = 'Loading...' }) => (
+  <div className="flex justify-center items-center p-8">
+    <div className="w-8 h-8 border-4 border-blue-500 border-t-transparent rounded-full animate-spin"></div>
+    {message && <span className="ml-2 text-gray-500">{message}</span>}
+  </div>
+);
+
 const StockPage: React.FC = () => {
   const { symbol } = useParams<{ symbol?: string }>();
-  const [stockData, setStockData] = useState<StockData | null>(null);
-  const [dataLoading, setDataLoading] = useState<boolean>(true);
-  const [dataError, setDataError] = useState<string | null>(null);
+  
+  // Active tab from URL determines priority loading
   const [activeTab, setActiveTab] = useState<string>('overview');
   const [activeSubTab, setActiveSubTab] = useState<string>('');
+  
+  // Data states - all optional, loaded progressively
+  const [stockData, setStockData] = useState<StockData | null>(null);
   const [status, setStatus] = useState('');
-  const [isNotesDialogOpen, setIsNotesDialogOpen] = useState(false);
   const [personalNotes, setPersonalNotes] = useState('');
+  
+  // Loading states per data type
+  const [dataLoading, setDataLoading] = useState<{
+    overview: boolean;
+    status: boolean;
+    notes: boolean;
+    financials: boolean;
+    checklist: boolean;
+    valuation: boolean;
+    businessAnalysis: boolean;
+  }>({
+    overview: true,
+    status: false,
+    notes: false,
+    financials: false,
+    checklist: false,
+    valuation: false,
+    businessAnalysis: false,
+  });
+
+  // Error states
+  const [errors, setErrors] = useState<{
+    overview?: string;
+    status?: string;
+    notes?: string;
+    financials?: string;
+    checklist?: string;
+    valuation?: string;
+    businessAnalysis?: string;
+  }>({});
+
+  const [isNotesDialogOpen, setIsNotesDialogOpen] = useState(false);
   const [tooltip, setTooltip] = useState({ visible: false, content: '', x: 0, y: 0 });
 
   const statusOptions = [
@@ -32,9 +75,9 @@ const StockPage: React.FC = () => {
     'PASS',
   ];
 
+  const { quote, loading: quoteLoading } = useGlobalQuote({ symbol: symbol || '' });
 
-  const { quote, loading: quoteLoading, error: quoteError } = useGlobalQuote({ symbol: symbol || '' });
-
+  // Parse URL hash to determine active tab
   useEffect(() => {
     const handleHashChange = () => {
       const hash = window.location.hash.replace('#', '');
@@ -43,13 +86,84 @@ const StockPage: React.FC = () => {
       setActiveSubTab(sub ? decodeURIComponent(sub) : '');
     };
 
-    handleHashChange(); // Initial check
+    handleHashChange();
     window.addEventListener('hashchange', handleHashChange);
 
     return () => {
       window.removeEventListener('hashchange', handleHashChange);
     };
   }, [symbol]);
+
+  // Core data fetching functions
+  const fetchOverviewData = async (): Promise<StockData | null> => {
+    if (!symbol) return null;
+    try {
+      const response = await fetch(`http://localhost:8080/stocks/overview/${symbol}`);
+      if (!response.ok) throw new Error(`HTTP error! status: ${response.status}`);
+      return await response.json();
+    } catch (e: any) {
+      setErrors(prev => ({ ...prev, overview: e.message }));
+      return null;
+    }
+  };
+
+  const fetchStatusData = async (): Promise<string> => {
+    if (!symbol) return 'NEW';
+    try {
+      const response = await fetch(`http://localhost:8080/users/dante/stocks/${symbol}/status`);
+      if (!response.ok) return 'NEW';
+      const data = await response.json();
+      return (data as string).toUpperCase() || 'NEW';
+    } catch (e: any) {
+      setErrors(prev => ({ ...prev, status: 'Failed to load status' }));
+      return 'NEW';
+    }
+  };
+
+  const fetchNotesData = async (): Promise<string> => {
+    if (!symbol) return '';
+    try {
+      const response = await fetch(`http://localhost:8080/users/dante/stocks/${symbol}/personalnotes`);
+      if (!response.ok) return '';
+      return await response.text();
+    } catch (e: any) {
+      setErrors(prev => ({ ...prev, notes: 'Failed to load notes' }));
+      return '';
+    }
+  };
+
+  // Reset all data when symbol changes
+  useEffect(() => {
+    setStockData(null);
+    setStatus('');
+    setPersonalNotes('');
+    setErrors({});
+  }, [symbol]);
+
+  // Smart data loading based on active tab
+  useEffect(() => {
+    if (!symbol) return;
+
+    const loadData = async () => {
+      // Fetch overview immediately for all tabs (needed by many)
+      setDataLoading(prev => ({ ...prev, overview: true }));
+      const overviewData = await fetchOverviewData();
+      if (overviewData) setStockData(overviewData);
+      setDataLoading(prev => ({ ...prev, overview: false }));
+
+      // Priority 2: Common data needed by all tabs
+      setDataLoading(prev => ({ ...prev, status: true, notes: true }));
+      const [statusData, notesData] = await Promise.all([
+        fetchStatusData(),
+        fetchNotesData()
+      ]);
+      setStatus(statusData);
+      setPersonalNotes(notesData);
+      setDataLoading(prev => ({ ...prev, status: false, notes: false }));
+    };
+
+    loadData();
+  }, [symbol, activeTab]);
 
   const handleTabClick = (tabName: string) => {
     let newHash = tabName;
@@ -60,7 +174,7 @@ const StockPage: React.FC = () => {
     } else if (tabName === 'valuation') {
       newHash += '/dcf';
     } else if (tabName === 'businessAnalysis') {
-      // No sub-tab for now, so just the tab name is fine
+      // No sub-tab for now
     }
     window.location.hash = newHash;
   };
@@ -74,17 +188,13 @@ const StockPage: React.FC = () => {
     try {
       const response = await fetch(`http://localhost:8080/users/dante/stocks/${symbol}/personalnotes`, {
         method: 'PUT',
-        headers: {
-          'Content-Type': 'application/json',
-        },
+        headers: { 'Content-Type': 'application/json' },
         body: personalNotes,
       });
-      if (!response.ok) {
-        throw new Error(`HTTP error! status: ${response.status}`);
-      }
+      if (!response.ok) throw new Error(`HTTP error! status: ${response.status}`);
       setIsNotesDialogOpen(false);
     } catch (e: any) {
-      setDataError(e.message);
+      console.error('Failed to save notes:', e.message);
     }
   };
 
@@ -93,23 +203,19 @@ const StockPage: React.FC = () => {
     try {
       const response = await fetch(`http://localhost:8080/users/dante/stocks/${symbol}/status/${newStatus}`, {
         method: 'PUT',
-        headers: {
-          'Content-Type': 'application/json',
-        },
+        headers: { 'Content-Type': 'application/json' },
       });
-      if (!response.ok) {
-        throw new Error(`HTTP error! status: ${response.status}`);
-      }
+      if (!response.ok) throw new Error(`HTTP error! status: ${response.status}`);
       setStatus(newStatus.toUpperCase());
     } catch (e: any) {
-      setDataError(e.message);
+      console.error('Failed to update status:', e.message);
     }
   };
 
   const handleMouseOver = (e: React.MouseEvent, content: string) => {
     setTooltip({
       visible: true,
-      content: content,
+      content,
       x: e.clientX,
       y: e.clientY,
     });
@@ -119,68 +225,23 @@ const StockPage: React.FC = () => {
     setTooltip({ visible: false, content: '', x: 0, y: 0 });
   };
 
-  useEffect(() => {
-    if (!symbol) {
-      setDataLoading(false);
-      setStockData(null);
-      setDataError(null);
-      return;
+  const showTabLoading = () => {
+    switch (activeTab) {
+      case 'overview':
+        return dataLoading.overview;
+      case 'financials':
+        return dataLoading.financials;
+      case 'checklist':
+        return dataLoading.checklist;
+      case 'valuation':
+        return dataLoading.valuation;
+      case 'businessAnalysis':
+        return dataLoading.businessAnalysis;
+      default:
+        return false;
     }
+  };
 
-    const fetchStockData = async () => {
-      setDataLoading(true);
-      setDataError(null);
-      try {
-        const response = await fetch(`http://localhost:8080/stocks/overview/${symbol}`);
-        if (!response.ok) {
-          throw new Error(`HTTP error! status: ${response.status}`);
-        }
-        const data: StockData = await response.json();
-        setStockData(data);
-      } catch (e: any) {
-        setDataError(e.message);
-      } finally {
-        setDataLoading(false);
-      }
-    };
-
-    const fetchStockStatus = async () => {
-      if (!symbol) return;
-      try {
-        const response = await fetch(`http://localhost:8080/users/dante/stocks/${symbol}/status`);
-        if (response.ok) {
-          const status = await response.json();
-          setStatus(status.toUpperCase() || 'NEW');
-        } else {
-          // If the stock doesn't have a status, default to "New"
-          setStatus('NEW');
-        }
-      } catch (error) {
-        console.error('Failed to fetch stock status:', error);
-        setStatus('NEW'); // Default to "New" on error
-      }
-    };
-
-    const fetchPersonalNotes = async () => {
-      if (!symbol) return;
-      try {
-        const response = await fetch(`http://localhost:8080/users/dante/stocks/${symbol}/personalnotes`);
-        if (response.ok) {
-          const notes = await response.text();
-          setPersonalNotes(notes);
-        }
-      } catch (error) {
-        console.error('Failed to fetch personal notes:', error);
-      }
-    };
-
-    fetchStockData();
-    fetchStockStatus();
-    fetchPersonalNotes();
-  }, [symbol]);
-
-  const isLoading = dataLoading || quoteLoading;
-  const hasError = dataError || quoteError;
   if (!symbol) {
     return (
       <div className="container mx-auto p-4">
@@ -189,16 +250,12 @@ const StockPage: React.FC = () => {
     );
   }
 
-  if (isLoading) {
-    return <div className="text-center p-4">Loading stock data...</div>;
+  if (showTabLoading()) {
+    return <TabLoader message={`Loading ${activeTab}...`} />;
   }
 
-  if (hasError) {
-    return <div className="text-center p-4 text-red-500">Error: {hasError}</div>;
-  }
-
-  if (!stockData) {
-    return <div className="text-center p-4">No stock data available.</div>;
+  if (errors.overview && !stockData) {
+    return <div className="text-center p-4 text-red-500">Error: {errors.overview}</div>;
   }
 
   const changePercent =
@@ -214,6 +271,7 @@ const StockPage: React.FC = () => {
     GBP: '£',
   };
 
+  const displayCurrency = stockData?.currency ? currencySymbol[stockData.currency] : '$';
   return (
     <div className="container mx-auto p-4">
       <h2 className="text-2xl font-bold text-center mb-4">
@@ -230,11 +288,11 @@ const StockPage: React.FC = () => {
       </div>
       <div className="flex justify-between items-center mb-4">
         <h2 className="text-2xl font-bold">
-          Stock Details for {symbol.toUpperCase()}
-          {!dataLoading && !quoteLoading && symbol && <FinancialDataStatus symbol={symbol} />}
+          Stock Details for {symbol?.toUpperCase()}
+          {!dataLoading.overview && !quoteLoading && symbol && <FinancialDataStatus symbol={symbol} />}
           {quote && (
             <span className={`ml-4 ${priceColor}`}>
-              {quote.adjClose} {currencySymbol[stockData.currency] || stockData.currency}{' '}
+              {quote.adjClose} {displayCurrency}{' '}
               <span className="text-sm ml-2">({changePercent.toFixed(2)}%)</span>
             </span>
           )}
@@ -268,6 +326,11 @@ const StockPage: React.FC = () => {
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" />
             </svg>
           </button>
+          {(dataLoading.status || dataLoading.notes) && (
+            <div className="flex items-center text-gray-500 text-sm" title="Loading additional data...">
+              <div className="w-4 h-4 border-2 border-blue-500 border-t-transparent rounded-full animate-spin mr-2"></div>
+            </div>
+          )}
         </div>
       </div>
       <div className="flex border-b border-gray-200 mb-4">
@@ -314,14 +377,30 @@ const StockPage: React.FC = () => {
       </div>
       <div>
         {activeTab === 'overview' && stockData && (
-          <OverviewTab
-            stockData={stockData}
-          />
+          <Suspense fallback={<TabLoader message="Loading overview..." />}>
+            <OverviewTab stockData={stockData} />
+          </Suspense>
         )}
-        {activeTab === 'businessAnalysis' && <BusinessAnalysisTab symbol={symbol} />}
-        {activeTab === 'financials' && <FinancialsTab symbol={symbol} activeSubTab={activeSubTab} onSubTabClick={handleSubTabClick} />}
-        {activeTab === 'checklist' && <ChecklistTab symbol={symbol} activeSubTab={activeSubTab} onSubTabClick={handleSubTabClick} />}
-        {activeTab === 'valuation' && <ValuationTab symbol={symbol} activeSubTab={activeSubTab} onSubTabClick={handleSubTabClick} />}
+        {activeTab === 'businessAnalysis' && (
+          <Suspense fallback={<TabLoader message="Loading business analysis..." />}>
+            <BusinessAnalysisTab symbol={symbol || ''} />
+          </Suspense>
+        )}
+        {activeTab === 'financials' && (
+          <Suspense fallback={<TabLoader message="Loading financials..." />}>
+            <FinancialsTab symbol={symbol || ''} activeSubTab={activeSubTab} onSubTabClick={handleSubTabClick} />
+          </Suspense>
+        )}
+        {activeTab === 'checklist' && (
+          <Suspense fallback={<TabLoader message="Loading checklist..." />}>
+            <ChecklistTab symbol={symbol || ''} activeSubTab={activeSubTab} onSubTabClick={handleSubTabClick} />
+          </Suspense>
+        )}
+        {activeTab === 'valuation' && (
+          <Suspense fallback={<TabLoader message="Loading valuation..." />}>
+            <ValuationTab symbol={symbol || ''} activeSubTab={activeSubTab} onSubTabClick={handleSubTabClick} />
+          </Suspense>
+        )}
       </div>
       <NotesDialog
         isOpen={isNotesDialogOpen}
