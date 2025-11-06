@@ -1,6 +1,7 @@
 import React from 'react';
 import DcfCalculator from './DcfCalculator';
 import ReverseDcfCalculator from './ReverseDcfCalculator';
+import GrowthTab from './GrowthTab';
 
 interface ValuationTabProps {
   symbol: string;
@@ -28,10 +29,19 @@ const ValuationTab: React.FC<ValuationTabProps> = ({ symbol, activeSubTab, onSub
         >
           Reverse DCF
         </button>
+        <button
+          className={`px-4 py-2 text-lg font-medium ${
+            activeSubTab === 'growth' ? 'border-b-2 border-blue-500 text-blue-600' : 'text-gray-600 hover:text-blue-600'
+          }`}
+          onClick={() => onSubTabClick('growth')}
+        >
+          Growth
+        </button>
       </div>
       <div>
         {activeSubTab === 'dcf' && <DcfCalculator symbol={symbol} />}
         {activeSubTab === 'reverse_dcf' && <ReverseDcfCalculator symbol={symbol} />}
+        {activeSubTab === 'growth' && <GrowthTab symbol={symbol} />}
       </div>
     </div>
   );

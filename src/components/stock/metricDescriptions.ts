@@ -164,12 +164,27 @@ export const metricDescriptions = {
         pocfratio: "Price to Operating Cash Flow (P/OCF) Ratio. Compares a company's market price to its operating cash flow. It's a useful measure for valuing stocks that have positive cash flow but are not profitable.",
         priceToSalesRatio: "Price-to-Sales (P/S) Ratio. The P/S ratio is a valuation ratio that compares a company’s stock price to its revenues. It is an indicator of the value that financial markets have placed on each dollar of a company’s sales or revenues.",
     },
-        dcfInputs: {
-            beta: "Beta measures a stock's volatility in relation to the overall market. A beta greater than 1 indicates the stock is more volatile than the market, while a beta less than 1 indicates it's less volatile.",
-            riskFreeRate: "The theoretical rate of return of an investment with zero risk. It's often represented by the yield on a government bond.",
-            marketRiskPremium: "The excess return that investing in the stock market provides over a risk-free rate. It's the compensation for taking on the higher risk of equity investing.",
-                            fcfGrowthRate: "The estimated annual percentage increase in a company's Free Cash Flow (FCF) over a future period (typically years 1-5). It's a key assumption in projecting future cash flows.",
-                                    terminalMultiple: "The P/FCF multiple at which the stock is expected to trade in the final projected year (Year 5). This is used to calculate the Terminal Value.",
-                                    sbcAdjustmentToggle: "A toggle to determine whether Stock-Based Compensation (SBC) should be subtracted from Operating Cash Flow (OCF) when calculating Free Cash Flow (FCF). Enabling this treats SBC as a cash expense, potentially providing a more conservative view of FCF.",
-                                    wacc: "The Weighted Average Cost of Capital (WACC) represents a company's average after-tax cost of capital from all sources, including common stock, preferred stock, bonds, and other forms of debt. It is the discount rate used to value future cash flows in a DCF analysis.",        }
+    dcfInputs: {
+        beta: "Beta measures a stock's volatility in relation to the overall market. A beta greater than 1 indicates the stock is more volatile than the market, while a beta less than 1 indicates it's less volatile.",
+        riskFreeRate: "The theoretical rate of return of an investment with zero risk. It's often represented by the yield on a government bond.",
+        marketRiskPremium: "The excess return that investing in the stock market provides over a risk-free rate. It's the compensation for taking on the higher risk of equity investing.",
+                        fcfGrowthRate: "The estimated annual percentage increase in a company's Free Cash Flow (FCF) over a future period (typically years 1-5). It's a key assumption in projecting future cash flows.",
+                                terminalMultiple: "The P/FCF multiple at which the stock is expected to trade in the final projected year (Year 5). This is used to calculate the Terminal Value.",
+                                sbcAdjustmentToggle: "A toggle to determine whether Stock-Based Compensation (SBC) should be subtracted from Operating Cash Flow (OCF) when calculating Free Cash Flow (FCF). Enabling this treats SBC as a cash expense, potentially providing a more conservative view of FCF.",
+                                wacc: "The Weighted Average Cost of Capital (WACC) represents a company's average after-tax cost of capital from all sources, including common stock, preferred stock, bonds, and other forms of debt. It is the discount rate used to value future cash flows in a DCF analysis.",
+    },
+    growthInputs: {
+        initialRevenueGrowthRate: "The estimated annual percentage increase in revenue for the near-term period (typically years 1-3). This represents the high-growth phase of the company's lifecycle.",
+        growthFadePeriod: "The number of years over which the revenue growth rate gradually declines from the initial high growth rate to the terminal growth rate. This represents the transition from high growth to mature growth.",
+        terminalGrowthRate: "The long-term sustainable growth rate that the company is expected to achieve in perpetuity. This should be close to or below the risk-free rate and represents mature, stable growth.",
+        yearsToProject: "The total number of years to project future cash flows in the valuation model. A longer projection period captures more of the growth phase but increases uncertainty.",
+        targetOperatingMargin: "The long-term steady-state operating margin that the company is expected to achieve when it reaches maturity. This represents the profitability level of a mature company in the industry.",
+        yearsToReachTargetMargin: "The number of years over which the company's operating margin gradually improves from its current level to the target operating margin.",
+        reinvestmentRate: "The percentage of revenue that must be reinvested to achieve the projected growth rate. Higher growth typically requires higher reinvestment.",
+        initialCostOfCapital: "The discount rate used for high-growth companies, reflecting higher risk. This rate gradually converges to the terminal cost of capital over time.",
+        terminalCostOfCapital: "The discount rate for mature, stable companies with lower risk. This represents the long-term cost of capital when the company reaches steady state.",
+        yearsOfRiskConvergence: "The number of years over which the cost of capital declines from the initial high rate to the terminal lower rate as the company matures and becomes less risky.",
+        probabilityOfFailure: "The estimated probability that the company will fail or go into distress. This adjusts the valuation downward to account for the risk of total or partial loss.",
+        distressProceeds: "The percentage of book value or revenue that would be recovered in a distress scenario. This is used to calculate the expected value if the company fails."
+    }
 };
