@@ -13,6 +13,7 @@ const profitabilityKeys: (keyof FinancialRatioReport)[] = [
     'operatingProfitMargin',
     'ebitdaMargin',
     'adjustedEbitdaMargin',
+    'freeCashflowMargin',
     'roic',
 ];
 
@@ -92,6 +93,7 @@ const allPercentageKeys: (keyof FinancialRatioReport)[] = [
     'operatingProfitMargin',
     'ebitdaMargin',
     'adjustedEbitdaMargin',
+    'freeCashflowMargin',
     'roic', // Added roic
     'dividendYield',
     'dividendPayoutRatio',

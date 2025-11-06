@@ -164,6 +164,7 @@ export interface StockData {
     operatingProfitMargin: number | null;
     ebitdaMargin: number | null;
     adjustedEbitdaMargin: number | null;
+    freeCashflowMargin: number | null;
     roic: number | null;
     currentRatio: number | null;
     quickRatio: number | null;

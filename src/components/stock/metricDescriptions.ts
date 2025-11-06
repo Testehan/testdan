@@ -111,6 +111,7 @@ export const metricDescriptions = {
         operatingProfitMargin: "Indicates how much profit a company makes on each dollar of sales after paying for variable costs of production, but before interest and tax.",
         ebitdaMargin: "Measures a company's operating profit as a percentage of its revenue, before interest, taxes, depreciation, and amortization. It's a good indicator of operational efficiency.",
         adjustedEbitdaMargin: "Adjusted EBITDA Margin is EBITDA (excluding one-time items, stock-based comp, etc.) divided by revenue, expressed as a percentage. It measures adjusted operating profitability.",
+        freeCashflowMargin: "Percentage of revenue converted to free cash. Measures how efficiently a company turns sales into spendable cash.",
         roic: "Return on Invested Capital (ROIC) measures the percentage return that a company makes from capital (both debt and equity) invested in the business. It shows how well a company is converting its invested capital into profits.",
 
         currentRatio: "Measures a company's ability to pay off its short-term liabilities with its current assets. A ratio between 1.5 and 2.0 is often considered healthy.",

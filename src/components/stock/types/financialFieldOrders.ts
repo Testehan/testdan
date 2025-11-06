@@ -146,6 +146,7 @@ export const financialRatioFieldOrder: (keyof FinancialRatioReport)[] = [
     "ebitdaMargin",
     "returnOnAssets",
     "returnOnEquity",
+    "freeCashflowMargin",
     "roic",
     "currentRatio",
     "quickRatio",
