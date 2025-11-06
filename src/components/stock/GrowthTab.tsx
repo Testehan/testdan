@@ -68,6 +68,31 @@ interface GrowthHistoryEntry {
     yearsOfRiskConvergence: number;
     probabilityOfFailure: number;
     distressProceedsPctOfBookOrRevenue: number;
+    marginalTaxRate: number;
+  };
+  growthOutput: {
+    intrinsicValuePerShare: string;
+    verdict: string;
+  };
+}
+
+interface GrowthValuationResponse {
+  valuationDate: string;
+  growthValuationData: GrowthData;
+  growthUserInput: {
+    initialRevenueGrowthRate: number;
+    growthFadePeriod: number;
+    terminalGrowthRate: number;
+    yearsToProject: number;
+    targetOperatingMargin: number;
+    yearsToReachTargetMargin: number;
+    reinvestmentAsPctOfRevenue: number;
+    initialCostOfCapital: number;
+    terminalCostOfCapital: number;
+    yearsOfRiskConvergence: number;
+    probabilityOfFailure: number;
+    distressProceedsPctOfBookOrRevenue: number;
+    marginalTaxRate: number;
   };
   growthOutput: {
     intrinsicValuePerShare: string;
@@ -105,6 +130,7 @@ const GrowthTab: React.FC<GrowthTabProps> = ({ symbol }) => {
   const [probabilityOfFailure, setProbabilityOfFailure] = useState<number>(0);
   const [distressProceeds, setDistressProceeds] = useState<number>(0);
   const [yearsToProject, setYearsToProject] = useState<number>(10);
+  const [marginalTaxRateInput, setMarginalTaxRateInput] = useState<number>(0.25);
   const [calculatedPricePerShare, setCalculatedPricePerShare] = useState<number | null>(null);
   
   // Save functionality
@@ -146,6 +172,9 @@ const GrowthTab: React.FC<GrowthTabProps> = ({ symbol }) => {
     setYearsOfRiskConvergence(defaultValues.yearsOfRiskConvergence);
     setProbabilityOfFailure(defaultValues.probabilityOfFailure);
     setDistressProceeds(defaultValues.distressProceeds);
+    if (growthData) {
+      setMarginalTaxRateInput(growthData.marginalTaxRate);
+    }
     setCalculatedPricePerShare(null);
   };
 
@@ -187,9 +216,15 @@ const GrowthTab: React.FC<GrowthTabProps> = ({ symbol }) => {
       if (upsideDownside > 20) verdict = "Undervalued";
       else if (upsideDownside < -20) verdict = "Overvalued";
 
+      // Create modified growth data with user-input values
+      const modifiedGrowthData = {
+        ...growthData,
+        marginalTaxRate: marginalTaxRateInput
+      };
+
       const payload = {
         valuationDate: new Date().toISOString(),
-        growthValuationData: growthData,
+        growthValuationData: modifiedGrowthData,
         growthUserInput: {
           initialRevenueGrowthRate: initialRevenueGrowthRate,
           growthFadePeriod: growthFadePeriod,
@@ -255,80 +290,67 @@ const GrowthTab: React.FC<GrowthTabProps> = ({ symbol }) => {
     }
   };
 
-  // Growth valuation calculation functions
-  const calculateGrowthValuation = () => {
-    if (!growthData) return;
+  // Growth valuation calculation - calls server API
+  const calculateGrowthValuation = async () => {
+    if (!growthData || !symbol) return;
 
-    const projectRevenue = (currentRevenue: number, year: number): number => {
-      const nearTermYears = 3; // Near-term years 1-3
-      let growthRate: number;
+    try {
+      const sortedStatements = [...growthData.incomeStatements].sort((a, b) => a.fiscalYear - b.fiscalYear);
+      const latestStatement = sortedStatements[sortedStatements.length - 1];
       
-      if (year <= nearTermYears) {
-        growthRate = initialRevenueGrowthRate / 100;
-      } else if (year <= nearTermYears + growthFadePeriod) {
-        const fadeYears = year - nearTermYears;
-        growthRate = (initialRevenueGrowthRate / 100) - ((initialRevenueGrowthRate / 100 - terminalGrowthRate / 100) / growthFadePeriod) * fadeYears;
-      } else {
-        growthRate = terminalGrowthRate / 100;
-      }
-      
-      return currentRevenue * (1 + growthRate);
-    };
+      // Create modified growth data with user-input values
+      const modifiedGrowthData = {
+        ...growthData,
+        marginalTaxRate: marginalTaxRateInput
+      };
 
-    const projectOperatingMargin = (currentMargin: number, year: number): number => {
-      if (year >= yearsToReachTargetMargin) return targetOperatingMargin / 100;
-      return currentMargin + (targetOperatingMargin / 100 - currentMargin) / yearsToReachTargetMargin * year;
-    };
+      const growthValuationPayload = {
+        valuationDate: new Date().toISOString(),
+        growthValuationData: modifiedGrowthData,
+        growthUserInput: {
+          initialRevenueGrowthRate,
+          growthFadePeriod,
+          terminalGrowthRate,
+          yearsToProject,
+          targetOperatingMargin,
+          yearsToReachTargetMargin,
+          reinvestmentAsPctOfRevenue: reinvestmentRate,
+          initialCostOfCapital,
+          terminalCostOfCapital,
+          yearsOfRiskConvergence,
+          probabilityOfFailure,
+          distressProceedsPctOfBookOrRevenue: distressProceeds,
+          // Add current year data needed for calculation
+          currentRevenue: latestStatement.revenue,
+          currentOperatingMargin: latestStatement.operatingIncome / latestStatement.revenue
+        },
+        growthOutput: {
+          intrinsicValuePerShare: "0.00",
+          verdict: "Neutral"
+        }
+      };
 
-    const computeFCF = (revenue: number, operatingMargin: number): number => {
-      const operatingIncome = revenue * operatingMargin;
-      return operatingIncome * (1 - growthData.marginalTaxRate) - revenue * (reinvestmentRate / 100);
-    };
+      const response = await fetch(`http://localhost:8080/stock/valuation/calculate/growth`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(growthValuationPayload),
+      });
 
-    const discountRate = (year: number): number => {
-      if (year >= yearsOfRiskConvergence) return terminalCostOfCapital / 100;
-      return (initialCostOfCapital / 100) - ((initialCostOfCapital / 100 - terminalCostOfCapital / 100) / yearsOfRiskConvergence) * year;
-    };
-
-    const discountedFCF = (fcf: number, year: number): number => {
-      const rate = discountRate(year);
-      return fcf / Math.pow(1 + rate, year);
-    };
-
-    const terminalValue = (finalFCF: number): number => {
-      return finalFCF * (1 + terminalGrowthRate / 100) / ((terminalCostOfCapital / 100) - (terminalGrowthRate / 100));
-    };
-
-    const calculateEquityValue = (currentRevenue: number, currentMargin: number, totalYears: number): number => {
-      let revenue = currentRevenue;
-      let equityValue = 0;
-      let fcf = 0;
-
-      for (let year = 1; year <= totalYears; year++) {
-        revenue = projectRevenue(revenue, year);
-        const margin = projectOperatingMargin(currentMargin, year);
-        fcf = computeFCF(revenue, margin);
-        equityValue += discountedFCF(fcf, year);
+      if (!response.ok) {
+        throw new Error(`HTTP error! status: ${response.status}`);
       }
 
-      const terminalVal = terminalValue(fcf);
-      equityValue += terminalVal / Math.pow(1 + discountRate(totalYears), totalYears);
-
-      // Adjust for failure
-      equityValue = (1 - probabilityOfFailure / 100) * equityValue + (probabilityOfFailure / 100) * distressProceeds;
-
-      // Subtract debt, add cash
-      return (equityValue - growthData.totalDebt + growthData.cashBalance) / growthData.commonSharesOutstanding;
-    };
-
-    // Get current data (latest year)
-    const sortedStatements = [...growthData.incomeStatements].sort((a, b) => a.fiscalYear - b.fiscalYear);
-    const latestStatement = sortedStatements[sortedStatements.length - 1];
-    const currentRevenue = latestStatement.revenue;
-    const currentMargin = latestStatement.operatingIncome / currentRevenue;
-
-    const pricePerShare = calculateEquityValue(currentRevenue, currentMargin, yearsToProject);
-    setCalculatedPricePerShare(pricePerShare);
+      const result = await response.json();
+      // Handle both possible response formats
+      const value = result.calculatedPricePerShare !== undefined ? result.calculatedPricePerShare : 
+                    result.intrinsicValuePerShare !== undefined ? parseFloat(result.intrinsicValuePerShare) : null;
+      setCalculatedPricePerShare(value);
+    } catch (error) {
+      console.error('Failed to calculate growth valuation:', error);
+      setSaveError((error as Error).message);
+    }
   };
 
   useEffect(() => {
@@ -343,8 +365,12 @@ const GrowthTab: React.FC<GrowthTabProps> = ({ symbol }) => {
         if (!response.ok) {
           throw new Error(`HTTP error! status: ${response.status}`);
         }
-        const data: GrowthData = await response.json();
+        const responseData: GrowthValuationResponse = await response.json();
+        // Extract the growthValuationData from the response
+        const data = responseData.growthValuationData;
         setGrowthData(data);
+        // Initialize input fields from fetched data (use growthUserInput for marginal tax rate)
+        setMarginalTaxRateInput(responseData.growthUserInput.marginalTaxRate);
       } catch (e: any) {
         setError(e.message);
       } finally {
@@ -404,47 +430,33 @@ const GrowthTab: React.FC<GrowthTabProps> = ({ symbol }) => {
         Growth Calculator for {growthData.name} ({growthData.ticker})
       </h2>
       
-      <div className="grid grid-cols-2 gap-4 mb-6">
-        <div className="bg-gray-50 p-4 rounded-lg">
-          <span className="text-gray-600 font-medium">Sector:</span>
-          <span className="ml-2 text-gray-900">{growthData.sector}</span>
-        </div>
-        <div className="bg-gray-50 p-4 rounded-lg">
-          <span className="text-gray-600 font-medium">Industry:</span>
-          <span className="ml-2 text-gray-900">{growthData.industry}</span>
-        </div>
-        <div className="bg-gray-50 p-4 rounded-lg">
-          <span className="text-gray-600 font-medium">Market Cap:</span>
-          <span className="ml-2 text-gray-900">{formatLargeNumber(growthData.marketCapitalization)}</span>
-        </div>
-        <div className="bg-gray-50 p-4 rounded-lg">
-          <span className="text-gray-600 font-medium">Risk-Free Rate:</span>
-          <span className="ml-2 text-gray-900">{(growthData.riskFreeRate * 100).toFixed(2)}%</span>
-        </div>
-      </div>
-
-      <div className="mt-6 grid grid-cols-2 gap-4">
-        <div className="bg-gray-50 p-4 rounded-lg">
-          <span className="text-gray-600 font-medium">Total Debt:</span>
-          <span className="ml-2 text-gray-900">{formatLargeNumber(growthData.totalDebt)}</span>
-        </div>
-        <div className="bg-gray-50 p-4 rounded-lg">
-          <span className="text-gray-600 font-medium">Cash Balance:</span>
-          <span className="ml-2 text-gray-900">{formatLargeNumber(growthData.cashBalance)}</span>
-        </div>
-        <div className="bg-gray-50 p-4 rounded-lg">
-          <span className="text-gray-600 font-medium">Marginal Tax Rate:</span>
-          <span className="ml-2 text-gray-900">{(growthData.marginalTaxRate * 100).toFixed(2)}%</span>
-        </div>
-        <div className="bg-gray-50 p-4 rounded-lg">
-          <span className="text-gray-600 font-medium">Shares Outstanding:</span>
-          <span className="ml-2 text-gray-900">{formatLargeNumber(growthData.commonSharesOutstanding)}</span>
-        </div>
+      <div className="grid grid-cols-2 gap-2 mb-6">
+        <div><strong>Sector:</strong> {growthData.sector}</div>
+        <div><strong>Industry:</strong> {growthData.industry}</div>
+        <div><strong>Market Cap:</strong> {formatLargeNumber(growthData.marketCapitalization)}</div>
+        <div><strong>Total Debt:</strong> {formatLargeNumber(growthData.totalDebt)}</div>
+        <div><strong>Cash Balance:</strong> {formatLargeNumber(growthData.cashBalance)}</div>
+        <div><strong>Shares Outstanding:</strong> {formatLargeNumber(growthData.commonSharesOutstanding)}</div>
+        <div><strong>Risk-Free Rate:</strong> {(growthData.riskFreeRate * 100).toFixed(2)}%</div>
       </div>
 
       <div className="mt-8 bg-white p-6 rounded-lg border border-gray-200">
         <h3 className="text-xl font-bold mb-4">Growth Valuation Parameters</h3>
         <div className="grid grid-cols-2 gap-6">
+          <div>
+            <label className="flex items-center text-sm font-medium text-gray-700 mb-1">
+              Marginal Tax Rate (%)
+              <InfoIcon description="The tax rate applied to the company's last dollar of income. Used to calculate the after-tax cost of debt and other tax-adjusted metrics." />
+            </label>
+            <input
+              type="number"
+              step="0.01"
+              value={(marginalTaxRateInput * 100).toFixed(2)}
+              onChange={(e) => setMarginalTaxRateInput(parseFloat(e.target.value) / 100)}
+              className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-300 focus:ring focus:ring-indigo-200 focus:ring-opacity-50 bg-blue-100"
+            />
+          </div>
+
           <div>
             <label className="flex items-center text-sm font-medium text-gray-700 mb-1">
               Initial Revenue Growth Rate (%)
@@ -454,7 +466,7 @@ const GrowthTab: React.FC<GrowthTabProps> = ({ symbol }) => {
               type="number"
               value={initialRevenueGrowthRate}
               onChange={(e) => setInitialRevenueGrowthRate(parseFloat(e.target.value))}
-              className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+              className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-300 focus:ring focus:ring-indigo-200 focus:ring-opacity-50 bg-blue-100"
             />
           </div>
 
@@ -467,7 +479,7 @@ const GrowthTab: React.FC<GrowthTabProps> = ({ symbol }) => {
               type="number"
               value={growthFadePeriod}
               onChange={(e) => setGrowthFadePeriod(parseFloat(e.target.value))}
-              className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+              className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-300 focus:ring focus:ring-indigo-200 focus:ring-opacity-50 bg-blue-100"
             />
           </div>
 
@@ -481,7 +493,7 @@ const GrowthTab: React.FC<GrowthTabProps> = ({ symbol }) => {
               value={terminalGrowthRate}
               onChange={(e) => setTerminalGrowthRate(parseFloat(e.target.value))}
               max={growthData.riskFreeRate * 100}
-              className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+              className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-300 focus:ring focus:ring-indigo-200 focus:ring-opacity-50 bg-blue-100"
             />
           </div>
 
@@ -494,7 +506,7 @@ const GrowthTab: React.FC<GrowthTabProps> = ({ symbol }) => {
               type="number"
               value={yearsToProject}
               onChange={(e) => setYearsToProject(parseFloat(e.target.value))}
-              className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+              className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-300 focus:ring focus:ring-indigo-200 focus:ring-opacity-50 bg-blue-100"
             />
           </div>
 
@@ -507,7 +519,7 @@ const GrowthTab: React.FC<GrowthTabProps> = ({ symbol }) => {
               type="number"
               value={targetOperatingMargin}
               onChange={(e) => setTargetOperatingMargin(parseFloat(e.target.value))}
-              className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+              className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-300 focus:ring focus:ring-indigo-200 focus:ring-opacity-50 bg-blue-100"
             />
           </div>
 
@@ -520,20 +532,20 @@ const GrowthTab: React.FC<GrowthTabProps> = ({ symbol }) => {
               type="number"
               value={yearsToReachTargetMargin}
               onChange={(e) => setYearsToReachTargetMargin(parseFloat(e.target.value))}
-              className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+              className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-300 focus:ring focus:ring-indigo-200 focus:ring-opacity-50 bg-blue-100"
             />
           </div>
 
           <div>
             <label className="flex items-center text-sm font-medium text-gray-700 mb-1">
-              Reinvestment as % of Revenue
+              Reinvestment Rate (%)
               <InfoIcon description={metricDescriptions.growthInputs.reinvestmentRate} />
             </label>
             <input
               type="number"
               value={reinvestmentRate}
               onChange={(e) => setReinvestmentRate(parseFloat(e.target.value))}
-              className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+              className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-300 focus:ring focus:ring-indigo-200 focus:ring-opacity-50 bg-blue-100"
             />
           </div>
 
@@ -546,7 +558,7 @@ const GrowthTab: React.FC<GrowthTabProps> = ({ symbol }) => {
               type="number"
               value={initialCostOfCapital}
               onChange={(e) => setInitialCostOfCapital(parseFloat(e.target.value))}
-              className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+              className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-300 focus:ring focus:ring-indigo-200 focus:ring-opacity-50 bg-blue-100"
             />
           </div>
 
@@ -559,7 +571,7 @@ const GrowthTab: React.FC<GrowthTabProps> = ({ symbol }) => {
               type="number"
               value={terminalCostOfCapital}
               onChange={(e) => setTerminalCostOfCapital(parseFloat(e.target.value))}
-              className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+              className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-300 focus:ring focus:ring-indigo-200 focus:ring-opacity-50 bg-blue-100"
             />
           </div>
 
@@ -572,7 +584,7 @@ const GrowthTab: React.FC<GrowthTabProps> = ({ symbol }) => {
               type="number"
               value={yearsOfRiskConvergence}
               onChange={(e) => setYearsOfRiskConvergence(parseFloat(e.target.value))}
-              className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+              className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-300 focus:ring focus:ring-indigo-200 focus:ring-opacity-50 bg-blue-100"
             />
           </div>
 
@@ -587,7 +599,7 @@ const GrowthTab: React.FC<GrowthTabProps> = ({ symbol }) => {
               onChange={(e) => setProbabilityOfFailure(parseFloat(e.target.value))}
               min={0}
               max={100}
-              className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+              className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-300 focus:ring focus:ring-indigo-200 focus:ring-opacity-50 bg-blue-100"
             />
           </div>
 
@@ -600,7 +612,7 @@ const GrowthTab: React.FC<GrowthTabProps> = ({ symbol }) => {
               type="number"
               value={distressProceeds}
               onChange={(e) => setDistressProceeds(parseFloat(e.target.value))}
-              className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+              className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-300 focus:ring focus:ring-indigo-200 focus:ring-opacity-50 bg-blue-100"
             />
           </div>
         </div>
@@ -629,7 +641,7 @@ const GrowthTab: React.FC<GrowthTabProps> = ({ symbol }) => {
           {saveError && <span className="ml-4 text-red-500">Error: {saveError}</span>}
         </div>
 
-        {calculatedPricePerShare !== null && growthData && (
+        {calculatedPricePerShare !== null && calculatedPricePerShare !== undefined && !isNaN(calculatedPricePerShare as number) && growthData && (
           <div className="mt-6 p-4 bg-green-50 border border-green-200 rounded-lg">
             <h4 className="text-lg font-bold text-green-800 mb-2">Calculated Valuation</h4>
             {(() => {

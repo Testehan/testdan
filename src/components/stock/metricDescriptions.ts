@@ -180,7 +180,7 @@ export const metricDescriptions = {
         yearsToProject: "The total number of years to project future cash flows in the valuation model. A longer projection period captures more of the growth phase but increases uncertainty.",
         targetOperatingMargin: "The long-term steady-state operating margin that the company is expected to achieve when it reaches maturity. This represents the profitability level of a mature company in the industry.",
         yearsToReachTargetMargin: "The number of years over which the company's operating margin gradually improves from its current level to the target operating margin.",
-        reinvestmentRate: "The percentage of revenue that must be reinvested to achieve the projected growth rate. Higher growth typically requires higher reinvestment.",
+        reinvestmentRate: "The percentage of incremental revenue (new revenue generated each year) that the company reinvests back into the business to drive future growth. For example, entering '20' signifies a 20% reinvestment rate.",
         initialCostOfCapital: "The discount rate used for high-growth companies, reflecting higher risk. This rate gradually converges to the terminal cost of capital over time.",
         terminalCostOfCapital: "The discount rate for mature, stable companies with lower risk. This represents the long-term cost of capital when the company reaches steady state.",
         yearsOfRiskConvergence: "The number of years over which the cost of capital declines from the initial high rate to the terminal lower rate as the company matures and becomes less risky.",
