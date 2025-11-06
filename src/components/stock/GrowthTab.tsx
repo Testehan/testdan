@@ -133,6 +133,9 @@ const GrowthTab: React.FC<GrowthTabProps> = ({ symbol }) => {
   const [marginalTaxRateInput, setMarginalTaxRateInput] = useState<number>(0.25);
   const [calculatedPricePerShare, setCalculatedPricePerShare] = useState<number | null>(null);
   
+  // Store original server values for reset
+  const [serverGrowthUserInput, setServerGrowthUserInput] = useState<GrowthValuationResponse['growthUserInput'] | null>(null);
+  
   // Save functionality
   const [isSaving, setIsSaving] = useState<boolean>(false);
   const [saveError, setSaveError] = useState<string | null>(null);
@@ -143,38 +146,25 @@ const GrowthTab: React.FC<GrowthTabProps> = ({ symbol }) => {
   const [historyLoading, setHistoryLoading] = useState<boolean>(true);
   const [historyError, setHistoryError] = useState<string | null>(null);
 
-  // Default values for reset
-  const defaultValues = {
-    initialRevenueGrowthRate: 15,
-    growthFadePeriod: 5,
-    terminalGrowthRate: 2,
-    targetOperatingMargin: 20,
-    yearsToReachTargetMargin: 10,
-    reinvestmentRate: 30,
-    yearsToProject: 10,
-    initialCostOfCapital: 10,
-    terminalCostOfCapital: 8,
-    yearsOfRiskConvergence: 10,
-    probabilityOfFailure: 0,
-    distressProceeds: 0
-  };
-
   const resetCalculator = () => {
-    setInitialRevenueGrowthRate(defaultValues.initialRevenueGrowthRate);
-    setGrowthFadePeriod(defaultValues.growthFadePeriod);
-    setTerminalGrowthRate(defaultValues.terminalGrowthRate);
-    setTargetOperatingMargin(defaultValues.targetOperatingMargin);
-    setYearsToReachTargetMargin(defaultValues.yearsToReachTargetMargin);
-    setReinvestmentRate(defaultValues.reinvestmentRate);
-    setYearsToProject(defaultValues.yearsToProject);
-    setInitialCostOfCapital(defaultValues.initialCostOfCapital);
-    setTerminalCostOfCapital(defaultValues.terminalCostOfCapital);
-    setYearsOfRiskConvergence(defaultValues.yearsOfRiskConvergence);
-    setProbabilityOfFailure(defaultValues.probabilityOfFailure);
-    setDistressProceeds(defaultValues.distressProceeds);
-    if (growthData) {
-      setMarginalTaxRateInput(growthData.marginalTaxRate);
+    if (serverGrowthUserInput) {
+      // Reset to server values
+      setInitialRevenueGrowthRate(serverGrowthUserInput.initialRevenueGrowthRate);
+      setGrowthFadePeriod(serverGrowthUserInput.growthFadePeriod);
+      setTerminalGrowthRate(serverGrowthUserInput.terminalGrowthRate);
+      setYearsToProject(serverGrowthUserInput.yearsToProject);
+      setTargetOperatingMargin(serverGrowthUserInput.targetOperatingMargin);
+      setYearsToReachTargetMargin(serverGrowthUserInput.yearsToReachTargetMargin);
+      // Server sends reinvestmentAsPctOfRevenue as decimal (0.14), convert to percentage (14) for UI
+      setReinvestmentRate(serverGrowthUserInput.reinvestmentAsPctOfRevenue * 100);
+      setInitialCostOfCapital(serverGrowthUserInput.initialCostOfCapital);
+      setTerminalCostOfCapital(serverGrowthUserInput.terminalCostOfCapital);
+      setYearsOfRiskConvergence(serverGrowthUserInput.yearsOfRiskConvergence);
+      setProbabilityOfFailure(serverGrowthUserInput.probabilityOfFailure);
+      setDistressProceeds(serverGrowthUserInput.distressProceedsPctOfBookOrRevenue);
+      setMarginalTaxRateInput(serverGrowthUserInput.marginalTaxRate);
     }
+
     setCalculatedPricePerShare(null);
   };
 
@@ -232,7 +222,7 @@ const GrowthTab: React.FC<GrowthTabProps> = ({ symbol }) => {
           yearsToProject: yearsToProject,
           targetOperatingMargin: targetOperatingMargin,
           yearsToReachTargetMargin: yearsToReachTargetMargin,
-          reinvestmentAsPctOfRevenue: reinvestmentRate,
+          reinvestmentAsPctOfRevenue: reinvestmentRate / 100,
           initialCostOfCapital: initialCostOfCapital,
           terminalCostOfCapital: terminalCostOfCapital,
           yearsOfRiskConvergence: yearsOfRiskConvergence,
@@ -314,12 +304,13 @@ const GrowthTab: React.FC<GrowthTabProps> = ({ symbol }) => {
           yearsToProject,
           targetOperatingMargin,
           yearsToReachTargetMargin,
-          reinvestmentAsPctOfRevenue: reinvestmentRate,
+          reinvestmentAsPctOfRevenue: reinvestmentRate / 100,
           initialCostOfCapital,
           terminalCostOfCapital,
           yearsOfRiskConvergence,
           probabilityOfFailure,
           distressProceedsPctOfBookOrRevenue: distressProceeds,
+          marginalTaxRate: marginalTaxRateInput,
           // Add current year data needed for calculation
           currentRevenue: latestStatement.revenue,
           currentOperatingMargin: latestStatement.operatingIncome / latestStatement.revenue
@@ -369,7 +360,22 @@ const GrowthTab: React.FC<GrowthTabProps> = ({ symbol }) => {
         // Extract the growthValuationData from the response
         const data = responseData.growthValuationData;
         setGrowthData(data);
-        // Initialize input fields from fetched data (use growthUserInput for marginal tax rate)
+        // Store original server values for reset
+        setServerGrowthUserInput(responseData.growthUserInput);
+        // Initialize input fields from fetched data (use growthUserInput)
+        setInitialRevenueGrowthRate(responseData.growthUserInput.initialRevenueGrowthRate);
+        setGrowthFadePeriod(responseData.growthUserInput.growthFadePeriod);
+        setTerminalGrowthRate(responseData.growthUserInput.terminalGrowthRate);
+        setYearsToProject(responseData.growthUserInput.yearsToProject);
+        setTargetOperatingMargin(responseData.growthUserInput.targetOperatingMargin);
+        setYearsToReachTargetMargin(responseData.growthUserInput.yearsToReachTargetMargin);
+        // Server sends reinvestmentAsPctOfRevenue as decimal (0.14), convert to percentage (14) for UI
+        setReinvestmentRate(responseData.growthUserInput.reinvestmentAsPctOfRevenue * 100);
+        setInitialCostOfCapital(responseData.growthUserInput.initialCostOfCapital);
+        setTerminalCostOfCapital(responseData.growthUserInput.terminalCostOfCapital);
+        setYearsOfRiskConvergence(responseData.growthUserInput.yearsOfRiskConvergence);
+        setProbabilityOfFailure(responseData.growthUserInput.probabilityOfFailure);
+        setDistressProceeds(responseData.growthUserInput.distressProceedsPctOfBookOrRevenue);
         setMarginalTaxRateInput(responseData.growthUserInput.marginalTaxRate);
       } catch (e: any) {
         setError(e.message);
@@ -464,7 +470,8 @@ const GrowthTab: React.FC<GrowthTabProps> = ({ symbol }) => {
             </label>
             <input
               type="number"
-              value={initialRevenueGrowthRate}
+              step="0.01"
+              value={initialRevenueGrowthRate.toFixed(2)}
               onChange={(e) => setInitialRevenueGrowthRate(parseFloat(e.target.value))}
               className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-300 focus:ring focus:ring-indigo-200 focus:ring-opacity-50 bg-blue-100"
             />
@@ -490,7 +497,8 @@ const GrowthTab: React.FC<GrowthTabProps> = ({ symbol }) => {
             </label>
             <input
               type="number"
-              value={terminalGrowthRate}
+              step="0.01"
+              value={terminalGrowthRate.toFixed(2)}
               onChange={(e) => setTerminalGrowthRate(parseFloat(e.target.value))}
               max={growthData.riskFreeRate * 100}
               className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-300 focus:ring focus:ring-indigo-200 focus:ring-opacity-50 bg-blue-100"
@@ -517,7 +525,8 @@ const GrowthTab: React.FC<GrowthTabProps> = ({ symbol }) => {
             </label>
             <input
               type="number"
-              value={targetOperatingMargin}
+              step="0.01"
+              value={targetOperatingMargin.toFixed(2)}
               onChange={(e) => setTargetOperatingMargin(parseFloat(e.target.value))}
               className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-300 focus:ring focus:ring-indigo-200 focus:ring-opacity-50 bg-blue-100"
             />
@@ -543,7 +552,8 @@ const GrowthTab: React.FC<GrowthTabProps> = ({ symbol }) => {
             </label>
             <input
               type="number"
-              value={reinvestmentRate}
+              step="0.01"
+              value={reinvestmentRate.toFixed(2)}
               onChange={(e) => setReinvestmentRate(parseFloat(e.target.value))}
               className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-300 focus:ring focus:ring-indigo-200 focus:ring-opacity-50 bg-blue-100"
             />
@@ -556,7 +566,8 @@ const GrowthTab: React.FC<GrowthTabProps> = ({ symbol }) => {
             </label>
             <input
               type="number"
-              value={initialCostOfCapital}
+              step="0.01"
+              value={initialCostOfCapital.toFixed(2)}
               onChange={(e) => setInitialCostOfCapital(parseFloat(e.target.value))}
               className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-300 focus:ring focus:ring-indigo-200 focus:ring-opacity-50 bg-blue-100"
             />
@@ -569,7 +580,8 @@ const GrowthTab: React.FC<GrowthTabProps> = ({ symbol }) => {
             </label>
             <input
               type="number"
-              value={terminalCostOfCapital}
+              step="0.01"
+              value={terminalCostOfCapital.toFixed(2)}
               onChange={(e) => setTerminalCostOfCapital(parseFloat(e.target.value))}
               className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-300 focus:ring focus:ring-indigo-200 focus:ring-opacity-50 bg-blue-100"
             />
@@ -595,7 +607,8 @@ const GrowthTab: React.FC<GrowthTabProps> = ({ symbol }) => {
             </label>
             <input
               type="number"
-              value={probabilityOfFailure}
+              step="0.01"
+              value={probabilityOfFailure.toFixed(2)}
               onChange={(e) => setProbabilityOfFailure(parseFloat(e.target.value))}
               min={0}
               max={100}
@@ -610,7 +623,8 @@ const GrowthTab: React.FC<GrowthTabProps> = ({ symbol }) => {
             </label>
             <input
               type="number"
-              value={distressProceeds}
+              step="0.01"
+              value={distressProceeds.toFixed(2)}
               onChange={(e) => setDistressProceeds(parseFloat(e.target.value))}
               className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-300 focus:ring focus:ring-indigo-200 focus:ring-opacity-50 bg-blue-100"
             />
