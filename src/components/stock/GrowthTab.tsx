@@ -872,6 +872,7 @@ const GrowthTab: React.FC<GrowthTabProps> = ({ symbol }) => {  const [growthData
                   <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Intrinsic Value Per Share</th>
                   <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Share Price at Valuation</th>
                   <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Verdict</th>
+                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Comments</th>
                 </tr>
               </thead>
               <tbody className="bg-white divide-y divide-gray-200">
@@ -887,6 +888,11 @@ const GrowthTab: React.FC<GrowthTabProps> = ({ symbol }) => {  const [growthData
                         'bg-yellow-200 text-yellow-800'
                       }`}>
                         {entry.growthOutput.verdict}
+                      </td>
+                      <td className="px-6 py-4 text-sm text-gray-500 truncate max-w-xs" title={entry.growthUserInput.userComments}>
+                        {entry.growthUserInput.userComments && entry.growthUserInput.userComments.length > 50 
+                          ? `${entry.growthUserInput.userComments.substring(0, 47)}...` 
+                          : entry.growthUserInput.userComments}
                       </td>
                     </tr>
                   ))
