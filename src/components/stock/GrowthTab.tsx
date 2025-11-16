@@ -69,6 +69,7 @@ interface GrowthHistoryEntry {
     probabilityOfFailure: number;
     distressProceedsPctOfBookOrRevenue: number;
     marginalTaxRate: number;
+    userComments: string;
   };
   growthOutput: {
     intrinsicValuePerShare: string;
@@ -93,6 +94,7 @@ interface GrowthValuationResponse {
     probabilityOfFailure: number;
     distressProceedsPctOfBookOrRevenue: number;
     marginalTaxRate: number;
+    userComments: string;
   };
   growthOutput: {
     intrinsicValuePerShare: string;
@@ -209,6 +211,7 @@ const GrowthTab: React.FC<GrowthTabProps> = ({ symbol }) => {  const [growthData
   const [distressProceeds, setDistressProceeds] = useState<number>(0);
   const [yearsToProject, setYearsToProject] = useState<number>(10);
   const [marginalTaxRateInput, setMarginalTaxRateInput] = useState<number>(0.25);
+  const [userComments, setUserComments] = useState<string>('');
   const [calculatedPricePerShare, setCalculatedPricePerShare] = useState<number | null>(null);
   
   // Store original server values for reset
@@ -262,6 +265,7 @@ const GrowthTab: React.FC<GrowthTabProps> = ({ symbol }) => {  const [growthData
     setProbabilityOfFailure(entry.growthUserInput.probabilityOfFailure);
     setDistressProceeds(entry.growthUserInput.distressProceedsPctOfBookOrRevenue);
     setMarginalTaxRateInput(entry.growthUserInput.marginalTaxRate);
+    setUserComments(entry.growthUserInput.userComments || ''); // Set userComments, default to empty string if not present
     
     // Set the calculated result
     setCalculatedPricePerShare(parseFloat(entry.growthOutput.intrinsicValuePerShare));
@@ -307,6 +311,7 @@ const GrowthTab: React.FC<GrowthTabProps> = ({ symbol }) => {  const [growthData
           probabilityOfFailure: probabilityOfFailure,
           distressProceedsPctOfBookOrRevenue: distressProceeds,
           marginalTaxRate: marginalTaxRateInput,
+          userComments: userComments,
         },
         growthOutput: {
           intrinsicValuePerShare: calculatedPricePerShare.toFixed(2),
@@ -455,6 +460,7 @@ const GrowthTab: React.FC<GrowthTabProps> = ({ symbol }) => {  const [growthData
         setProbabilityOfFailure(responseData.growthUserInput.probabilityOfFailure);
         setDistressProceeds(responseData.growthUserInput.distressProceedsPctOfBookOrRevenue);
         setMarginalTaxRateInput(responseData.growthUserInput.marginalTaxRate);
+        setUserComments(responseData.growthUserInput.userComments || ''); // Populate userComments on initial load
       } catch (e: any) {
         setError(e.message);
       } finally {
@@ -763,6 +769,18 @@ const GrowthTab: React.FC<GrowthTabProps> = ({ symbol }) => {  const [growthData
               value={distressProceeds.toFixed(2)}
               onChange={(e) => setDistressProceeds(parseFloat(e.target.value))}
               className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-300 focus:ring focus:ring-indigo-200 focus:ring-opacity-50 bg-blue-100"
+            />
+          </div>
+
+          <div> {/* No longer spans two columns */}
+            <label className="block text-sm font-medium text-gray-700 mb-1">
+              Comments
+            </label>
+            <textarea
+              value={userComments}
+              onChange={(e) => setUserComments(e.target.value)}
+              className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-300 focus:ring focus:ring-indigo-200 focus:ring-opacity-50 bg-blue-100 min-h-[100px] p-2"
+              placeholder="Add any additional comments or notes here..."
             />
           </div>
         </div>
