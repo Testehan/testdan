@@ -64,6 +64,29 @@ interface DcfCalculatorProps {
   symbol: string;
 }
 
+// Interface for DCF calculation request
+interface DcfValuation {
+  dcfCalculationData: DcfData;
+  dcfUserInput: {
+    beta: number;
+    riskFreeRate: number;
+    marketRiskPremium: number;
+    fcfGrowthRate: number;
+    terminalMultiple: number;
+    sbcAdjustmentToggle: boolean;
+    userComments: string;
+  };
+}
+
+// Interface for DCF calculation response
+interface DcfOutput {
+  wacc: number;
+  projectedFcfs: ProjectedFcf[];
+  terminalValue: number;
+  equityValue: number;
+  intrinsicValuePerShare: number;
+  verdict: string;
+}
 
 interface VerdictStyling {
   verdictText: string;
@@ -190,96 +213,74 @@ const DcfCalculator: React.FC<DcfCalculatorProps> = ({ symbol }) => {
     }
   }, [symbol, fetchValuationHistory]);
 
-  // Calculations are now wrapped in a useCallback so they can be triggered by input changes
-  const performCalculations = useCallback(() => {
+  // Server-side calculation function
+  const performCalculations = useCallback(async () => {
     if (!dcfData) return;
 
-    // Use input states for calculations
-    const beta = inputBeta;
-    const riskFreeRate = inputRiskFreeRate;
-    const marketRiskPremium = inputMarketRiskPremium;
+    try {
+      // Calculate FCF projections client-side for display
+      const {
+        cashFlow: { operatingCashFlow: initialOperatingCashFlowFetched, capitalExpenditure: initialCapitalExpenditure, stockBasedCompensation },
+      } = dcfData;
 
-    const fcfGrowthRateUsed = userInputFcfGrowthRate;
-
-    // Destructure what we need from dcfData, primarily for current values
-    const {
-      meta: { sharesOutstanding, currentSharePrice },
-      cashFlow: { operatingCashFlow: initialOperatingCashFlowFetched, capitalExpenditure: initialCapitalExpenditure, stockBasedCompensation },
-      balanceSheet: { totalShortTermDebt, totalLongTermDebt, totalCashAndEquivalents }
-    } = dcfData;
-
-    let initialOperatingCashFlow = initialOperatingCashFlowFetched;
-    if (sbcAdjustmentToggle) {
+      let initialOperatingCashFlow = initialOperatingCashFlowFetched;
+      if (sbcAdjustmentToggle) {
         initialOperatingCashFlow -= stockBasedCompensation;
-    }
+      }
 
-    // --- WACC Calculation ---
-    const costOfEquity = riskFreeRate + beta * marketRiskPremium;
-    const totalDebt = totalShortTermDebt + totalLongTermDebt;
-    const marketValueOfEquity = currentSharePrice * sharesOutstanding;
-    const marketValueOfDebt = totalDebt;
-    const totalCapital = marketValueOfEquity + marketValueOfDebt;
-    
-    const costOfDebt = totalDebt > 0 ? (dcfData.income.interestExpense / totalDebt) : 0;
-    const taxRate = 0.25; // Default tax rate as it's no longer a user input
-    
-    let calculatedWacc = 0;
-    if (totalCapital > 0) {
-        const weightOfEquity = marketValueOfEquity / totalCapital;
-        const weightOfDebt = marketValueOfDebt / totalCapital;
-        calculatedWacc = (weightOfEquity * costOfEquity) + (weightOfDebt * costOfDebt * (1 - taxRate));
-    }
-    setWacc(calculatedWacc);
+      // --- FCF Projection ---
+      const projectionYears = 5;
+      const fcfProjections: ProjectedFcf[] = [];
+      let currentOperatingCashFlow = initialOperatingCashFlow;
+      let currentCapitalExpenditure = initialCapitalExpenditure;
 
-
-    // --- FCF Projection ---
-    const projectionYears = 5;
-    const fcfProjections: ProjectedFcf[] = [];
-
-    // Initial values for the projection loop
-    let currentOperatingCashFlow = initialOperatingCashFlow;
-    let currentCapitalExpenditure = initialCapitalExpenditure;
-
-    for (let i = 1; i <= projectionYears; i++) {
-        // Project OCF and CapEx based on the revenue growth rate assumption
-        currentOperatingCashFlow *= (1 + fcfGrowthRateUsed);
-        currentCapitalExpenditure *= (1 + fcfGrowthRateUsed);
-
-        // FCFF = OCF - CapEx
+      for (let i = 1; i <= projectionYears; i++) {
+        currentOperatingCashFlow *= (1 + userInputFcfGrowthRate);
+        currentCapitalExpenditure *= (1 + userInputFcfGrowthRate);
         const fcf = currentOperatingCashFlow - Math.abs(currentCapitalExpenditure);
+        fcfProjections.push({ year: i, fcf });
+      }
+      setProjectedFcfs(fcfProjections);
 
-                fcfProjections.push({
-                    year: i,
-                    fcf: fcf,
-                });    }
-    setProjectedFcfs(fcfProjections);
+      // Calculate terminal value client-side
+      const lastProjectedFcf = fcfProjections[fcfProjections.length - 1].fcf;
+      const calculatedTerminalValue = lastProjectedFcf * userInputTerminalMultiple;
+      setTerminalValue(calculatedTerminalValue);
 
-    // --- Terminal Value Calculation ---
-    let calculatedTerminalValue = 0;
-    if (fcfProjections.length > 0) {
-        const lastProjectedFcf = fcfProjections[fcfProjections.length - 1].fcf;
-        calculatedTerminalValue = lastProjectedFcf * userInputTerminalMultiple;
-    }
-    setTerminalValue(calculatedTerminalValue);
+      // Send request to server for final valuation
+      const dcfValuation: DcfValuation = {
+        dcfCalculationData: dcfData,
+        dcfUserInput: {
+          beta: inputBeta,
+          riskFreeRate: inputRiskFreeRate,
+          marketRiskPremium: inputMarketRiskPremium,
+          fcfGrowthRate: userInputFcfGrowthRate,
+          terminalMultiple: userInputTerminalMultiple,
+          sbcAdjustmentToggle: sbcAdjustmentToggle,
+          userComments: userComments,
+        },
+      };
 
-    // --- Discounting FCFs and Terminal Value ---
-    let sumOfDiscountedFcfs = 0;
-    fcfProjections.forEach((proj) => {
-        sumOfDiscountedFcfs += proj.fcf / Math.pow(1 + calculatedWacc, proj.year);
-    });
+      const response = await fetch('http://localhost:8080/stock/valuation/calculate/dcf', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(dcfValuation),
+      });
 
-    const discountedTerminalValue = calculatedTerminalValue / Math.pow(1 + calculatedWacc, projectionYears);
+      if (!response.ok) {
+        throw new Error(`HTTP error! status: ${response.status}`);
+      }
 
-    // --- Intrinsic Value Calculation ---
-    const totalEnterpriseValue = sumOfDiscountedFcfs + discountedTerminalValue;
+      const dcfOutput: DcfOutput = await response.json();
 
-    // Adjust for Cash & Debt to get Equity Value
-    const equityValue = totalEnterpriseValue + totalCashAndEquivalents - totalDebt;
-    setIntrinsicValue(equityValue);
-
-    // Intrinsic Value Per Share
-    if (sharesOutstanding > 0) {
-        setIntrinsicValuePerShare(equityValue / sharesOutstanding);
+      // Update state with server response (use server's values as authoritative)
+      setWacc(dcfOutput.wacc);
+      setIntrinsicValue(dcfOutput.equityValue);
+      setIntrinsicValuePerShare(dcfOutput.intrinsicValuePerShare);
+    } catch (error) {
+      console.error('Failed to calculate DCF:', error);
     }
   }, [
     dcfData,
@@ -289,14 +290,8 @@ const DcfCalculator: React.FC<DcfCalculatorProps> = ({ symbol }) => {
     userInputFcfGrowthRate,
     userInputTerminalMultiple,
     sbcAdjustmentToggle,
-]);
-
-  // Effect to trigger calculations when dcfData changes (for initial load)
-  useEffect(() => {
-    if (dcfData) {
-      performCalculations();
-    }
-  }, [dcfData, performCalculations]);
+    userComments,
+  ]);
 
   const resetCalculator = useCallback(() => {
     if (!originalDcfData) return;
@@ -323,8 +318,7 @@ const DcfCalculator: React.FC<DcfCalculatorProps> = ({ symbol }) => {
     setIntrinsicValue(null);
     setIntrinsicValuePerShare(null);
 
-    // No need to explicitly call performCalculations here, as updating dcfData and input states
-    // will trigger the useEffect that calls performCalculations.
+    // Calculations will NOT be triggered automatically. User must click Calculate button.
   }, [
     originalDcfData,
     // Add all setters to the dependency array
@@ -353,13 +347,8 @@ const DcfCalculator: React.FC<DcfCalculatorProps> = ({ symbol }) => {
 
     setDcfData(entry.dcfCalculationData);
 
-
-
-    // Explicitly re-run calculations with the loaded historical data
-    // This ensures immediate update of derived values
-    performCalculations();
+    // User must click Calculate button to see updated results
   }, [
-    performCalculations, // Add performCalculations to dependency array
     setInputBeta, setInputRiskFreeRate, setInputMarketRiskPremium,
     setFcfGrowthRate,
     setUserInputFcfGrowthRate,
@@ -625,7 +614,7 @@ const DcfCalculator: React.FC<DcfCalculatorProps> = ({ symbol }) => {
         )}
 
         <h6 className="text-lg font-medium mt-4 mb-2">Projected Free Cash Flows:</h6>
-        {projectedFcfs.length > 0 ? (
+        {projectedFcfs && projectedFcfs.length > 0 ? (
           <div className="overflow-x-auto">
             <table className="min-w-full divide-y divide-gray-200">
               <thead className="bg-gray-50">
@@ -648,13 +637,13 @@ const DcfCalculator: React.FC<DcfCalculatorProps> = ({ symbol }) => {
           <p>No FCF projections available.</p>
         )}
 
-        {terminalValue !== null && (
+        {terminalValue != null && (
           <p className="mt-4"><strong>Terminal Value:</strong> {terminalValue.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</p>
         )}
-        {intrinsicValue !== null && (
+        {intrinsicValue != null && (
           <p><strong>Intrinsic Value (Equity Value):</strong> {intrinsicValue.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</p>
         )}
-        {intrinsicValuePerShare !== null && (
+        {intrinsicValuePerShare != null && (
           <p><strong>Intrinsic Value Per Share:</strong> {dcfData.meta.currency} {intrinsicValuePerShare.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</p>
         )}
         {intrinsicValuePerShare !== null && dcfData.meta.currentSharePrice !== null && (
