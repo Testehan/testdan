@@ -886,10 +886,10 @@ const GrowthTab: React.FC<GrowthTabProps> = ({ symbol }) => {  const [growthData
       <div className="mt-6">
         <h3 className="text-xl font-bold mb-4">Income Statements</h3>
         <div className="overflow-x-auto">
-          <table className="min-w-full divide-y divide-gray-200">
+          <table className="min-w-full divide-y divide-gray-200 table-fixed">
             <thead className="bg-gray-50">
               <tr>
-                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Metric</th>
+                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider w-64">Metric</th>
                 {displayYears.map((year) => (
                   <th key={year} className={`px-6 py-3 text-left text-xs font-medium uppercase tracking-wider ${year === projectedYear ? 'text-blue-600 bg-blue-50' : 'text-gray-500'}`}>
                     {year === projectedYear ? `${year} (Proj)` : year}
@@ -899,7 +899,7 @@ const GrowthTab: React.FC<GrowthTabProps> = ({ symbol }) => {  const [growthData
             </thead>
             <tbody className="bg-white divide-y divide-gray-200">
               <tr>
-                <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">Revenue</td>
+                <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900 w-64">Revenue</td>
                 {displayYears.map((year) => {
                   if (year === projectedYear) {
                     return <td key={year} className="px-6 py-4 whitespace-nowrap text-sm font-semibold text-blue-600 bg-blue-50">{formatLargeNumber(projectedRevenue)}</td>;
@@ -909,7 +909,7 @@ const GrowthTab: React.FC<GrowthTabProps> = ({ symbol }) => {  const [growthData
                 })}
               </tr>
               <tr>
-                <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">Operating Income</td>
+                <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900 w-64">Operating Income</td>
                 {displayYears.map((year) => {
                   if (year === projectedYear) {
                     return <td key={year} className="px-6 py-4 whitespace-nowrap text-sm font-semibold text-blue-600 bg-blue-50">{formatLargeNumber(projectedOperatingIncome)}</td>;
@@ -919,7 +919,7 @@ const GrowthTab: React.FC<GrowthTabProps> = ({ symbol }) => {  const [growthData
                 })}
               </tr>
               <tr>
-                <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">Pre-tax Income</td>
+                <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900 w-64">Pre-tax Income</td>
                 {displayYears.map((year) => {
                   if (year === projectedYear) {
                     return <td key={year} className="px-6 py-4 whitespace-nowrap text-sm font-semibold text-blue-600 bg-blue-50">{formatLargeNumber(projectedPretaxIncome)}</td>;
@@ -929,7 +929,7 @@ const GrowthTab: React.FC<GrowthTabProps> = ({ symbol }) => {  const [growthData
                 })}
               </tr>
               <tr>
-                <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">Net Income</td>
+                <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900 w-64">Net Income</td>
                 {displayYears.map((year) => {
                   if (year === projectedYear) {
                     return <td key={year} className="px-6 py-4 whitespace-nowrap text-sm font-semibold text-blue-600 bg-blue-50">{formatLargeNumber(projectedNetIncome)}</td>;
@@ -946,10 +946,10 @@ const GrowthTab: React.FC<GrowthTabProps> = ({ symbol }) => {  const [growthData
       <div className="mt-6">
         <h3 className="text-xl font-bold mb-4">Balance Sheets</h3>
         <div className="overflow-x-auto">
-          <table className="min-w-full divide-y divide-gray-200">
+          <table className="min-w-full divide-y divide-gray-200 table-fixed">
             <thead className="bg-gray-50">
               <tr>
-                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Metric</th>
+                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider w-64">Metric</th>
                 {displayYears.map((year) => (
                   <th key={year} className={`px-6 py-3 text-left text-xs font-medium uppercase tracking-wider ${year === projectedYear ? 'text-blue-600 bg-blue-50' : 'text-gray-500'}`}>
                     {year === projectedYear ? `${year} (Proj)` : year}
@@ -959,7 +959,7 @@ const GrowthTab: React.FC<GrowthTabProps> = ({ symbol }) => {  const [growthData
             </thead>
             <tbody className="bg-white divide-y divide-gray-200">
               <tr>
-                <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">Cash & Equivalents</td>
+                <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900 w-64">Cash & Equivalents</td>
                 {displayYears.map((year) => {
                   if (year === projectedYear) {
                     return <td key={year} className="px-6 py-4 whitespace-nowrap text-sm text-gray-400 bg-blue-50">-</td>;
@@ -969,7 +969,7 @@ const GrowthTab: React.FC<GrowthTabProps> = ({ symbol }) => {  const [growthData
                 })}
               </tr>
               <tr>
-                <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">Short-term Debt</td>
+                <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900 w-64">Short-term Debt</td>
                 {displayYears.map((year) => {
                   if (year === projectedYear) {
                     return <td key={year} className="px-6 py-4 whitespace-nowrap text-sm text-gray-400 bg-blue-50">-</td>;
@@ -979,7 +979,7 @@ const GrowthTab: React.FC<GrowthTabProps> = ({ symbol }) => {  const [growthData
                 })}
               </tr>
               <tr>
-                <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">Long-term Debt</td>
+                <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900 w-64">Long-term Debt</td>
                 {displayYears.map((year) => {
                   if (year === projectedYear) {
                     return <td key={year} className="px-6 py-4 whitespace-nowrap text-sm text-gray-400 bg-blue-50">-</td>;
@@ -989,7 +989,7 @@ const GrowthTab: React.FC<GrowthTabProps> = ({ symbol }) => {  const [growthData
                 })}
               </tr>
               <tr>
-                <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">Total Assets</td>
+                <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900 w-64">Total Assets</td>
                 {displayYears.map((year) => {
                   if (year === projectedYear) {
                     return <td key={year} className="px-6 py-4 whitespace-nowrap text-sm text-gray-400 bg-blue-50">-</td>;
@@ -999,7 +999,7 @@ const GrowthTab: React.FC<GrowthTabProps> = ({ symbol }) => {  const [growthData
                 })}
               </tr>
               <tr>
-                <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">Total Equity</td>
+                <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900 w-64">Total Equity</td>
                 {displayYears.map((year) => {
                   if (year === projectedYear) {
                     return <td key={year} className="px-6 py-4 whitespace-nowrap text-sm text-gray-400 bg-blue-50">-</td>;
@@ -1016,10 +1016,10 @@ const GrowthTab: React.FC<GrowthTabProps> = ({ symbol }) => {  const [growthData
       <div className="mt-6">
         <h3 className="text-xl font-bold mb-4">Cash Flows</h3>
         <div className="overflow-x-auto">
-          <table className="min-w-full divide-y divide-gray-200">
+          <table className="min-w-full divide-y divide-gray-200 table-fixed">
             <thead className="bg-gray-50">
               <tr>
-                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Metric</th>
+                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider w-64">Metric</th>
                 {displayYears.map((year) => (
                   <th key={year} className={`px-6 py-3 text-left text-xs font-medium uppercase tracking-wider ${year === projectedYear ? 'text-blue-600 bg-blue-50' : 'text-gray-500'}`}>
                     {year === projectedYear ? `${year} (Proj)` : year}
@@ -1029,7 +1029,7 @@ const GrowthTab: React.FC<GrowthTabProps> = ({ symbol }) => {  const [growthData
             </thead>
             <tbody className="bg-white divide-y divide-gray-200">
               <tr>
-                <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">Operating Cash Flow</td>
+                <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900 w-64">Operating Cash Flow</td>
                 {displayYears.map((year) => {
                   if (year === projectedYear) {
                     return <td key={year} className="px-6 py-4 whitespace-nowrap text-sm font-semibold text-blue-600 bg-blue-50">{formatLargeNumber(projectedOperatingCashFlow)}</td>;
@@ -1039,7 +1039,7 @@ const GrowthTab: React.FC<GrowthTabProps> = ({ symbol }) => {  const [growthData
                 })}
               </tr>
               <tr>
-                <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">Capital Expenditures</td>
+                <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900 w-64">Capital Expenditures</td>
                 {displayYears.map((year) => {
                   if (year === projectedYear) {
                     return <td key={year} className="px-6 py-4 whitespace-nowrap text-sm font-semibold text-blue-600 bg-blue-50">{formatLargeNumber(projectedCapitalExpenditures)}</td>;
@@ -1049,7 +1049,7 @@ const GrowthTab: React.FC<GrowthTabProps> = ({ symbol }) => {  const [growthData
                 })}
               </tr>
               <tr>
-                <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">Depreciation & Amortization</td>
+                <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900 w-64">Depreciation & Amortization</td>
                 {displayYears.map((year) => {
                   if (year === projectedYear) {
                     return <td key={year} className="px-6 py-4 whitespace-nowrap text-sm font-semibold text-blue-600 bg-blue-50">{formatLargeNumber(projectedDepreciationAndAmortization)}</td>;
@@ -1059,7 +1059,7 @@ const GrowthTab: React.FC<GrowthTabProps> = ({ symbol }) => {  const [growthData
                 })}
               </tr>
               <tr>
-                <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">Change in Working Capital</td>
+                <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900 w-64">Change in Working Capital</td>
                 {displayYears.map((year) => {
                   if (year === projectedYear) {
                     return <td key={year} className="px-6 py-4 whitespace-nowrap text-sm font-semibold text-blue-600 bg-blue-50">{formatLargeNumber(projectedChangeInWorkingCapital)}</td>;
