@@ -101,9 +101,10 @@ interface GrowthValuationResponse {
 }
 
 const formatLargeNumber = (value: number): string => {
-  if (value >= 1e12) return (value / 1e12).toFixed(2) + 'T';
-  if (value >= 1e9) return (value / 1e9).toFixed(2) + 'B';
-  if (value >= 1e6) return (value / 1e6).toFixed(2) + 'M';
+  const absValue = Math.abs(value);
+  if (absValue >= 1e12) return (value / 1e12).toFixed(2) + 'T';
+  if (absValue >= 1e9) return (value / 1e9).toFixed(2) + 'B';
+  if (absValue >= 1e6) return (value / 1e6).toFixed(2) + 'M';
   return value.toLocaleString();
 };
 
@@ -183,6 +184,7 @@ const GrowthTab: React.FC<GrowthTabProps> = ({ symbol }) => {
     setYearsOfRiskConvergence(entry.growthUserInput.yearsOfRiskConvergence);
     setProbabilityOfFailure(entry.growthUserInput.probabilityOfFailure);
     setDistressProceeds(entry.growthUserInput.distressProceedsPctOfBookOrRevenue);
+    setMarginalTaxRateInput(entry.growthUserInput.marginalTaxRate);
     
     // Set the calculated result
     setCalculatedPricePerShare(parseFloat(entry.growthOutput.intrinsicValuePerShare));
@@ -208,8 +210,7 @@ const GrowthTab: React.FC<GrowthTabProps> = ({ symbol }) => {
 
       // Create modified growth data with user-input values
       const modifiedGrowthData = {
-        ...growthData,
-        marginalTaxRate: marginalTaxRateInput
+        ...growthData
       };
 
       const payload = {
@@ -227,7 +228,8 @@ const GrowthTab: React.FC<GrowthTabProps> = ({ symbol }) => {
           terminalCostOfCapital: terminalCostOfCapital,
           yearsOfRiskConvergence: yearsOfRiskConvergence,
           probabilityOfFailure: probabilityOfFailure,
-          distressProceedsPctOfBookOrRevenue: distressProceeds
+          distressProceedsPctOfBookOrRevenue: distressProceeds,
+          marginalTaxRate: marginalTaxRateInput,
         },
         growthOutput: {
           intrinsicValuePerShare: calculatedPricePerShare.toFixed(2),
@@ -290,8 +292,7 @@ const GrowthTab: React.FC<GrowthTabProps> = ({ symbol }) => {
       
       // Create modified growth data with user-input values
       const modifiedGrowthData = {
-        ...growthData,
-        marginalTaxRate: marginalTaxRateInput
+        ...growthData
       };
 
       const growthValuationPayload = {
@@ -429,6 +430,23 @@ const GrowthTab: React.FC<GrowthTabProps> = ({ symbol }) => {
   const incomeMap = new Map(sortedIncomeStatements.map(s => [s.fiscalYear, s]));
   const balanceMap = new Map(sortedBalanceSheets.map(s => [s.fiscalYear, s]));
   const cashFlowMap = new Map(sortedCashFlows.map(s => [s.fiscalYear, s]));
+
+  // Calculate projected year and revenue based on Growth Fade Period
+  const currentYear = new Date().getFullYear();
+  const projectedYear = currentYear + growthFadePeriod;
+  const latestStatement = sortedIncomeStatements.reduce((latest, current) => 
+    current.fiscalYear > latest.fiscalYear ? current : latest, sortedIncomeStatements[0]);
+  const currentRevenue = latestStatement?.revenue || 0;
+  const growthRateDecimal = initialRevenueGrowthRate / 100;
+  const projectedRevenue = currentRevenue * Math.pow(1 + growthRateDecimal, growthFadePeriod);
+  
+  // Calculate projected income statement values using target operating margin and marginal tax rate
+  const projectedOperatingIncome = projectedRevenue * (targetOperatingMargin / 100);
+  const projectedPretaxIncome = projectedOperatingIncome;
+  const projectedNetIncome = projectedPretaxIncome * (1 - marginalTaxRateInput);
+
+  // Add projected year to the years array for display
+  const displayYears = [projectedYear, ...allYears];
 
   return (
     <div className="p-4">
@@ -754,9 +772,9 @@ const GrowthTab: React.FC<GrowthTabProps> = ({ symbol }) => {
             <thead className="bg-gray-50">
               <tr>
                 <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Metric</th>
-                {allYears.map((year) => (
-                  <th key={year} className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                    {year}
+                {displayYears.map((year) => (
+                  <th key={year} className={`px-6 py-3 text-left text-xs font-medium uppercase tracking-wider ${year === projectedYear ? 'text-blue-600 bg-blue-50' : 'text-gray-500'}`}>
+                    {year === projectedYear ? `${year} (Proj)` : year}
                   </th>
                 ))}
               </tr>
@@ -764,28 +782,40 @@ const GrowthTab: React.FC<GrowthTabProps> = ({ symbol }) => {
             <tbody className="bg-white divide-y divide-gray-200">
               <tr>
                 <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">Revenue</td>
-                {allYears.map((year) => {
+                {displayYears.map((year) => {
+                  if (year === projectedYear) {
+                    return <td key={year} className="px-6 py-4 whitespace-nowrap text-sm font-semibold text-blue-600 bg-blue-50">{formatLargeNumber(projectedRevenue)}</td>;
+                  }
                   const data = incomeMap.get(year);
                   return <td key={year} className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">{data ? formatLargeNumber(data.revenue) : '-'}</td>;
                 })}
               </tr>
               <tr>
                 <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">Operating Income</td>
-                {allYears.map((year) => {
+                {displayYears.map((year) => {
+                  if (year === projectedYear) {
+                    return <td key={year} className="px-6 py-4 whitespace-nowrap text-sm font-semibold text-blue-600 bg-blue-50">{formatLargeNumber(projectedOperatingIncome)}</td>;
+                  }
                   const data = incomeMap.get(year);
                   return <td key={year} className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">{data ? formatLargeNumber(data.operatingIncome) : '-'}</td>;
                 })}
               </tr>
               <tr>
                 <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">Pre-tax Income</td>
-                {allYears.map((year) => {
+                {displayYears.map((year) => {
+                  if (year === projectedYear) {
+                    return <td key={year} className="px-6 py-4 whitespace-nowrap text-sm font-semibold text-blue-600 bg-blue-50">{formatLargeNumber(projectedPretaxIncome)}</td>;
+                  }
                   const data = incomeMap.get(year);
                   return <td key={year} className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">{data ? formatLargeNumber(data.pretaxIncome) : '-'}</td>;
                 })}
               </tr>
               <tr>
                 <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">Net Income</td>
-                {allYears.map((year) => {
+                {displayYears.map((year) => {
+                  if (year === projectedYear) {
+                    return <td key={year} className="px-6 py-4 whitespace-nowrap text-sm font-semibold text-blue-600 bg-blue-50">{formatLargeNumber(projectedNetIncome)}</td>;
+                  }
                   const data = incomeMap.get(year);
                   return <td key={year} className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">{data ? formatLargeNumber(data.netIncome) : '-'}</td>;
                 })}
@@ -802,9 +832,9 @@ const GrowthTab: React.FC<GrowthTabProps> = ({ symbol }) => {
             <thead className="bg-gray-50">
               <tr>
                 <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Metric</th>
-                {allYears.map((year) => (
-                  <th key={year} className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                    {year}
+                {displayYears.map((year) => (
+                  <th key={year} className={`px-6 py-3 text-left text-xs font-medium uppercase tracking-wider ${year === projectedYear ? 'text-blue-600 bg-blue-50' : 'text-gray-500'}`}>
+                    {year === projectedYear ? `${year} (Proj)` : year}
                   </th>
                 ))}
               </tr>
@@ -812,35 +842,50 @@ const GrowthTab: React.FC<GrowthTabProps> = ({ symbol }) => {
             <tbody className="bg-white divide-y divide-gray-200">
               <tr>
                 <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">Cash & Equivalents</td>
-                {allYears.map((year) => {
+                {displayYears.map((year) => {
+                  if (year === projectedYear) {
+                    return <td key={year} className="px-6 py-4 whitespace-nowrap text-sm text-gray-400 bg-blue-50">-</td>;
+                  }
                   const data = balanceMap.get(year);
                   return <td key={year} className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">{data ? formatLargeNumber(data.cashAndEquivalents) : '-'}</td>;
                 })}
               </tr>
               <tr>
                 <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">Short-term Debt</td>
-                {allYears.map((year) => {
+                {displayYears.map((year) => {
+                  if (year === projectedYear) {
+                    return <td key={year} className="px-6 py-4 whitespace-nowrap text-sm text-gray-400 bg-blue-50">-</td>;
+                  }
                   const data = balanceMap.get(year);
                   return <td key={year} className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">{data ? formatLargeNumber(data.shortTermDebt) : '-'}</td>;
                 })}
               </tr>
               <tr>
                 <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">Long-term Debt</td>
-                {allYears.map((year) => {
+                {displayYears.map((year) => {
+                  if (year === projectedYear) {
+                    return <td key={year} className="px-6 py-4 whitespace-nowrap text-sm text-gray-400 bg-blue-50">-</td>;
+                  }
                   const data = balanceMap.get(year);
                   return <td key={year} className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">{data ? formatLargeNumber(data.longTermDebt) : '-'}</td>;
                 })}
               </tr>
               <tr>
                 <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">Total Assets</td>
-                {allYears.map((year) => {
+                {displayYears.map((year) => {
+                  if (year === projectedYear) {
+                    return <td key={year} className="px-6 py-4 whitespace-nowrap text-sm text-gray-400 bg-blue-50">-</td>;
+                  }
                   const data = balanceMap.get(year);
                   return <td key={year} className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">{data ? formatLargeNumber(data.totalAssets) : '-'}</td>;
                 })}
               </tr>
               <tr>
                 <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">Total Equity</td>
-                {allYears.map((year) => {
+                {displayYears.map((year) => {
+                  if (year === projectedYear) {
+                    return <td key={year} className="px-6 py-4 whitespace-nowrap text-sm text-gray-400 bg-blue-50">-</td>;
+                  }
                   const data = balanceMap.get(year);
                   return <td key={year} className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">{data ? formatLargeNumber(data.totalEquity) : '-'}</td>;
                 })}
@@ -857,9 +902,9 @@ const GrowthTab: React.FC<GrowthTabProps> = ({ symbol }) => {
             <thead className="bg-gray-50">
               <tr>
                 <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Metric</th>
-                {allYears.map((year) => (
-                  <th key={year} className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                    {year}
+                {displayYears.map((year) => (
+                  <th key={year} className={`px-6 py-3 text-left text-xs font-medium uppercase tracking-wider ${year === projectedYear ? 'text-blue-600 bg-blue-50' : 'text-gray-500'}`}>
+                    {year === projectedYear ? `${year} (Proj)` : year}
                   </th>
                 ))}
               </tr>
@@ -867,28 +912,40 @@ const GrowthTab: React.FC<GrowthTabProps> = ({ symbol }) => {
             <tbody className="bg-white divide-y divide-gray-200">
               <tr>
                 <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">Operating Cash Flow</td>
-                {allYears.map((year) => {
+                {displayYears.map((year) => {
+                  if (year === projectedYear) {
+                    return <td key={year} className="px-6 py-4 whitespace-nowrap text-sm text-gray-400 bg-blue-50">-</td>;
+                  }
                   const data = cashFlowMap.get(year);
                   return <td key={year} className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">{data ? formatLargeNumber(data.operatingCashFlow) : '-'}</td>;
                 })}
               </tr>
               <tr>
                 <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">Capital Expenditures</td>
-                {allYears.map((year) => {
+                {displayYears.map((year) => {
+                  if (year === projectedYear) {
+                    return <td key={year} className="px-6 py-4 whitespace-nowrap text-sm text-gray-400 bg-blue-50">-</td>;
+                  }
                   const data = cashFlowMap.get(year);
                   return <td key={year} className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">{data ? formatLargeNumber(data.capitalExpenditures) : '-'}</td>;
                 })}
               </tr>
               <tr>
                 <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">Depreciation & Amortization</td>
-                {allYears.map((year) => {
+                {displayYears.map((year) => {
+                  if (year === projectedYear) {
+                    return <td key={year} className="px-6 py-4 whitespace-nowrap text-sm text-gray-400 bg-blue-50">-</td>;
+                  }
                   const data = cashFlowMap.get(year);
                   return <td key={year} className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">{data ? formatLargeNumber(data.depreciationAndAmortization) : '-'}</td>;
                 })}
               </tr>
               <tr>
                 <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">Change in Working Capital</td>
-                {allYears.map((year) => {
+                {displayYears.map((year) => {
+                  if (year === projectedYear) {
+                    return <td key={year} className="px-6 py-4 whitespace-nowrap text-sm text-gray-400 bg-blue-50">-</td>;
+                  }
                   const data = cashFlowMap.get(year);
                   return <td key={year} className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">{data ? formatLargeNumber(data.changeInWorkingCapital) : '-'}</td>;
                 })}
