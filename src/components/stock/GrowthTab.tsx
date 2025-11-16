@@ -113,8 +113,85 @@ const sortByYearDesc = <T extends { fiscalYear: number }>(data: T[]): T[] => {
   return [...data].sort((a, b) => b.fiscalYear - a.fiscalYear);
 };
 
-const GrowthTab: React.FC<GrowthTabProps> = ({ symbol }) => {
-  const [growthData, setGrowthData] = useState<GrowthData | null>(null);
+const dprnAndAmortizationBenchmarks: { [key: string]: number } = {
+  'Software / Internet / Tech Services': 0.035, // 3.5%
+  'Consumer Goods / Retail (non-heavy)': 0.045, // 4.5%
+  'Advertising / Marketing': 0.03, // 3%
+  'Pharmaceuticals / Biotech (mature)': 0.06, // 6%
+  'Industrials / Manufacturing': 0.06, // 6%
+  'Auto & Truck / Capital Goods': 0.07, // 7%
+  'Telecom': 0.115, // 11.5%
+  'Utilities / Electric': 0.095, // 9.5%
+  'Oil & Gas / Energy (integrated/exploration)': 0.095, // 9.5%
+  'Air Transport / Airlines': 0.09, // 9%
+  'Real Estate / REITs': 0.075, // 7.5%
+  'Technology': 0.035, // Default for broad 'Technology' sector
+  'Consumer Cyclical': 0.045, // Default for broad 'Consumer Cyclical'
+  'Consumer Defensive': 0.045, // Default for broad 'Consumer Defensive'
+  'Healthcare': 0.06, // Default for broad 'Healthcare'
+  'Basic Materials': 0.06, // Default for broad 'Basic Materials'
+  'Financial Services': 0.01, // Asset-light, often low D&A
+  'Communication Services': 0.115, // Similar to Telecom
+  'Energy': 0.095, // Similar to Oil & Gas
+  'Utilities': 0.095, // Similar to Utilities / Electric
+  'Industrials': 0.06, // Similar to Industrials / Manufacturing
+  'Real Estate': 0.075, // Similar to Real Estate / REITs
+  'Unknown': 0.05, // Fallback for uncategorized
+};
+
+const capexBenchmarks: { [key: string]: number } = {
+  'Software / Internet / Tech Services': 0.02, // 2%
+  'Consumer Goods / Retail (non-heavy)': 0.045, // 4.5%
+  'Advertising / Marketing': 0.015, // 1.5%
+  'Pharmaceuticals / Biotech (mature)': 0.05, // 5%
+  'Industrials / Manufacturing': 0.07, // 7%
+  'Auto & Truck / Capital Goods': 0.08, // 8%
+  'Telecom': 0.12, // 12%
+  'Utilities / Electric': 0.1, // 10%
+  'Oil & Gas / Energy (integrated/exploration)': 0.12, // 12%
+  'Air Transport / Airlines': 0.1, // 10%
+  'Real Estate / REITs': 0.08, // 8%
+  'Technology': 0.02,
+  'Consumer Cyclical': 0.045,
+  'Consumer Defensive': 0.045,
+  'Healthcare': 0.05,
+  'Basic Materials': 0.07,
+  'Financial Services': 0.01,
+  'Communication Services': 0.12,
+  'Energy': 0.12,
+  'Utilities': 0.1,
+  'Industrials': 0.07,
+  'Real Estate': 0.08,
+  'Unknown': 0.05, // Fallback
+};
+
+const deltaNwcBenchmarks: { [key: string]: number } = {
+  'Software / Internet / Tech Services': 0.005,     // 0.5% — often near-zero or negative due to deferred revenue/subscriptions
+  'Consumer Goods / Retail (non-heavy)': 0.01,      // 1.0% — moderate inventory/receivables needs
+  'Advertising / Marketing': 0.005,                 // 0.5% — asset-light, low WC intensity
+  'Pharmaceuticals / Biotech (mature)': 0.008,      // 0.8% — some receivables, but efficient mature ops
+  'Industrials / Manufacturing': 0.015,             // 1.5% — inventory + receivables typical
+  'Auto & Truck / Capital Goods': 0.02,             // 2.0% — higher inventory and supply chain
+  'Telecom': 0.01,                                  // 1.0% — stable, regulated ops with moderate WC
+  'Utilities / Electric': 0.005,                    // 0.5% — very low incremental needs once built
+  'Oil & Gas / Energy (integrated/exploration)': 0.015, // 1.5% — moderate due to inventory/cycles
+  'Air Transport / Airlines': 0.015,                // 1.5% — fuel/inventory + receivables
+  'Real Estate / REITs': 0.01,                      // 1.0% — property-focused, low operating WC
+  'Technology': 0.005,                              // 0.5% — broad tech, asset-light bias
+  'Consumer Cyclical': 0.012,                       // 1.2% — retail/discretionary variability
+  'Consumer Defensive': 0.008,                      // 0.8% — staples are efficient/stable
+  'Healthcare': 0.008,                              // 0.8% — similar to pharma/biotech mature
+  'Basic Materials': 0.015,                         // 1.5% — inventory-heavy
+  'Financial Services': 0.002,                      // 0.2% — often minimal/non-positive WC needs
+  'Communication Services': 0.01,                   // 1.0% — telecom/media mix
+  'Energy': 0.015,                                  // 1.5% — broad energy
+  'Utilities': 0.005,                               // 0.5% — infrastructure-heavy, low incremental
+  'Industrials': 0.015,                             // 1.5% — manufacturing/capital goods
+  'Real Estate': 0.01,                              // 1.0% — REIT/property
+  'Unknown': 0.01                                   // 1.0% — fallback conservative default
+};
+
+const GrowthTab: React.FC<GrowthTabProps> = ({ symbol }) => {  const [growthData, setGrowthData] = useState<GrowthData | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
@@ -444,6 +521,47 @@ const GrowthTab: React.FC<GrowthTabProps> = ({ symbol }) => {
   const projectedOperatingIncome = projectedRevenue * (targetOperatingMargin / 100);
   const projectedPretaxIncome = projectedOperatingIncome;
   const projectedNetIncome = projectedPretaxIncome * (1 - marginalTaxRateInput);
+
+  let averageDprnAndAmortizationAsPctOfRevenue = 0;
+  let averageChangeInWcAsPctOfRevenue = 0;
+
+  const numHistoricalYears = Math.min(sortedIncomeStatements.length, sortedCashFlows.length);
+  let dprnAndAmortizationRatios: number[] = [];
+  let changeInWcRatios: number[] = [];
+
+  for (let i = 0; i < numHistoricalYears; i++) {
+    const incomeStatement = sortedIncomeStatements[i];
+    const cashFlow = sortedCashFlows[i];
+
+    if (incomeStatement && cashFlow && incomeStatement.revenue !== 0) {
+      // D&A as % of Revenue
+      dprnAndAmortizationRatios.push(cashFlow.depreciationAndAmortization / incomeStatement.revenue);
+      
+      // Change in Working Capital as % of Revenue
+      changeInWcRatios.push(cashFlow.changeInWorkingCapital / incomeStatement.revenue);
+    }
+  }
+
+  if (dprnAndAmortizationRatios.length > 0) {
+    averageDprnAndAmortizationAsPctOfRevenue = dprnAndAmortizationRatios.reduce((sum, ratio) => sum + ratio, 0) / dprnAndAmortizationRatios.length;
+  }
+
+  if (changeInWcRatios.length > 0) {
+    averageChangeInWcAsPctOfRevenue = changeInWcRatios.reduce((sum, ratio) => sum + ratio, 0) / changeInWcRatios.length;
+  }
+
+  // Determine target D&A % based on sector for mature phase
+  const targetDprnAsPctOfRevenue = dprnAndAmortizationBenchmarks[growthData.sector] || dprnAndAmortizationBenchmarks[growthData.industry] || dprnAndAmortizationBenchmarks['Unknown'];
+
+  // Projected Cash Flow items
+  const projectedDepreciationAndAmortization = projectedRevenue * targetDprnAsPctOfRevenue; // Use target for projected year
+  // Determine target NWC Change % based on sector for mature phase
+  const targetNwcChangeAsPctOfRevenue = deltaNwcBenchmarks[growthData.sector] || deltaNwcBenchmarks[growthData.industry] || deltaNwcBenchmarks['Unknown'];
+  const projectedChangeInWorkingCapital = projectedRevenue * targetNwcChangeAsPctOfRevenue; // Use target for projected year
+  const projectedOperatingCashFlow = projectedNetIncome + projectedDepreciationAndAmortization - projectedChangeInWorkingCapital;
+  // Determine target CapEx % based on sector for mature phase
+  const targetCapexAsPctOfRevenue = capexBenchmarks[growthData.sector] || capexBenchmarks[growthData.industry] || capexBenchmarks['Unknown'];
+  const projectedCapitalExpenditures = projectedRevenue * targetCapexAsPctOfRevenue; // Use target for projected year
 
   // Add projected year to the years array for display
   const displayYears = [projectedYear, ...allYears];
@@ -914,7 +1032,7 @@ const GrowthTab: React.FC<GrowthTabProps> = ({ symbol }) => {
                 <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">Operating Cash Flow</td>
                 {displayYears.map((year) => {
                   if (year === projectedYear) {
-                    return <td key={year} className="px-6 py-4 whitespace-nowrap text-sm text-gray-400 bg-blue-50">-</td>;
+                    return <td key={year} className="px-6 py-4 whitespace-nowrap text-sm font-semibold text-blue-600 bg-blue-50">{formatLargeNumber(projectedOperatingCashFlow)}</td>;
                   }
                   const data = cashFlowMap.get(year);
                   return <td key={year} className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">{data ? formatLargeNumber(data.operatingCashFlow) : '-'}</td>;
@@ -924,7 +1042,7 @@ const GrowthTab: React.FC<GrowthTabProps> = ({ symbol }) => {
                 <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">Capital Expenditures</td>
                 {displayYears.map((year) => {
                   if (year === projectedYear) {
-                    return <td key={year} className="px-6 py-4 whitespace-nowrap text-sm text-gray-400 bg-blue-50">-</td>;
+                    return <td key={year} className="px-6 py-4 whitespace-nowrap text-sm font-semibold text-blue-600 bg-blue-50">{formatLargeNumber(projectedCapitalExpenditures)}</td>;
                   }
                   const data = cashFlowMap.get(year);
                   return <td key={year} className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">{data ? formatLargeNumber(data.capitalExpenditures) : '-'}</td>;
@@ -934,7 +1052,7 @@ const GrowthTab: React.FC<GrowthTabProps> = ({ symbol }) => {
                 <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">Depreciation & Amortization</td>
                 {displayYears.map((year) => {
                   if (year === projectedYear) {
-                    return <td key={year} className="px-6 py-4 whitespace-nowrap text-sm text-gray-400 bg-blue-50">-</td>;
+                    return <td key={year} className="px-6 py-4 whitespace-nowrap text-sm font-semibold text-blue-600 bg-blue-50">{formatLargeNumber(projectedDepreciationAndAmortization)}</td>;
                   }
                   const data = cashFlowMap.get(year);
                   return <td key={year} className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">{data ? formatLargeNumber(data.depreciationAndAmortization) : '-'}</td>;
@@ -944,7 +1062,7 @@ const GrowthTab: React.FC<GrowthTabProps> = ({ symbol }) => {
                 <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">Change in Working Capital</td>
                 {displayYears.map((year) => {
                   if (year === projectedYear) {
-                    return <td key={year} className="px-6 py-4 whitespace-nowrap text-sm text-gray-400 bg-blue-50">-</td>;
+                    return <td key={year} className="px-6 py-4 whitespace-nowrap text-sm font-semibold text-blue-600 bg-blue-50">{formatLargeNumber(projectedChangeInWorkingCapital)}</td>;
                   }
                   const data = cashFlowMap.get(year);
                   return <td key={year} className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">{data ? formatLargeNumber(data.changeInWorkingCapital) : '-'}</td>;
