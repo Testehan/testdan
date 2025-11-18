@@ -2,8 +2,9 @@ import React, {useCallback, useEffect, useState, useRef} from 'react';
 import {NumericFormat} from 'react-number-format';
 import {metricDescriptions} from './metricDescriptions';
 import InfoIcon from './InfoIcon';
-import ConfirmDialog from './common/ConfirmDialog';
 import HistoryTable from './common/HistoryTable';
+import { useDeleteConfirmation } from './common/DeleteConfirmationDialog';
+import { useValuationHistory } from './hooks/useValuation';
 
 // Using the full DcfData structure as confirmed by the user
 interface DcfData {
@@ -104,14 +105,27 @@ const ReverseDcfCalculator: React.FC<ReverseDcfCalculatorProps> = ({ symbol }) =
     const [saveError, setSaveError] = useState<string | null>(null);
     const [saveSuccess, setSaveSuccess] = useState<boolean>(false);
 
-    const [reverseDcfValuationHistory, setReverseDcfValuationHistory] = useState<ReverseDcfHistoryEntry[]>([]);
-    const [historyLoading, setHistoryLoading] = useState<boolean>(true);
-    const [historyError, setHistoryError] = useState<string | null>(null);
+    const { data: reverseDcfValuationHistory, loading: historyLoading, error: historyError, fetch: fetchReverseDcfHistory } = useValuationHistory<ReverseDcfHistoryEntry>('/stock/valuation/reverse-dcf/history');
     const initialCalculationDone = useRef(false);
 
-    // Delete confirmation dialog state
-    const [isDeleteConfirmOpen, setIsDeleteConfirmOpen] = useState<boolean>(false);
-    const [valuationDateToDelete, setValuationDateToDelete] = useState<string | null>(null);
+    const { open: openDeleteDialog, Dialog: DeleteDialog } = useDeleteConfirmation(async (id: string) => {
+      if (!symbol) return;
+      
+      try {
+        const response = await fetch(`http://localhost:8080/stock/valuation/reverse-dcf/${symbol}?valuationDate=${encodeURIComponent(id)}`, {
+          method: 'DELETE',
+        });
+
+        if (!response.ok) {
+          throw new Error('Failed to delete reverse DCF valuation');
+        }
+
+        await fetchReverseDcfHistory(symbol);
+      } catch (error) {
+        console.error('Failed to delete reverse DCF valuation:', error);
+        setSaveError((error as Error).message);
+      }
+    });
 
     const calculateWacc = useCallback((dcfData: DcfData) => {
         const { assumptions, income, balanceSheet, meta } = dcfData;
@@ -139,28 +153,6 @@ const ReverseDcfCalculator: React.FC<ReverseDcfCalculatorProps> = ({ symbol }) =
         }
     }, []);
 
-    const fetchReverseDcfHistory = useCallback(async (currentSymbol: string) => {
-        setHistoryLoading(true);
-        setHistoryError(null);
-        try {
-            const historyResponse = await fetch(`http://localhost:8080/stock/valuation/reverse-dcf/history/${currentSymbol}`);
-            if (!historyResponse.ok && historyResponse.status !== 404) {
-                throw new Error(`History data HTTP error! status: ${historyResponse.status}`);
-            }
-            const historyData: ReverseDcfHistoryEntry[] = historyResponse.status === 404 ? [] : await historyResponse.json();
-            // Sort historyData by valuationDate in descending order
-            const sortedHistoryData = historyData.sort((a, b) => {
-                const dateA = new Date(a.valuationDate);
-                const dateB = new Date(b.valuationDate);
-                return dateB.getTime() - dateA.getTime();
-            });
-            setReverseDcfValuationHistory(sortedHistoryData);
-        } catch (e: unknown) {
-            setHistoryError((e as Error).message);
-        } finally {
-            setHistoryLoading(false);
-        }
-    }, []);
 
     useEffect(() => {
         const fetchData = async () => {
@@ -185,7 +177,6 @@ const ReverseDcfCalculator: React.FC<ReverseDcfCalculatorProps> = ({ symbol }) =
 
             } catch (e: unknown) {
                 setError((e as Error).message);
-                setHistoryError((e as Error).message); // Also set history error if main fetch fails
             } finally {
                 setLoading(false);
             }
@@ -324,29 +315,6 @@ const ReverseDcfCalculator: React.FC<ReverseDcfCalculatorProps> = ({ symbol }) =
         }
     };
 
-    const handleDeleteReverseDcf = async () => {
-        if (!symbol || !valuationDateToDelete) return;
-        
-        try {
-            const response = await fetch(`http://localhost:8080/stock/valuation/reverse-dcf/${symbol}?valuationDate=${encodeURIComponent(valuationDateToDelete)}`, {
-                method: 'DELETE',
-            });
-
-            if (!response.ok) {
-                throw new Error('Failed to delete reverse DCF valuation');
-            }
-
-            // Reload history table
-            await fetchReverseDcfHistory(symbol);
-        } catch (error) {
-            console.error('Failed to delete reverse DCF valuation:', error);
-            setSaveError((error as Error).message);
-        } finally {
-            setIsDeleteConfirmOpen(false);
-            setValuationDateToDelete(null);
-        }
-    };
-
 
     if (loading) return <div className="text-center p-4">Loading Reverse DCF data...</div>;
     if (error) return <div className="text-center p-4 text-red-500">Error: {error}</div>;
@@ -471,10 +439,7 @@ const ReverseDcfCalculator: React.FC<ReverseDcfCalculatorProps> = ({ symbol }) =
                     loading={historyLoading}
                     error={historyError}
                     onLoadEntry={loadHistoricalReverseDcfValuation}
-                    onDelete={(entry) => {
-                        setValuationDateToDelete(entry.valuationDate);
-                        setIsDeleteConfirmOpen(true);
-                    }}
+                    onDelete={(entry) => openDeleteDialog(entry.valuationDate)}
                     columns={[
                         {
                             key: 'sharePrice',
@@ -513,15 +478,9 @@ const ReverseDcfCalculator: React.FC<ReverseDcfCalculatorProps> = ({ symbol }) =
                 />
             </div>
 
-            <ConfirmDialog
-                isOpen={isDeleteConfirmOpen}
+            <DeleteDialog
                 title="Delete Valuation"
                 message="Are you sure you want to delete this valuation? This action cannot be undone."
-                onConfirm={handleDeleteReverseDcf}
-                onCancel={() => {
-                    setIsDeleteConfirmOpen(false);
-                    setValuationDateToDelete(null);
-                }}
             />
         </div>
     );

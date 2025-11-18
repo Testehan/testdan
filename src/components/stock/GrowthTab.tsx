@@ -1,8 +1,9 @@
 import React, { useState, useEffect } from 'react';
 import InfoIcon from './InfoIcon';
 import { metricDescriptions } from './metricDescriptions';
-import ConfirmDialog from './common/ConfirmDialog';
 import HistoryTable from './common/HistoryTable';
+import { useDeleteConfirmation } from './common/DeleteConfirmationDialog';
+import { useValuationHistory } from './hooks/useValuation';
 import { formatLargeNumber } from '../../utils/valuation';
 
 interface IncomeStatement {
@@ -139,13 +140,26 @@ const GrowthTab: React.FC<GrowthTabProps> = ({ symbol }) => {  const [growthData
   const [saveSuccess, setSaveSuccess] = useState<boolean>(false);
 
   // History functionality
-  const [valuationHistory, setValuationHistory] = useState<GrowthHistoryEntry[]>([]);
-  const [historyLoading, setHistoryLoading] = useState<boolean>(true);
-  const [historyError, setHistoryError] = useState<string | null>(null);
+  const { data: valuationHistory, loading: historyLoading, error: historyError, fetch: fetchValuationHistory } = useValuationHistory<GrowthHistoryEntry>('/stock/valuation/growth/history');
   
-  // Delete confirmation dialog state
-  const [isDeleteConfirmOpen, setIsDeleteConfirmOpen] = useState<boolean>(false);
-  const [valuationDateToDelete, setValuationDateToDelete] = useState<string | null>(null);
+  const { open: openDeleteDialog, Dialog: DeleteDialog } = useDeleteConfirmation(async (id: string) => {
+    if (!symbol) return;
+    
+    try {
+      const response = await fetch(`http://localhost:8080/stock/valuation/growth/${symbol}?valuationDate=${encodeURIComponent(id)}`, {
+        method: 'DELETE',
+      });
+
+      if (!response.ok) {
+        throw new Error('Failed to delete growth valuation');
+      }
+
+      await fetchValuationHistory(symbol);
+    } catch (error) {
+      console.error('Failed to delete growth valuation:', error);
+      setSaveError((error as Error).message);
+    }
+  });
 
   const resetCalculator = () => {
     if (serverGrowthUserInput) {
@@ -259,51 +273,6 @@ const GrowthTab: React.FC<GrowthTabProps> = ({ symbol }) => {  const [growthData
       setSaveError((error as Error).message);
     } finally {
       setIsSaving(false);
-    }
-  };
-
-  const handleDeleteGrowth = async () => {
-    if (!symbol || !valuationDateToDelete) return;
-    
-    try {
-      const response = await fetch(`http://localhost:8080/stock/valuation/growth/${symbol}?valuationDate=${encodeURIComponent(valuationDateToDelete)}`, {
-        method: 'DELETE',
-      });
-
-      if (!response.ok) {
-        throw new Error('Failed to delete growth valuation');
-      }
-
-      // Reload history table
-      await fetchValuationHistory(symbol);
-    } catch (error) {
-      console.error('Failed to delete growth valuation:', error);
-      setSaveError((error as Error).message);
-    } finally {
-      setIsDeleteConfirmOpen(false);
-      setValuationDateToDelete(null);
-    }
-  };
-
-  const fetchValuationHistory = async (currentSymbol: string) => {
-    setHistoryLoading(true);
-    setHistoryError(null);
-
-    try {
-      const historyResponse = await fetch(`http://localhost:8080/stock/valuation/growth/history/${currentSymbol}`);
-      if (!historyResponse.ok && historyResponse.status !== 404) {
-        throw new Error(`History data HTTP error! status: ${historyResponse.status}`);
-      }
-      const historyData: GrowthHistoryEntry[] = historyResponse.status === 404 ? [] : await historyResponse.json();
-      // Sort historyData by valuationDate in descending order
-      const sortedHistoryData = historyData.sort((a, b) => {
-        return new Date(b.valuationDate).getTime() - new Date(a.valuationDate).getTime();
-      });
-      setValuationHistory(sortedHistoryData);
-    } catch (e) {
-      setHistoryError((e as Error).message);
-    } finally {
-      setHistoryLoading(false);
     }
   };
 
@@ -758,17 +727,10 @@ const GrowthTab: React.FC<GrowthTabProps> = ({ symbol }) => {  const [growthData
           )}
         </div>
 
-        <ConfirmDialog
-          isOpen={isDeleteConfirmOpen}
+        <DeleteDialog
           title="Delete Valuation"
           message="Are you sure you want to delete this valuation? This action cannot be undone."
-          onConfirm={handleDeleteGrowth}
-          onCancel={() => {
-            setIsDeleteConfirmOpen(false);
-            setValuationDateToDelete(null);
-          }}
         />
-
 
       {/* History Table */}
       <div className="mt-8">
@@ -778,10 +740,7 @@ const GrowthTab: React.FC<GrowthTabProps> = ({ symbol }) => {  const [growthData
           loading={historyLoading}
           error={historyError}
           onLoadEntry={loadHistoricalValuation}
-          onDelete={(entry) => {
-            setValuationDateToDelete(entry.valuationDate);
-            setIsDeleteConfirmOpen(true);
-          }}
+          onDelete={(entry) => openDeleteDialog(entry.valuationDate)}
           showVerdict={true}
           verdictField="verdict"
           columns={[

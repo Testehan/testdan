@@ -2,8 +2,9 @@ import React, { useState, useEffect, useCallback, useRef } from 'react';
 import { NumericFormat } from 'react-number-format';
 import { metricDescriptions } from './metricDescriptions';
 import InfoIcon from './InfoIcon';
-import ConfirmDialog from './common/ConfirmDialog';
 import HistoryTable from './common/HistoryTable';
+import { useDeleteConfirmation } from './common/DeleteConfirmationDialog';
+import { useValuationHistory } from './hooks/useValuation';
 import { getVerdictStyling } from '../../utils/valuation';
 
 interface DcfData {
@@ -121,37 +122,27 @@ const DcfCalculator: React.FC<DcfCalculatorProps> = ({ symbol }) => {
   const [userInputTerminalMultiple, setUserInputTerminalMultiple] = useState<number>(15);
   const [sbcAdjustmentToggle, setSbcAdjustmentToggle] = useState<boolean>(true);
   const [userComments, setUserComments] = useState<string>('');
-  const [valuationHistory, setValuationHistory] = useState<DcfHistoryEntry[]>([]);
-  const [historyLoading, setHistoryLoading] = useState<boolean>(true);
-  const [historyError, setHistoryError] = useState<string | null>(null);
+  const { data: valuationHistory, loading: historyLoading, error: historyError, fetch: fetchValuationHistory } = useValuationHistory<DcfHistoryEntry>('/stock/valuation/dcf/history');
   
-  // Delete confirmation dialog state
-  const [isDeleteConfirmOpen, setIsDeleteConfirmOpen] = useState<boolean>(false);
-  const [valuationDateToDelete, setValuationDateToDelete] = useState<string | null>(null);
-
-
-  const fetchValuationHistory = useCallback(async (currentSymbol: string) => {
-    setHistoryLoading(true);
-    setHistoryError(null);
+  const { open: openDeleteDialog, Dialog: DeleteDialog } = useDeleteConfirmation(async (id: string) => {
+    if (!symbol) return;
+    
     try {
-      const historyResponse = await fetch(`http://localhost:8080/stock/valuation/dcf/history/${currentSymbol}`);
-      if (!historyResponse.ok && historyResponse.status !== 404) {
-        throw new Error(`History data HTTP error! status: ${historyResponse.status}`);
-      }
-      const historyData: DcfHistoryEntry[] = historyResponse.status === 404 ? [] : await historyResponse.json();
-      // Sort historyData by valuationDate in descending order
-      const sortedHistoryData = historyData.sort((a, b) => {
-        const dateA = new Date(a.valuationDate);
-        const dateB = new Date(b.valuationDate);
-        return dateB.getTime() - dateA.getTime();
+      const response = await fetch(`http://localhost:8080/stock/valuation/dcf/${symbol}?valuationDate=${encodeURIComponent(id)}`, {
+        method: 'DELETE',
       });
-      setValuationHistory(sortedHistoryData);
-    } catch (e: unknown) {
-      setHistoryError((e as Error).message);
-    } finally {
-      setHistoryLoading(false);
+
+      if (!response.ok) {
+        throw new Error(`HTTP error! status: ${response.status}`);
+      }
+
+      await fetchValuationHistory(symbol);
+    } catch (error) {
+      console.error('Failed to delete DCF valuation:', error);
+      setSaveError((error as Error).message);
     }
-  }, []);
+  });
+
 
   // Effect for fetching DCF data
   useEffect(() => {
@@ -186,7 +177,6 @@ const DcfCalculator: React.FC<DcfCalculatorProps> = ({ symbol }) => {
       } catch (e: unknown) {
         const errorMessage = (e as Error).message;
         setError(errorMessage);
-        setHistoryError(errorMessage); // Set history error if main fetch fails
       } finally {
         setLoading(false);
       }
@@ -411,29 +401,6 @@ const DcfCalculator: React.FC<DcfCalculatorProps> = ({ symbol }) => {
       setSaveError((e as Error).message);
     } finally {
       setIsSaving(false);
-    }
-  };
-
-  const handleDeleteDcf = async () => {
-    if (!symbol || !valuationDateToDelete) return;
-    
-    try {
-      const response = await fetch(`http://localhost:8080/stock/valuation/dcf/${symbol}?valuationDate=${encodeURIComponent(valuationDateToDelete)}`, {
-        method: 'DELETE',
-      });
-
-      if (!response.ok) {
-        throw new Error(`HTTP error! status: ${response.status}`);
-      }
-
-      // Reload history table
-      await fetchValuationHistory(symbol);
-    } catch (error) {
-      console.error('Failed to delete DCF valuation:', error);
-      setSaveError((error as Error).message);
-    } finally {
-      setIsDeleteConfirmOpen(false);
-      setValuationDateToDelete(null);
     }
   };
 
@@ -684,10 +651,7 @@ const DcfCalculator: React.FC<DcfCalculatorProps> = ({ symbol }) => {
           loading={historyLoading}
           error={historyError}
           onLoadEntry={loadHistoricalValuation}
-          onDelete={(entry) => {
-            setValuationDateToDelete(entry.valuationDate);
-            setIsDeleteConfirmOpen(true);
-          }}
+          onDelete={(entry) => openDeleteDialog(entry.valuationDate)}
           showVerdict={true}
           verdictField="verdict"
           columns={[
@@ -710,17 +674,10 @@ const DcfCalculator: React.FC<DcfCalculatorProps> = ({ symbol }) => {
           ]}
         />
       </div>
-      
-      {/* Delete Confirmation Dialog */}
-      <ConfirmDialog
-        isOpen={isDeleteConfirmOpen}
-        title="Confirm Deletion"
-        message="Are you sure you want to delete this valuation?"
-        onConfirm={handleDeleteDcf}
-        onCancel={() => {
-          setIsDeleteConfirmOpen(false);
-          setValuationDateToDelete(null);
-        }}
+       
+      <DeleteDialog
+        title="Delete Valuation"
+        message="Are you sure you want to delete this valuation? This action cannot be undone."
       />
     </div>
   );
