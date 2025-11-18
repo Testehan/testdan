@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import InfoIcon from './InfoIcon';
 import { metricDescriptions } from './metricDescriptions';
 import ConfirmDialog from './common/ConfirmDialog';
+import HistoryTable from './common/HistoryTable';
 import { formatLargeNumber } from '../../utils/valuation';
 
 interface IncomeStatement {
@@ -106,84 +107,6 @@ interface GrowthValuationResponse {
 
 const sortByYearDesc = <T extends { fiscalYear: number }>(data: T[]): T[] => {
   return [...data].sort((a, b) => b.fiscalYear - a.fiscalYear);
-};
-
-const dprnAndAmortizationBenchmarks: { [key: string]: number } = {
-  'Software / Internet / Tech Services': 0.035, // 3.5%
-  'Consumer Goods / Retail (non-heavy)': 0.045, // 4.5%
-  'Advertising / Marketing': 0.03, // 3%
-  'Pharmaceuticals / Biotech (mature)': 0.06, // 6%
-  'Industrials / Manufacturing': 0.06, // 6%
-  'Auto & Truck / Capital Goods': 0.07, // 7%
-  'Telecom': 0.115, // 11.5%
-  'Utilities / Electric': 0.095, // 9.5%
-  'Oil & Gas / Energy (integrated/exploration)': 0.095, // 9.5%
-  'Air Transport / Airlines': 0.09, // 9%
-  'Real Estate / REITs': 0.075, // 7.5%
-  'Technology': 0.035, // Default for broad 'Technology' sector
-  'Consumer Cyclical': 0.045, // Default for broad 'Consumer Cyclical'
-  'Consumer Defensive': 0.045, // Default for broad 'Consumer Defensive'
-  'Healthcare': 0.06, // Default for broad 'Healthcare'
-  'Basic Materials': 0.06, // Default for broad 'Basic Materials'
-  'Financial Services': 0.01, // Asset-light, often low D&A
-  'Communication Services': 0.115, // Similar to Telecom
-  'Energy': 0.095, // Similar to Oil & Gas
-  'Utilities': 0.095, // Similar to Utilities / Electric
-  'Industrials': 0.06, // Similar to Industrials / Manufacturing
-  'Real Estate': 0.075, // Similar to Real Estate / REITs
-  'Unknown': 0.05, // Fallback for uncategorized
-};
-
-const capexBenchmarks: { [key: string]: number } = {
-  'Software / Internet / Tech Services': 0.02, // 2%
-  'Consumer Goods / Retail (non-heavy)': 0.045, // 4.5%
-  'Advertising / Marketing': 0.015, // 1.5%
-  'Pharmaceuticals / Biotech (mature)': 0.05, // 5%
-  'Industrials / Manufacturing': 0.07, // 7%
-  'Auto & Truck / Capital Goods': 0.08, // 8%
-  'Telecom': 0.12, // 12%
-  'Utilities / Electric': 0.1, // 10%
-  'Oil & Gas / Energy (integrated/exploration)': 0.12, // 12%
-  'Air Transport / Airlines': 0.1, // 10%
-  'Real Estate / REITs': 0.08, // 8%
-  'Technology': 0.02,
-  'Consumer Cyclical': 0.045,
-  'Consumer Defensive': 0.045,
-  'Healthcare': 0.05,
-  'Basic Materials': 0.07,
-  'Financial Services': 0.01,
-  'Communication Services': 0.12,
-  'Energy': 0.12,
-  'Utilities': 0.1,
-  'Industrials': 0.07,
-  'Real Estate': 0.08,
-  'Unknown': 0.05, // Fallback
-};
-
-const deltaNwcBenchmarks: { [key: string]: number } = {
-  'Software / Internet / Tech Services': 0.005,     // 0.5% — often near-zero or negative due to deferred revenue/subscriptions
-  'Consumer Goods / Retail (non-heavy)': 0.01,      // 1.0% — moderate inventory/receivables needs
-  'Advertising / Marketing': 0.005,                 // 0.5% — asset-light, low WC intensity
-  'Pharmaceuticals / Biotech (mature)': 0.008,      // 0.8% — some receivables, but efficient mature ops
-  'Industrials / Manufacturing': 0.015,             // 1.5% — inventory + receivables typical
-  'Auto & Truck / Capital Goods': 0.02,             // 2.0% — higher inventory and supply chain
-  'Telecom': 0.01,                                  // 1.0% — stable, regulated ops with moderate WC
-  'Utilities / Electric': 0.005,                    // 0.5% — very low incremental needs once built
-  'Oil & Gas / Energy (integrated/exploration)': 0.015, // 1.5% — moderate due to inventory/cycles
-  'Air Transport / Airlines': 0.015,                // 1.5% — fuel/inventory + receivables
-  'Real Estate / REITs': 0.01,                      // 1.0% — property-focused, low operating WC
-  'Technology': 0.005,                              // 0.5% — broad tech, asset-light bias
-  'Consumer Cyclical': 0.012,                       // 1.2% — retail/discretionary variability
-  'Consumer Defensive': 0.008,                      // 0.8% — staples are efficient/stable
-  'Healthcare': 0.008,                              // 0.8% — similar to pharma/biotech mature
-  'Basic Materials': 0.015,                         // 1.5% — inventory-heavy
-  'Financial Services': 0.002,                      // 0.2% — often minimal/non-positive WC needs
-  'Communication Services': 0.01,                   // 1.0% — telecom/media mix
-  'Energy': 0.015,                                  // 1.5% — broad energy
-  'Utilities': 0.005,                               // 0.5% — infrastructure-heavy, low incremental
-  'Industrials': 0.015,                             // 1.5% — manufacturing/capital goods
-  'Real Estate': 0.01,                              // 1.0% — REIT/property
-  'Unknown': 0.01                                   // 1.0% — fallback conservative default
 };
 
 const GrowthTab: React.FC<GrowthTabProps> = ({ symbol }) => {  const [growthData, setGrowthData] = useState<GrowthData | null>(null);
@@ -548,47 +471,6 @@ const GrowthTab: React.FC<GrowthTabProps> = ({ symbol }) => {  const [growthData
   const projectedPretaxIncome = projectedOperatingIncome;
   const projectedNetIncome = projectedPretaxIncome * (1 - marginalTaxRateInput);
 
-  let averageDprnAndAmortizationAsPctOfRevenue = 0;
-  let averageChangeInWcAsPctOfRevenue = 0;
-
-  const numHistoricalYears = Math.min(sortedIncomeStatements.length, sortedCashFlows.length);
-  let dprnAndAmortizationRatios: number[] = [];
-  let changeInWcRatios: number[] = [];
-
-  for (let i = 0; i < numHistoricalYears; i++) {
-    const incomeStatement = sortedIncomeStatements[i];
-    const cashFlow = sortedCashFlows[i];
-
-    if (incomeStatement && cashFlow && incomeStatement.revenue !== 0) {
-      // D&A as % of Revenue
-      dprnAndAmortizationRatios.push(cashFlow.depreciationAndAmortization / incomeStatement.revenue);
-      
-      // Change in Working Capital as % of Revenue
-      changeInWcRatios.push(cashFlow.changeInWorkingCapital / incomeStatement.revenue);
-    }
-  }
-
-  if (dprnAndAmortizationRatios.length > 0) {
-    averageDprnAndAmortizationAsPctOfRevenue = dprnAndAmortizationRatios.reduce((sum, ratio) => sum + ratio, 0) / dprnAndAmortizationRatios.length;
-  }
-
-  if (changeInWcRatios.length > 0) {
-    averageChangeInWcAsPctOfRevenue = changeInWcRatios.reduce((sum, ratio) => sum + ratio, 0) / changeInWcRatios.length;
-  }
-
-  // Determine target D&A % based on sector for mature phase
-  const targetDprnAsPctOfRevenue = dprnAndAmortizationBenchmarks[growthData.sector] || dprnAndAmortizationBenchmarks[growthData.industry] || dprnAndAmortizationBenchmarks['Unknown'];
-
-  // Projected Cash Flow items
-  const projectedDepreciationAndAmortization = projectedRevenue * targetDprnAsPctOfRevenue; // Use target for projected year
-  // Determine target NWC Change % based on sector for mature phase
-  const targetNwcChangeAsPctOfRevenue = deltaNwcBenchmarks[growthData.sector] || deltaNwcBenchmarks[growthData.industry] || deltaNwcBenchmarks['Unknown'];
-  const projectedChangeInWorkingCapital = projectedRevenue * targetNwcChangeAsPctOfRevenue; // Use target for projected year
-  const projectedOperatingCashFlow = projectedNetIncome + projectedDepreciationAndAmortization - projectedChangeInWorkingCapital;
-  // Determine target CapEx % based on sector for mature phase
-  const targetCapexAsPctOfRevenue = capexBenchmarks[growthData.sector] || capexBenchmarks[growthData.industry] || capexBenchmarks['Unknown'];
-  const projectedCapitalExpenditures = projectedRevenue * targetCapexAsPctOfRevenue; // Use target for projected year
-
   // Add projected year to the years array for display
   const displayYears = [projectedYear, ...allYears];
 
@@ -891,65 +773,36 @@ const GrowthTab: React.FC<GrowthTabProps> = ({ symbol }) => {  const [growthData
       {/* History Table */}
       <div className="mt-8">
         <h5 className="text-lg font-medium mb-2">History of valuations</h5>
-        {historyLoading ? (
-          <p>Loading valuation history...</p>
-        ) : historyError ? (
-          <p className="text-red-500">Could not load valuation history.</p>
-        ) : (
-          <div className="overflow-x-auto">
-            <table className="min-w-full divide-y divide-gray-200">
-              <thead className="bg-gray-50">
-                <tr>
-                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Date of Valuation</th>
-                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Intrinsic Value Per Share</th>
-                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Share Price at Valuation</th>
-                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Verdict</th>
-                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Comments</th>
-                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Actions</th>
-                </tr>
-              </thead>
-              <tbody className="bg-white divide-y divide-gray-200">
-                {valuationHistory.length > 0 ? (
-                  valuationHistory.map((entry, index) => (
-                    <tr key={index} className="cursor-pointer hover:bg-gray-100">
-                      <td onClick={() => loadHistoricalValuation(entry)} className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">{new Date(entry.valuationDate).toLocaleString()}</td>
-                      <td onClick={() => loadHistoricalValuation(entry)} className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">${entry.growthOutput.intrinsicValuePerShare}</td>
-                      <td onClick={() => loadHistoricalValuation(entry)} className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">${entry.growthValuationData.currentSharePrice.toFixed(2)}</td>
-                      <td onClick={() => loadHistoricalValuation(entry)} className={`px-6 py-4 whitespace-nowrap text-sm font-semibold ${
-                        entry.growthOutput.verdict === 'Undervalued' ? 'bg-green-200 text-green-800': 
-                        entry.growthOutput.verdict === 'Overvalued' ? 'bg-red-200 text-red-800': 
-                        'bg-yellow-200 text-yellow-800'
-                      }`}>
-                        {entry.growthOutput.verdict}
-                      </td>
-                      <td onClick={() => loadHistoricalValuation(entry)} className="px-6 py-4 text-sm text-gray-500 truncate max-w-xs" title={entry.growthUserInput.userComments}>
-                        {entry.growthUserInput.userComments && entry.growthUserInput.userComments.length > 50 
-                          ? `${entry.growthUserInput.userComments.substring(0, 47)}...` 
-                          : entry.growthUserInput.userComments}
-                      </td>
-                      <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
-                        <button
-                          onClick={(e) => {
-                            e.stopPropagation();
-                            setValuationDateToDelete(entry.valuationDate);
-                            setIsDeleteConfirmOpen(true);
-                          }}
-                          className="px-3 py-1 bg-red-500 text-white rounded-md hover:bg-red-600 focus:outline-none focus:ring-2 focus:ring-red-500 focus:ring-opacity-50 text-xs"
-                        >
-                          Delete
-                        </button>
-                      </td>
-                    </tr>
-                  ))
-                ) : (
-                  <tr>
-                    <td colSpan={6} className="text-center py-4">No valuation history found for this stock.</td>
-                  </tr>
-                )}
-              </tbody>
-            </table>
-          </div>
-        )}
+        <HistoryTable
+          data={valuationHistory}
+          loading={historyLoading}
+          error={historyError}
+          onLoadEntry={loadHistoricalValuation}
+          onDelete={(entry) => {
+            setValuationDateToDelete(entry.valuationDate);
+            setIsDeleteConfirmOpen(true);
+          }}
+          showVerdict={true}
+          verdictField="verdict"
+          columns={[
+            {
+              key: 'intrinsicValue',
+              header: 'Intrinsic Value Per Share',
+              render: (entry: unknown) => {
+                const e = entry as GrowthHistoryEntry;
+                return `$${e.growthOutput.intrinsicValuePerShare}`;
+              },
+            },
+            {
+              key: 'sharePrice',
+              header: 'Share Price at Valuation',
+              render: (entry: unknown) => {
+                const e = entry as GrowthHistoryEntry;
+                return `$${e.growthValuationData.currentSharePrice.toFixed(2)}`;
+              },
+            },
+          ]}
+        />
       </div>
 
       <div className="mt-6">

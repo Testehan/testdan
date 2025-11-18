@@ -3,7 +3,7 @@ import {NumericFormat} from 'react-number-format';
 import {metricDescriptions} from './metricDescriptions';
 import InfoIcon from './InfoIcon';
 import ConfirmDialog from './common/ConfirmDialog';
-import { getVerdictStyling } from '../../utils/valuation';
+import HistoryTable from './common/HistoryTable';
 
 // Using the full DcfData structure as confirmed by the user
 interface DcfData {
@@ -466,66 +466,51 @@ const ReverseDcfCalculator: React.FC<ReverseDcfCalculatorProps> = ({ symbol }) =
             {/* History Table */}
             <div className="mt-8">
                 <h5 className="text-lg font-medium mb-2">History of valuations</h5>
-                {historyLoading ? (
-                    <p>Loading valuation history...</p>
-                ) : historyError ? (
-                    <p className="text-red-500">Could not load valuation history.</p>
-                ) : (
-                    <div className="overflow-x-auto">
-                        <table className="min-w-full divide-y divide-gray-200">
-                            <thead className="bg-gray-50">
-                                <tr>
-                                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Date of Valuation</th>
-                                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Share Price at Valuation</th>
-                                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Discount Rate</th>
-                                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Implied FCF Growth Rate</th>
-                                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Comments</th>
-                                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Actions</th>
-                                </tr>
-                            </thead>
-                            <tbody className="bg-white divide-y divide-gray-200">
-                                {reverseDcfValuationHistory.length > 0 ? (
-                                    reverseDcfValuationHistory.map((entry, index) => (
-                                        <tr key={index} onClick={() => loadHistoricalReverseDcfValuation(entry)} className="cursor-pointer hover:bg-gray-100">
-                                            <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">{new Date(entry.valuationDate).toLocaleString()}</td>
-                                            <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">{entry.dcfCalculationData.meta.currency} {entry.dcfCalculationData.meta.currentSharePrice.toFixed(2)}</td>
-                                            <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
-                                                <NumericFormat
-                                                    value={entry.reverseDcfUserInput.discountRate * 100}
-                                                    displayType="text"
-                                                    thousandSeparator={true}
-                                                    decimalScale={2}
-                                                    fixedDecimalScale={true}
-                                                    suffix="%"
-                                                />
-                                            </td>
-                                            <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">{(entry.reverseDcfOutput.impliedFCFGrowthRate * 100).toFixed(2)}%</td>
-                                            <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500" title={entry.reverseDcfUserInput.userComments}>
-                                                {entry.reverseDcfUserInput.userComments ? entry.reverseDcfUserInput.userComments.substring(0, 50) + (entry.reverseDcfUserInput.userComments.length > 50 ? '...' : '') : ''}
-                                            </td>
-                                            <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
-                                                <button
-                                                    onClick={(e) => {
-                                                        e.stopPropagation();
-                                                        setValuationDateToDelete(entry.valuationDate);
-                                                        setIsDeleteConfirmOpen(true);
-                                                    }}
-                                                    className="px-3 py-1 bg-red-500 text-white rounded-md hover:bg-red-600 focus:outline-none focus:ring-2 focus:ring-red-500 focus:ring-opacity-50 text-xs"
-                                                >
-                                                    Delete
-                                                </button>
-                                            </td>
-                                        </tr>
-                                    ))
-                                ) : (
-                                        <tr>
-                                            <td colSpan={6} className="text-center py-4">No reverse DCF valuation history found for this stock.</td>
-                                        </tr>
-                                )}
-                            </tbody>
-                        </table>
-                    </div>
-                )}
+                <HistoryTable
+                    data={reverseDcfValuationHistory}
+                    loading={historyLoading}
+                    error={historyError}
+                    onLoadEntry={loadHistoricalReverseDcfValuation}
+                    onDelete={(entry) => {
+                        setValuationDateToDelete(entry.valuationDate);
+                        setIsDeleteConfirmOpen(true);
+                    }}
+                    columns={[
+                        {
+                            key: 'sharePrice',
+                            header: 'Share Price at Valuation',
+                            render: (entry: unknown) => {
+                                const e = entry as ReverseDcfHistoryEntry;
+                                return `${e.dcfCalculationData.meta.currency} ${e.dcfCalculationData.meta.currentSharePrice.toFixed(2)}`;
+                            },
+                        },
+                        {
+                            key: 'discountRate',
+                            header: 'Discount Rate',
+                            render: (entry: unknown) => {
+                                const e = entry as ReverseDcfHistoryEntry;
+                                return (
+                                    <NumericFormat
+                                        value={e.reverseDcfUserInput.discountRate * 100}
+                                        displayType="text"
+                                        thousandSeparator={true}
+                                        decimalScale={2}
+                                        fixedDecimalScale={true}
+                                        suffix="%"
+                                    />
+                                );
+                            },
+                        },
+                        {
+                            key: 'impliedFCF',
+                            header: 'Implied FCF Growth Rate',
+                            render: (entry: unknown) => {
+                                const e = entry as ReverseDcfHistoryEntry;
+                                return `${(e.reverseDcfOutput.impliedFCFGrowthRate * 100).toFixed(2)}%`;
+                            },
+                        },
+                    ]}
+                />
             </div>
 
             <ConfirmDialog

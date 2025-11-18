@@ -2,42 +2,70 @@ import React from 'react';
 import { HistoryEntry } from '../types/valuation';
 import { getVerdictStyling } from '../../../utils/valuation';
 
+export interface ColumnConfig {
+  key: string;
+  header: string;
+  render: (entry: unknown) => React.ReactNode;
+  cellClassName?: string;
+}
+
 interface HistoryTableProps<T extends HistoryEntry> {
   data: T[];
   loading: boolean;
   error: string | null;
   onLoadEntry: (entry: T) => void;
   onDelete: (entry: T) => void;
+  columns: ColumnConfig[];
   loadingMessage?: string;
   emptyMessage?: string;
-  renderIntrinsicValue?: (entry: T) => React.ReactNode;
-  renderSharePrice?: (entry: T) => React.ReactNode;
-  renderExtraColumns?: (entry: T) => React.ReactNode;
+  showVerdict?: boolean;
+  verdictField?: string;
+  intrinsicValueField?: string;
+  sharePriceField?: string;
 }
 
-export function HistoryTable<T extends HistoryEntry & { 
-  userComments?: string;
-  output?: { intrinsicValuePerShare: number; verdict: string };
-  valuationData?: { meta: { currentSharePrice: number; currency: string } };
-}>({
+export function HistoryTable<T extends HistoryEntry>({
   data,
   loading,
   error,
   onLoadEntry,
   onDelete,
+  columns,
   loadingMessage = 'Loading valuation history...',
   emptyMessage = 'No valuation history found.',
-  renderIntrinsicValue,
-  renderSharePrice,
-  renderExtraColumns
+  showVerdict = false,
+  verdictField = 'verdict',
+  intrinsicValueField = 'intrinsicValuePerShare',
+  sharePriceField = 'currentSharePrice',
 }: HistoryTableProps<T>) {
   if (loading) {
     return <p>{loadingMessage}</p>;
   }
 
   if (error) {
-    return <p className="text-red-500">Could not load valuation history.</p>;
+    return <p className="text-red-500">{error}</p>;
   }
+
+  const getVerdictFromEntry = (entry: T): { verdict: string; bgColorClass: string } => {
+    if (showVerdict) {
+      const entryAny = entry as unknown as Record<string, unknown>;
+      const verdict = (entryAny[verdictField] as string) || 'Neutral';
+      
+      const intrinsicValuePerShare = (entryAny[intrinsicValueField] as number) || 0;
+      
+      const valuationData = entryAny.valuationData as { meta?: { currentSharePrice?: number } } | undefined;
+      const currentSharePrice = valuationData?.meta?.[sharePriceField as keyof typeof valuationData.meta] as number || 0;
+      
+      const styling = getVerdictStyling(intrinsicValuePerShare, currentSharePrice);
+      return { verdict, bgColorClass: styling.bgColorClass };
+    }
+    return { verdict: 'Neutral', bgColorClass: '' };
+  };
+
+  const getCommentsFromEntry = (entry: T): string => {
+    const entryAny = entry as unknown as { userComments?: string };
+    return entryAny.userComments || '';
+  };
 
   return (
     <div className="overflow-x-auto">
@@ -45,9 +73,14 @@ export function HistoryTable<T extends HistoryEntry & {
         <thead className="bg-gray-50">
           <tr>
             <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Date of Valuation</th>
-            <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Intrinsic Value Per Share</th>
-            <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Share Price at Valuation</th>
-            <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Verdict</th>
+            {columns.map((col) => (
+              <th key={col.key} className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                {col.header}
+              </th>
+            ))}
+            {showVerdict && (
+              <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Verdict</th>
+            )}
             <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Comments</th>
             <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Actions</th>
           </tr>
@@ -55,11 +88,8 @@ export function HistoryTable<T extends HistoryEntry & {
         <tbody className="bg-white divide-y divide-gray-200">
           {data.length > 0 ? (
             data.map((entry, index) => {
-              const verdict = entry.output?.verdict || 'Neutral';
-              const verdictStyling = getVerdictStyling(
-                entry.output?.intrinsicValuePerShare || 0,
-                entry.valuationData?.meta?.currentSharePrice || 0
-              );
+              const { verdict, bgColorClass } = getVerdictFromEntry(entry);
+              const comments = getCommentsFromEntry(entry);
               
               return (
                 <tr key={index} className="cursor-pointer hover:bg-gray-100">
@@ -69,32 +99,31 @@ export function HistoryTable<T extends HistoryEntry & {
                   >
                     {new Date(entry.valuationDate).toLocaleString()}
                   </td>
-                  <td 
-                    onClick={() => onLoadEntry(entry)}
-                    className="px-6 py-4 whitespace-nowrap text-sm text-gray-500"
-                  >
-                    {renderIntrinsicValue ? renderIntrinsicValue(entry) : `$${entry.output?.intrinsicValuePerShare?.toFixed(2) || '-'}`}
-                  </td>
-                  <td 
-                    onClick={() => onLoadEntry(entry)}
-                    className="px-6 py-4 whitespace-nowrap text-sm text-gray-500"
-                  >
-                    {renderSharePrice ? renderSharePrice(entry) : `$${entry.valuationData?.meta?.currentSharePrice?.toFixed(2) || '-'}`}
-                  </td>
-                  <td 
-                    onClick={() => onLoadEntry(entry)}
-                    className={`px-6 py-4 whitespace-nowrap text-sm font-semibold ${verdictStyling.bgColorClass}`}
-                  >
-                    {verdict}
-                  </td>
+                  {columns.map((col) => (
+                    <td 
+                      key={col.key}
+                      onClick={() => onLoadEntry(entry)}
+                      className={`px-6 py-4 whitespace-nowrap text-sm text-gray-500 ${col.cellClassName || ''}`}
+                    >
+                      {col.render(entry)}
+                    </td>
+                  ))}
+                  {showVerdict && (
+                    <td 
+                      onClick={() => onLoadEntry(entry)}
+                      className={`px-6 py-4 whitespace-nowrap text-sm font-semibold ${bgColorClass}`}
+                    >
+                      {verdict}
+                    </td>
+                  )}
                   <td 
                     onClick={() => onLoadEntry(entry)}
                     className="px-6 py-4 text-sm text-gray-500 truncate max-w-xs"
-                    title={entry.userComments}
+                    title={comments}
                   >
-                    {entry.userComments && entry.userComments.length > 50 
-                      ? `${entry.userComments.substring(0, 47)}...` 
-                      : entry.userComments || ''}
+                    {comments.length > 50 
+                      ? `${comments.substring(0, 47)}...` 
+                      : comments}
                   </td>
                   <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
                     <button
@@ -107,17 +136,12 @@ export function HistoryTable<T extends HistoryEntry & {
                       Delete
                     </button>
                   </td>
-                  {renderExtraColumns && (
-                    <td>
-                      {renderExtraColumns(entry)}
-                    </td>
-                  )}
                 </tr>
               );
             })
-              ) : (
+          ) : (
             <tr>
-              <td colSpan={renderExtraColumns ? 7 : 6} className="text-center py-4">{emptyMessage}</td>
+              <td colSpan={columns.length + (showVerdict ? 3 : 2)} className="text-center py-4">{emptyMessage}</td>
             </tr>
           )}
         </tbody>
