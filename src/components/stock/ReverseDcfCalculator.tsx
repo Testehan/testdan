@@ -1,4 +1,4 @@
-import React, {useCallback, useEffect, useState} from 'react';
+import React, {useCallback, useEffect, useState, useRef} from 'react';
 import {NumericFormat} from 'react-number-format';
 import {metricDescriptions} from './metricDescriptions';
 import InfoIcon from './InfoIcon';
@@ -66,6 +66,22 @@ interface ReverseDcfHistoryEntry {
     reverseDcfOutput: ReverseDcfOutput;
 }
 
+// Interface for Reverse DCF calculation request
+interface ReverseDcfValuation {
+    dcfCalculationData: DcfData;
+    reverseDcfUserInput: {
+        discountRate: number;
+        perpetualGrowthRate: number;
+        projectionYears: number;
+        userComments: string;
+    };
+}
+
+// Interface for Reverse DCF calculation response
+interface ReverseDcfCalculationOutput {
+    impliedFCFGrowthRate: number;
+}
+
 const ReverseDcfCalculator: React.FC<ReverseDcfCalculatorProps> = ({ symbol }) => {
     const [data, setData] = useState<DcfData | null>(null);
     const [originalData, setOriginalData] = useState<DcfData | null>(null);
@@ -89,6 +105,7 @@ const ReverseDcfCalculator: React.FC<ReverseDcfCalculatorProps> = ({ symbol }) =
     const [reverseDcfValuationHistory, setReverseDcfValuationHistory] = useState<ReverseDcfHistoryEntry[]>([]);
     const [historyLoading, setHistoryLoading] = useState<boolean>(true);
     const [historyError, setHistoryError] = useState<string | null>(null);
+    const initialCalculationDone = useRef(false);
 
     const calculateWacc = useCallback((dcfData: DcfData) => {
         const { assumptions, income, balanceSheet, meta } = dcfData;
@@ -173,62 +190,46 @@ const ReverseDcfCalculator: React.FC<ReverseDcfCalculatorProps> = ({ symbol }) =
         }
     }, [symbol, calculateWacc, fetchReverseDcfHistory]);
 
-    const calculateImpliedGrowth = useCallback(() => {
+    const calculateImpliedGrowth = useCallback(async () => {
         if (!data) return;
 
-        const { meta, balanceSheet, income, cashFlow, assumptions } = data;
-        const targetPrice = meta.currentSharePrice;
-        const totalDebt = balanceSheet.totalShortTermDebt + balanceSheet.totalLongTermDebt;
-        const enterpriseValue = (targetPrice * meta.sharesOutstanding) - balanceSheet.totalCashAndEquivalents + totalDebt;
-        
-        // const nopat = income.ebit * (1 - assumptions.effectiveTaxRate);
-        const baseFcf = cashFlow.operatingCashFlow - Math.abs(cashFlow.capitalExpenditure);
+        try {
+            const reverseDcfValuation: ReverseDcfValuation = {
+                dcfCalculationData: data,
+                reverseDcfUserInput: {
+                    discountRate: wacc,
+                    perpetualGrowthRate: perpetualGrowthRate,
+                    projectionYears: projectionYears,
+                    userComments: userComments,
+                },
+            };
 
-        let low = -1.0;
-        let high = 2.0;
-        let mid = 0;
-        let iteration = 0;
-        const maxIterations = 100;
+            const response = await fetch('http://localhost:8080/stock/valuation/calculate/reverse-dcf', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify(reverseDcfValuation),
+            });
 
-        while (iteration < maxIterations) {
-            mid = (low + high) / 2;
-            let presentValue = 0;
-            let lastFcf = 0;
-
-            for (let i = 1; i <= projectionYears; i++) {
-                const fcf = baseFcf * Math.pow(1 + mid, i);
-                presentValue += fcf / Math.pow(1 + wacc, i);
-                if (i === projectionYears) {
-                    lastFcf = fcf;
-                }
-            }
-            
-            if (wacc <= perpetualGrowthRate) {
-                setImpliedGrowthRate(null);
-                return;
+            if (!response.ok) {
+                throw new Error(`HTTP error! status: ${response.status}`);
             }
 
-            const terminalValue = (lastFcf * (1 + perpetualGrowthRate)) / (wacc - perpetualGrowthRate);
-            const discountedTerminalValue = terminalValue / Math.pow(1 + wacc, projectionYears);
-            const calculatedEv = presentValue + discountedTerminalValue;
-            
-            const difference = calculatedEv - enterpriseValue;
-
-            if (Math.abs(difference) < 1e-9) {
-                break;
-            }
-
-            if (difference > 0) {
-                high = mid;
-            } else {
-                low = mid;
-            }
-            iteration++;
+            const result: ReverseDcfCalculationOutput = await response.json();
+            setImpliedGrowthRate(result.impliedFCFGrowthRate);
+        } catch (error) {
+            console.error('Failed to calculate Reverse DCF:', error);
         }
+    }, [data, wacc, perpetualGrowthRate, projectionYears, userComments]);
 
-        setImpliedGrowthRate(mid);
-
-    }, [data, wacc, perpetualGrowthRate, projectionYears]);
+    // Trigger calculation once when data is first loaded
+    useEffect(() => {
+        if (data && !loading && !initialCalculationDone.current) {
+            initialCalculationDone.current = true;
+            calculateImpliedGrowth().catch(console.error);
+        }
+    }, [data, loading, calculateImpliedGrowth]);
 
     const loadHistoricalReverseDcfValuation = useCallback((entry: ReverseDcfHistoryEntry) => {
         // Update input states with historical data
@@ -318,13 +319,6 @@ const ReverseDcfCalculator: React.FC<ReverseDcfCalculatorProps> = ({ symbol }) =
     };
 
 
-    useEffect(() => {
-        if (data) {
-            calculateImpliedGrowth();
-        }
-    }, [data, calculateImpliedGrowth]);
-
-
     if (loading) return <div className="text-center p-4">Loading Reverse DCF data...</div>;
     if (error) return <div className="text-center p-4 text-red-500">Error: {error}</div>;
     if (!data) return <div className="text-center p-4">No data available.</div>;
@@ -355,7 +349,7 @@ const ReverseDcfCalculator: React.FC<ReverseDcfCalculatorProps> = ({ symbol }) =
                         <label className="block">
                             <div className="flex items-center">
                                 <span className="text-gray-700">Perpetual Growth Rate</span>
-                                <InfoIcon description={metricDescriptions.dcfInputs.perpetualGrowthRate} />
+                                <InfoIcon description="The long-term sustainable growth rate that the company is expected to achieve in perpetuity. This should be close to or below the risk-free rate." />
                             </div>
                             <NumericFormat
                                 value={perpetualGrowthRate * 100}
@@ -367,7 +361,7 @@ const ReverseDcfCalculator: React.FC<ReverseDcfCalculatorProps> = ({ symbol }) =
                         <label className="block">
                             <div className="flex items-center">
                                 <span className="text-gray-700">Projection Years</span>
-                                <InfoIcon description={metricDescriptions.dcfInputs.projectionYears} />
+                                <InfoIcon description="The total number of years to project future cash flows in the valuation model. A longer projection period captures more of the growth phase but increases uncertainty." />
                             </div>
                             <input
                                 type="number"

@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useCallback } from 'react';
+import React, { useState, useEffect, useCallback, useRef } from 'react';
 import { NumericFormat } from 'react-number-format';
 import { metricDescriptions } from './metricDescriptions';
 import InfoIcon from './InfoIcon';
@@ -116,6 +116,7 @@ const DcfCalculator: React.FC<DcfCalculatorProps> = ({ symbol }) => {
   const [dcfData, setDcfData] = useState<DcfData | null>(null);
   const [loading, setLoading] = useState<boolean>(true);
   const [error, setError] = useState<string | null>(null);
+  const initialCalculationDone = useRef(false);
 
   // States for calculated values
   const [wacc, setWacc] = useState<number | null>(null);
@@ -139,7 +140,7 @@ const DcfCalculator: React.FC<DcfCalculatorProps> = ({ symbol }) => {
   const [userInputFcfGrowthRate, setUserInputFcfGrowthRate] = useState<number>(0);
   const [inputTerminalMultiple, setInputTerminalMultiple] = useState<number>(15);
   const [userInputTerminalMultiple, setUserInputTerminalMultiple] = useState<number>(15);
-  const [sbcAdjustmentToggle, setSbcAdjustmentToggle] = useState<boolean>(false);
+  const [sbcAdjustmentToggle, setSbcAdjustmentToggle] = useState<boolean>(true);
   const [userComments, setUserComments] = useState<string>('');
   const [valuationHistory, setValuationHistory] = useState<DcfHistoryEntry[]>([]);
   const [historyLoading, setHistoryLoading] = useState<boolean>(true);
@@ -194,7 +195,7 @@ const DcfCalculator: React.FC<DcfCalculatorProps> = ({ symbol }) => {
         setUserInputFcfGrowthRate(dcfData.assumptions.fcfGrowthRate);
         setInputTerminalMultiple(dcfData.assumptions.marketCapToFcfMultiple); // Initialize with a default, as it's a new input
         setUserInputTerminalMultiple(dcfData.assumptions.marketCapToFcfMultiple);
-        setSbcAdjustmentToggle(false); // Initialize with default
+        setSbcAdjustmentToggle(true); // Initialize with default (checked)
 
         // Fetch history using the new function
         await fetchValuationHistory(symbol);
@@ -293,6 +294,14 @@ const DcfCalculator: React.FC<DcfCalculatorProps> = ({ symbol }) => {
     userComments,
   ]);
 
+  // Trigger calculation once when dcfData is first loaded
+  useEffect(() => {
+    if (dcfData && !loading && !initialCalculationDone.current) {
+      initialCalculationDone.current = true;
+      performCalculations().catch(console.error);
+    }
+  }, [dcfData, loading, performCalculations]);
+
   const resetCalculator = useCallback(() => {
     if (!originalDcfData) return;
 
@@ -308,7 +317,7 @@ const DcfCalculator: React.FC<DcfCalculatorProps> = ({ symbol }) => {
     setUserInputFcfGrowthRate(originalDcfData.assumptions.fcfGrowthRate);
     setInputTerminalMultiple(originalDcfData.assumptions.marketCapToFcfMultiple); // Reset to default
     setUserInputTerminalMultiple(originalDcfData.assumptions.marketCapToFcfMultiple);
-    setSbcAdjustmentToggle(false); // Reset to default
+    setSbcAdjustmentToggle(true); // Reset to default (checked)
     setUserComments('');
 
     // Reset calculated values
