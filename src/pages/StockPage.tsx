@@ -1,17 +1,17 @@
 import React, { useState, useEffect, Suspense, lazy, useRef } from 'react';
 import { useParams, Link } from 'react-router-dom';
-import { StockData } from '../components/stock/types/stockFinancials';
+import { StockData } from '../components/stock/shared/types/stockFinancials';
 import { useGlobalQuote } from '../components/stock/hooks/useFinancialReports';
-import FinancialDataStatus from '../components/stock/FinancialDataStatus';
-import StockSummaryTable from '../components/stock/StockSummaryTable';
-import NotesDialog from '../components/stock/NotesDialog';
+import FinancialDataStatus from '../components/stock/shared/components/FinancialDataStatus';
+import StockSummaryTable from '../components/stock/tables/StockSummaryTable';
+import NotesDialog from '../components/stock/shared/components/NotesDialog';
 
 // Lazy load tab components for code splitting and progressive loading
-const OverviewTab = lazy(() => import('../components/stock/OverviewTab'));
-const FinancialsTab = lazy(() => import('../components/stock/FinancialsTab'));
-const ChecklistTab = lazy(() => import('../components/stock/ChecklistTab'));
-const ValuationTab = lazy(() => import('../components/stock/ValuationTab'));
-const BusinessAnalysisTab = lazy(() => import('../components/stock/BusinessAnalysisTab'));
+const OverviewTab = lazy(() => import('../components/stock/tabs/OverviewTab'));
+const FinancialsTab = lazy(() => import('../components/stock/tabs/FinancialsTab'));
+const ChecklistTab = lazy(() => import('../components/stock/tabs/ChecklistTab'));
+const ValuationTab = lazy(() => import('../components/stock/tabs/ValuationTab'));
+const BusinessAnalysisTab = lazy(() => import('../components/stock/tabs/BusinessAnalysisTab'));
 
 // Loading fallback for lazy components
 const TabLoader: React.FC<{ message?: string }> = ({ message = 'Loading...' }) => (

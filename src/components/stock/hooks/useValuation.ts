@@ -1,5 +1,5 @@
 import { useState, useCallback } from 'react';
-import { HistoryEntry } from '../types/valuation';
+import { HistoryEntry } from '../shared/types/valuation';
 
 interface UseDeleteConfirmationReturn {
   isOpen: boolean;

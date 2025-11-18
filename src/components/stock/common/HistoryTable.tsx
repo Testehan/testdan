@@ -1,6 +1,6 @@
 import React from 'react';
-import { HistoryEntry } from '../types/valuation';
-import { getVerdictStyling } from '../../../utils/valuation';
+import { HistoryEntry } from '../shared/types/valuation';
+import { getVerdictStyling } from '../shared/utils/valuation';
 
 export interface ColumnConfig {
   key: string;
