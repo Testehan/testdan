@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import InfoIcon from './InfoIcon';
 import { metricDescriptions } from './metricDescriptions';
 import ConfirmDialog from './common/ConfirmDialog';
+import { formatLargeNumber } from '../../utils/valuation';
 
 interface IncomeStatement {
   fiscalYear: number;
@@ -103,15 +104,6 @@ interface GrowthValuationResponse {
   };
 }
 
-const formatLargeNumber = (value: number): string => {
-  const absValue = Math.abs(value);
-  if (absValue >= 1e12) return (value / 1e12).toFixed(2) + 'T';
-  if (absValue >= 1e9) return (value / 1e9).toFixed(2) + 'B';
-  if (absValue >= 1e6) return (value / 1e6).toFixed(2) + 'M';
-  return value.toLocaleString();
-};
-
-// Sort data by fiscal year in descending order (newest first)
 const sortByYearDesc = <T extends { fiscalYear: number }>(data: T[]): T[] => {
   return [...data].sort((a, b) => b.fiscalYear - a.fiscalYear);
 };

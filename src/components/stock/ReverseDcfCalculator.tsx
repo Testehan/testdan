@@ -3,6 +3,7 @@ import {NumericFormat} from 'react-number-format';
 import {metricDescriptions} from './metricDescriptions';
 import InfoIcon from './InfoIcon';
 import ConfirmDialog from './common/ConfirmDialog';
+import { getVerdictStyling } from '../../utils/valuation';
 
 // Using the full DcfData structure as confirmed by the user
 interface DcfData {

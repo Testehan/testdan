@@ -3,6 +3,7 @@ import { NumericFormat } from 'react-number-format';
 import { metricDescriptions } from './metricDescriptions';
 import InfoIcon from './InfoIcon';
 import ConfirmDialog from './common/ConfirmDialog';
+import { getVerdictStyling } from '../../utils/valuation';
 
 interface DcfData {
   meta: {
@@ -88,30 +89,6 @@ interface DcfOutput {
   intrinsicValuePerShare: number;
   verdict: string;
 }
-
-interface VerdictStyling {
-  verdictText: string;
-  bgColorClass: string;
-}
-
-const getVerdictStyling = (intrinsicPrice: number, currentPrice: number): VerdictStyling => {
-  const percentageDifference = (intrinsicPrice - currentPrice) / currentPrice;
-
-  let verdictText = '';
-  let bgColorClass = '';
-
-  if (percentageDifference > 0.20) { // More than 20% undervalued
-    verdictText = 'Undervalued';
-    bgColorClass = 'bg-green-200 text-green-800'; // Green for undervalued
-  } else if (percentageDifference < -0.20) { // More than 20% overvalued
-    verdictText = 'Overvalued';
-    bgColorClass = 'bg-red-200 text-red-800'; // Red for overvalued
-  } else {
-    verdictText = 'Neutral'; // Within +/- 20%
-    bgColorClass = 'bg-yellow-200 text-yellow-800'; // Yellow for neutral
-  }
-  return { verdictText, bgColorClass };
-};
 
 const DcfCalculator: React.FC<DcfCalculatorProps> = ({ symbol }) => {
   const [dcfData, setDcfData] = useState<DcfData | null>(null);
