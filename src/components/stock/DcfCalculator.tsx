@@ -2,6 +2,7 @@ import React, { useState, useEffect, useCallback, useRef } from 'react';
 import { NumericFormat } from 'react-number-format';
 import { metricDescriptions } from './metricDescriptions';
 import InfoIcon from './InfoIcon';
+import ConfirmDialog from './common/ConfirmDialog';
 
 interface DcfData {
   meta: {
@@ -145,6 +146,10 @@ const DcfCalculator: React.FC<DcfCalculatorProps> = ({ symbol }) => {
   const [valuationHistory, setValuationHistory] = useState<DcfHistoryEntry[]>([]);
   const [historyLoading, setHistoryLoading] = useState<boolean>(true);
   const [historyError, setHistoryError] = useState<string | null>(null);
+  
+  // Delete confirmation dialog state
+  const [isDeleteConfirmOpen, setIsDeleteConfirmOpen] = useState<boolean>(false);
+  const [valuationDateToDelete, setValuationDateToDelete] = useState<string | null>(null);
 
 
   const fetchValuationHistory = useCallback(async (currentSymbol: string) => {
@@ -424,11 +429,33 @@ const DcfCalculator: React.FC<DcfCalculatorProps> = ({ symbol }) => {
 
       // Reload history table
       await fetchValuationHistory(symbol);
-
     } catch (e: unknown) {
       setSaveError((e as Error).message);
     } finally {
       setIsSaving(false);
+    }
+  };
+
+  const handleDeleteDcf = async () => {
+    if (!symbol || !valuationDateToDelete) return;
+    
+    try {
+      const response = await fetch(`http://localhost:8080/stock/valuation/dcf/${symbol}?valuationDate=${encodeURIComponent(valuationDateToDelete)}`, {
+        method: 'DELETE',
+      });
+
+      if (!response.ok) {
+        throw new Error(`HTTP error! status: ${response.status}`);
+      }
+
+      // Reload history table
+      await fetchValuationHistory(symbol);
+    } catch (error) {
+      console.error('Failed to delete DCF valuation:', error);
+      setSaveError((error as Error).message);
+    } finally {
+      setIsDeleteConfirmOpen(false);
+      setValuationDateToDelete(null);
     }
   };
 
@@ -688,26 +715,39 @@ const DcfCalculator: React.FC<DcfCalculatorProps> = ({ symbol }) => {
                   <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Share Price at Valuation</th>
                   <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Verdict</th>
                   <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Comments</th>
+                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Actions</th>
                 </tr>
               </thead>
               <tbody className="bg-white divide-y divide-gray-200">
                 {valuationHistory.length > 0 ? (
                   valuationHistory.map((entry, index) => (
-                    <tr key={index} onClick={() => loadHistoricalValuation(entry)} className="cursor-pointer hover:bg-gray-100">
-                      <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">{new Date(entry.valuationDate).toLocaleString()}</td>
-                      <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">{entry.dcfCalculationData.meta.currency} {entry.dcfOutput.intrinsicValuePerShare.toFixed(2)}</td>
-                      <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">{entry.dcfCalculationData.meta.currency} {entry.dcfCalculationData.meta.currentSharePrice.toFixed(2)}</td>
-                      <td className={`px-6 py-4 whitespace-nowrap text-sm ${getVerdictStyling(entry.dcfOutput.intrinsicValuePerShare, entry.dcfCalculationData.meta.currentSharePrice).bgColorClass}`}>
+                    <tr key={index} className="cursor-pointer hover:bg-gray-100">
+                      <td onClick={() => loadHistoricalValuation(entry)} className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">{new Date(entry.valuationDate).toLocaleString()}</td>
+                      <td onClick={() => loadHistoricalValuation(entry)} className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">{entry.dcfCalculationData.meta.currency} {entry.dcfOutput.intrinsicValuePerShare.toFixed(2)}</td>
+                      <td onClick={() => loadHistoricalValuation(entry)} className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">{entry.dcfCalculationData.meta.currency} {entry.dcfCalculationData.meta.currentSharePrice.toFixed(2)}</td>
+                      <td onClick={() => loadHistoricalValuation(entry)} className={`px-6 py-4 whitespace-nowrap text-sm ${getVerdictStyling(entry.dcfOutput.intrinsicValuePerShare, entry.dcfCalculationData.meta.currentSharePrice).bgColorClass}`}>
                         {entry.dcfOutput.verdict}
                       </td>
-                      <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500" title={entry.dcfUserInput.userComments}>
+                      <td onClick={() => loadHistoricalValuation(entry)} className="px-6 py-4 whitespace-nowrap text-sm text-gray-500" title={entry.dcfUserInput.userComments}>
                         {entry.dcfUserInput.userComments ? entry.dcfUserInput.userComments.substring(0, 50) + (entry.dcfUserInput.userComments.length > 50 ? '...' : '') : ''}
+                      </td>
+                      <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                        <button
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            setValuationDateToDelete(entry.valuationDate);
+                            setIsDeleteConfirmOpen(true);
+                          }}
+                          className="px-3 py-1 bg-red-500 text-white rounded-md hover:bg-red-600 focus:outline-none focus:ring-2 focus:ring-red-500 focus:ring-opacity-50 text-xs"
+                        >
+                          Delete
+                        </button>
                       </td>
                     </tr>
                   ))
                 ) : (
                   <tr>
-                    <td colSpan={5} className="text-center py-4">No valuation history found for this stock.</td>
+                    <td colSpan={6} className="text-center py-4">No valuation history found for this stock.</td>
                   </tr>
                 )}
               </tbody>
@@ -715,6 +755,18 @@ const DcfCalculator: React.FC<DcfCalculatorProps> = ({ symbol }) => {
           </div>
         )}
       </div>
+      
+      {/* Delete Confirmation Dialog */}
+      <ConfirmDialog
+        isOpen={isDeleteConfirmOpen}
+        title="Confirm Deletion"
+        message="Are you sure you want to delete this valuation?"
+        onConfirm={handleDeleteDcf}
+        onCancel={() => {
+          setIsDeleteConfirmOpen(false);
+          setValuationDateToDelete(null);
+        }}
+      />
     </div>
   );
 };

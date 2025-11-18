@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import InfoIcon from './InfoIcon';
 import { metricDescriptions } from './metricDescriptions';
+import ConfirmDialog from './common/ConfirmDialog';
 
 interface IncomeStatement {
   fiscalYear: number;
@@ -226,6 +227,10 @@ const GrowthTab: React.FC<GrowthTabProps> = ({ symbol }) => {  const [growthData
   const [valuationHistory, setValuationHistory] = useState<GrowthHistoryEntry[]>([]);
   const [historyLoading, setHistoryLoading] = useState<boolean>(true);
   const [historyError, setHistoryError] = useState<string | null>(null);
+  
+  // Delete confirmation dialog state
+  const [isDeleteConfirmOpen, setIsDeleteConfirmOpen] = useState<boolean>(false);
+  const [valuationDateToDelete, setValuationDateToDelete] = useState<string | null>(null);
 
   const resetCalculator = () => {
     if (serverGrowthUserInput) {
@@ -339,6 +344,29 @@ const GrowthTab: React.FC<GrowthTabProps> = ({ symbol }) => {  const [growthData
       setSaveError((error as Error).message);
     } finally {
       setIsSaving(false);
+    }
+  };
+
+  const handleDeleteGrowth = async () => {
+    if (!symbol || !valuationDateToDelete) return;
+    
+    try {
+      const response = await fetch(`http://localhost:8080/stock/valuation/growth/${symbol}?valuationDate=${encodeURIComponent(valuationDateToDelete)}`, {
+        method: 'DELETE',
+      });
+
+      if (!response.ok) {
+        throw new Error('Failed to delete growth valuation');
+      }
+
+      // Reload history table
+      await fetchValuationHistory(symbol);
+    } catch (error) {
+      console.error('Failed to delete growth valuation:', error);
+      setSaveError((error as Error).message);
+    } finally {
+      setIsDeleteConfirmOpen(false);
+      setValuationDateToDelete(null);
     }
   };
 
@@ -844,17 +872,29 @@ const GrowthTab: React.FC<GrowthTabProps> = ({ symbol }) => {  const [growthData
                       {(percentageDifference * 100).toFixed(2)}%
                     </span>
                   </div>
-                  <div className="mt-3">
-                    <span className={`inline-block px-3 py-1 rounded font-semibold ${bgColorClass}`}>
-                      <strong>Verdict:</strong> {verdictText}
-                    </span>
-                  </div>
-                </>
-              );
-            })()}
-          </div>
-        )}
-      </div>
+                    <div className="mt-3">
+                      <span className={`inline-block px-3 py-1 rounded font-semibold ${bgColorClass}`}>
+                        <strong>Verdict:</strong> {verdictText}
+                      </span>
+                    </div>
+                  </>
+                );
+              })()}
+            </div>
+          )}
+        </div>
+
+        <ConfirmDialog
+          isOpen={isDeleteConfirmOpen}
+          title="Delete Valuation"
+          message="Are you sure you want to delete this valuation? This action cannot be undone."
+          onConfirm={handleDeleteGrowth}
+          onCancel={() => {
+            setIsDeleteConfirmOpen(false);
+            setValuationDateToDelete(null);
+          }}
+        />
+
 
       {/* History Table */}
       <div className="mt-8">
@@ -873,32 +913,45 @@ const GrowthTab: React.FC<GrowthTabProps> = ({ symbol }) => {  const [growthData
                   <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Share Price at Valuation</th>
                   <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Verdict</th>
                   <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Comments</th>
+                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Actions</th>
                 </tr>
               </thead>
               <tbody className="bg-white divide-y divide-gray-200">
                 {valuationHistory.length > 0 ? (
                   valuationHistory.map((entry, index) => (
-                    <tr key={index} onClick={() => loadHistoricalValuation(entry)} className="cursor-pointer hover:bg-gray-100">
-                      <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">{new Date(entry.valuationDate).toLocaleString()}</td>
-                      <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">${entry.growthOutput.intrinsicValuePerShare}</td>
-                      <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">${entry.growthValuationData.currentSharePrice.toFixed(2)}</td>
-                      <td className={`px-6 py-4 whitespace-nowrap text-sm font-semibold ${
-                        entry.growthOutput.verdict === 'Undervalued' ? 'bg-green-200 text-green-800' : 
-                        entry.growthOutput.verdict === 'Overvalued' ? 'bg-red-200 text-red-800' : 
+                    <tr key={index} className="cursor-pointer hover:bg-gray-100">
+                      <td onClick={() => loadHistoricalValuation(entry)} className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">{new Date(entry.valuationDate).toLocaleString()}</td>
+                      <td onClick={() => loadHistoricalValuation(entry)} className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">${entry.growthOutput.intrinsicValuePerShare}</td>
+                      <td onClick={() => loadHistoricalValuation(entry)} className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">${entry.growthValuationData.currentSharePrice.toFixed(2)}</td>
+                      <td onClick={() => loadHistoricalValuation(entry)} className={`px-6 py-4 whitespace-nowrap text-sm font-semibold ${
+                        entry.growthOutput.verdict === 'Undervalued' ? 'bg-green-200 text-green-800': 
+                        entry.growthOutput.verdict === 'Overvalued' ? 'bg-red-200 text-red-800': 
                         'bg-yellow-200 text-yellow-800'
                       }`}>
                         {entry.growthOutput.verdict}
                       </td>
-                      <td className="px-6 py-4 text-sm text-gray-500 truncate max-w-xs" title={entry.growthUserInput.userComments}>
+                      <td onClick={() => loadHistoricalValuation(entry)} className="px-6 py-4 text-sm text-gray-500 truncate max-w-xs" title={entry.growthUserInput.userComments}>
                         {entry.growthUserInput.userComments && entry.growthUserInput.userComments.length > 50 
                           ? `${entry.growthUserInput.userComments.substring(0, 47)}...` 
                           : entry.growthUserInput.userComments}
+                      </td>
+                      <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                        <button
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            setValuationDateToDelete(entry.valuationDate);
+                            setIsDeleteConfirmOpen(true);
+                          }}
+                          className="px-3 py-1 bg-red-500 text-white rounded-md hover:bg-red-600 focus:outline-none focus:ring-2 focus:ring-red-500 focus:ring-opacity-50 text-xs"
+                        >
+                          Delete
+                        </button>
                       </td>
                     </tr>
                   ))
                 ) : (
                   <tr>
-                    <td colSpan={4} className="text-center py-4">No valuation history found for this stock.</td>
+                    <td colSpan={6} className="text-center py-4">No valuation history found for this stock.</td>
                   </tr>
                 )}
               </tbody>
@@ -1056,7 +1109,7 @@ const GrowthTab: React.FC<GrowthTabProps> = ({ symbol }) => {  const [growthData
                 <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900 w-64">Operating Cash Flow</td>
                 {displayYears.map((year) => {
                   if (year === projectedYear) {
-                    return <td key={year} className="px-6 py-4 whitespace-nowrap text-sm font-semibold text-blue-600 bg-blue-50">{formatLargeNumber(projectedOperatingCashFlow)}</td>;
+                    return <td key={year} className="px-6 py-4 whitespace-nowrap text-sm text-gray-400 bg-blue-50">-</td>;
                   }
                   const data = cashFlowMap.get(year);
                   return <td key={year} className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">{data ? formatLargeNumber(data.operatingCashFlow) : '-'}</td>;
@@ -1066,7 +1119,7 @@ const GrowthTab: React.FC<GrowthTabProps> = ({ symbol }) => {  const [growthData
                 <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900 w-64">Capital Expenditures</td>
                 {displayYears.map((year) => {
                   if (year === projectedYear) {
-                    return <td key={year} className="px-6 py-4 whitespace-nowrap text-sm font-semibold text-blue-600 bg-blue-50">{formatLargeNumber(projectedCapitalExpenditures)}</td>;
+                    return <td key={year} className="px-6 py-4 whitespace-nowrap text-sm text-gray-400 bg-blue-50">-</td>;
                   }
                   const data = cashFlowMap.get(year);
                   return <td key={year} className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">{data ? formatLargeNumber(data.capitalExpenditures) : '-'}</td>;
@@ -1076,7 +1129,7 @@ const GrowthTab: React.FC<GrowthTabProps> = ({ symbol }) => {  const [growthData
                 <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900 w-64">Depreciation & Amortization</td>
                 {displayYears.map((year) => {
                   if (year === projectedYear) {
-                    return <td key={year} className="px-6 py-4 whitespace-nowrap text-sm font-semibold text-blue-600 bg-blue-50">{formatLargeNumber(projectedDepreciationAndAmortization)}</td>;
+                    return <td key={year} className="px-6 py-4 whitespace-nowrap text-sm text-gray-400 bg-blue-50">-</td>;
                   }
                   const data = cashFlowMap.get(year);
                   return <td key={year} className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">{data ? formatLargeNumber(data.depreciationAndAmortization) : '-'}</td>;
@@ -1086,7 +1139,7 @@ const GrowthTab: React.FC<GrowthTabProps> = ({ symbol }) => {  const [growthData
                 <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900 w-64">Change in Working Capital</td>
                 {displayYears.map((year) => {
                   if (year === projectedYear) {
-                    return <td key={year} className="px-6 py-4 whitespace-nowrap text-sm font-semibold text-blue-600 bg-blue-50">{formatLargeNumber(projectedChangeInWorkingCapital)}</td>;
+                    return <td key={year} className="px-6 py-4 whitespace-nowrap text-sm text-gray-400 bg-blue-50">-</td>;
                   }
                   const data = cashFlowMap.get(year);
                   return <td key={year} className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">{data ? formatLargeNumber(data.changeInWorkingCapital) : '-'}</td>;
@@ -1096,7 +1149,6 @@ const GrowthTab: React.FC<GrowthTabProps> = ({ symbol }) => {  const [growthData
           </table>
         </div>
       </div>
-
     </div>
   );
 };

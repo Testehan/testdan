@@ -2,6 +2,7 @@ import React, {useCallback, useEffect, useState, useRef} from 'react';
 import {NumericFormat} from 'react-number-format';
 import {metricDescriptions} from './metricDescriptions';
 import InfoIcon from './InfoIcon';
+import ConfirmDialog from './common/ConfirmDialog';
 
 // Using the full DcfData structure as confirmed by the user
 interface DcfData {
@@ -106,6 +107,10 @@ const ReverseDcfCalculator: React.FC<ReverseDcfCalculatorProps> = ({ symbol }) =
     const [historyLoading, setHistoryLoading] = useState<boolean>(true);
     const [historyError, setHistoryError] = useState<string | null>(null);
     const initialCalculationDone = useRef(false);
+
+    // Delete confirmation dialog state
+    const [isDeleteConfirmOpen, setIsDeleteConfirmOpen] = useState<boolean>(false);
+    const [valuationDateToDelete, setValuationDateToDelete] = useState<string | null>(null);
 
     const calculateWacc = useCallback((dcfData: DcfData) => {
         const { assumptions, income, balanceSheet, meta } = dcfData;
@@ -318,6 +323,29 @@ const ReverseDcfCalculator: React.FC<ReverseDcfCalculatorProps> = ({ symbol }) =
         }
     };
 
+    const handleDeleteReverseDcf = async () => {
+        if (!symbol || !valuationDateToDelete) return;
+        
+        try {
+            const response = await fetch(`http://localhost:8080/stock/valuation/reverse-dcf/${symbol}?valuationDate=${encodeURIComponent(valuationDateToDelete)}`, {
+                method: 'DELETE',
+            });
+
+            if (!response.ok) {
+                throw new Error('Failed to delete reverse DCF valuation');
+            }
+
+            // Reload history table
+            await fetchReverseDcfHistory(symbol);
+        } catch (error) {
+            console.error('Failed to delete reverse DCF valuation:', error);
+            setSaveError((error as Error).message);
+        } finally {
+            setIsDeleteConfirmOpen(false);
+            setValuationDateToDelete(null);
+        }
+    };
+
 
     if (loading) return <div className="text-center p-4">Loading Reverse DCF data...</div>;
     if (error) return <div className="text-center p-4 text-red-500">Error: {error}</div>;
@@ -451,6 +479,7 @@ const ReverseDcfCalculator: React.FC<ReverseDcfCalculatorProps> = ({ symbol }) =
                                     <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Discount Rate</th>
                                     <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Implied FCF Growth Rate</th>
                                     <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Comments</th>
+                                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Actions</th>
                                 </tr>
                             </thead>
                             <tbody className="bg-white divide-y divide-gray-200">
@@ -473,18 +502,41 @@ const ReverseDcfCalculator: React.FC<ReverseDcfCalculatorProps> = ({ symbol }) =
                                             <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500" title={entry.reverseDcfUserInput.userComments}>
                                                 {entry.reverseDcfUserInput.userComments ? entry.reverseDcfUserInput.userComments.substring(0, 50) + (entry.reverseDcfUserInput.userComments.length > 50 ? '...' : '') : ''}
                                             </td>
+                                            <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                                                <button
+                                                    onClick={(e) => {
+                                                        e.stopPropagation();
+                                                        setValuationDateToDelete(entry.valuationDate);
+                                                        setIsDeleteConfirmOpen(true);
+                                                    }}
+                                                    className="px-3 py-1 bg-red-500 text-white rounded-md hover:bg-red-600 focus:outline-none focus:ring-2 focus:ring-red-500 focus:ring-opacity-50 text-xs"
+                                                >
+                                                    Delete
+                                                </button>
+                                            </td>
                                         </tr>
                                     ))
                                 ) : (
-                                    <tr>
-                                        <td colSpan={4} className="text-center py-4">No reverse DCF valuation history found for this stock.</td>
-                                    </tr>
+                                        <tr>
+                                            <td colSpan={6} className="text-center py-4">No reverse DCF valuation history found for this stock.</td>
+                                        </tr>
                                 )}
                             </tbody>
                         </table>
                     </div>
                 )}
             </div>
+
+            <ConfirmDialog
+                isOpen={isDeleteConfirmOpen}
+                title="Delete Valuation"
+                message="Are you sure you want to delete this valuation? This action cannot be undone."
+                onConfirm={handleDeleteReverseDcf}
+                onCancel={() => {
+                    setIsDeleteConfirmOpen(false);
+                    setValuationDateToDelete(null);
+                }}
+            />
         </div>
     );
 };
