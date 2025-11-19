@@ -11,6 +11,15 @@ interface StockSummary {
   status: string;
 }
 
+interface PaginatedResponse<T> {
+  content: T[];
+  totalPages: number;
+  totalElements: number;
+  size: number;
+  number: number; // current page number (0-indexed)
+  // Add other fields from Spring Page if needed
+}
+
 type SortColumn = keyof StockSummary;
 type SortDirection = 'asc' | 'desc';
 
@@ -21,6 +30,10 @@ const StockSummaryTable: React.FC = React.memo(() => {
   const [sortColumn, setSortColumn] = useState<SortColumn>('ticker');
   const [sortDirection, setSortDirection] = useState<SortDirection>('asc');
   const [statusFilter, setStatusFilter] = useState<string>('All');
+  const [currentPage, setCurrentPage] = useState<number>(0);
+  const [pageSize, setPageSize] = useState<number>(25);
+  const [totalPages, setTotalPages] = useState<number>(0);
+  const [totalElements, setTotalElements] = useState<number>(0);
   const navigate = useNavigate();
   const [isConfirmOpen, setIsConfirmOpen] = useState(false);
   const [stockToDelete, setStockToDelete] = useState<string | null>(null);
@@ -41,24 +54,29 @@ const StockSummaryTable: React.FC = React.memo(() => {
     'PASS',
   ];
 
-  useEffect(() => {
-    const fetchSummaryData = async () => {
-      try {
-        const response = await fetch('http://localhost:8080/stocks/reporting/checklist/summary/dante');
-        if (!response.ok) {
-          throw new Error(`HTTP error! status: ${response.status}`);
-        }
-        const data: StockSummary[] = await response.json();
-        setSummaryData(data);
-      } catch (e: any) {
-        setError(e.message);
-      } finally {
-        setLoading(false);
+  const fetchSummaryData = async (page: number, size: number) => {
+    setLoading(true);
+    setError(null);
+    try {
+      const response = await fetch(`http://localhost:8080/stocks/reporting/checklist/summary/dante?page=${page}&size=${size}`);
+      if (!response.ok) {
+        throw new Error(`HTTP error! status: ${response.status}`);
       }
-    };
+      const data: PaginatedResponse<StockSummary> = await response.json();
+      setSummaryData(data.content);
+      setTotalPages(data.totalPages);
+      setTotalElements(data.totalElements);
+      setCurrentPage(data.number);
+    } catch (e: any) {
+      setError(e.message);
+    } finally {
+      setLoading(false);
+    }
+  };
 
-    fetchSummaryData();
-  }, []);
+  useEffect(() => {
+    fetchSummaryData(currentPage, pageSize);
+  }, [currentPage, pageSize]);
 
 
   const handleContextMenu = (event: React.MouseEvent, ticker: string) => {
@@ -255,6 +273,62 @@ const StockSummaryTable: React.FC = React.memo(() => {
           ))}
         </tbody>
       </table>
+
+      {/* Pagination Controls */}
+      <div className="flex justify-between items-center mt-4">
+        <div className="flex items-center space-x-2">
+          <label htmlFor="pageSizeSelect" className="text-sm font-medium text-gray-700">
+            Items per page:
+          </label>
+          <select
+            id="pageSizeSelect"
+            value={pageSize}
+            onChange={(e) => {
+              setPageSize(Number(e.target.value));
+              setCurrentPage(0); // Reset to first page when page size changes
+            }}
+            className="bg-gray-50 border border-gray-300 text-gray-900 text-xs rounded-lg focus:ring-blue-500 focus:border-blue-500 p-1"
+          >
+            <option value={10}>10</option>
+            <option value={25}>25</option>
+            <option value={50}>50</option>
+            <option value={100}>100</option>
+          </select>
+        </div>
+        <div className="flex space-x-2">
+          <button
+            onClick={() => setCurrentPage(0)}
+            disabled={currentPage === 0}
+            className="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded disabled:opacity-50"
+          >
+            First
+          </button>
+          <button
+            onClick={() => setCurrentPage(prev => Math.max(0, prev - 1))}
+            disabled={currentPage === 0}
+            className="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded disabled:opacity-50"
+          >
+            Previous
+          </button>
+          <span>
+            Page {currentPage + 1} of {totalPages} ({totalElements} items)
+          </span>
+          <button
+            onClick={() => setCurrentPage(prev => Math.min(totalPages - 1, prev + 1))}
+            disabled={currentPage === totalPages - 1}
+            className="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded disabled:opacity-50"
+          >
+            Next
+          </button>
+          <button
+            onClick={() => setCurrentPage(totalPages - 1)}
+            disabled={currentPage === totalPages - 1}
+            className="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded disabled:opacity-50"
+          >
+            Last
+          </button>
+        </div>
+      </div>
       <ConfirmDialog
         isOpen={isConfirmOpen}
         title="Confirm Deletion"
