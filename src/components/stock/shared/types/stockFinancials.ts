@@ -248,4 +248,52 @@ export interface StockData {
     quotes: GlobalQuote[];
     lastUpdated: string;
   }
+
+  export interface FinancialAdjustmentReport {
+    calendarYear: number;
+    date: string;
+
+    // Reported Metrics
+    reportedOperatingIncome: string;
+    reportedNetIncome: string;
+    reportedEps: string;
+    reportedFreeCashFlow: string;
+    reportedEbitda: string;
+    reportedRoic: string;
+    reportedPe: string;
+    reportedInvestedCapital: string;
+    reportedBookValueOfEquity: string;
+    reportedNopat: string;
+    reportedSalesToCapital: string;
+    reportedNetDebtToEbitda: string;
+    reportedEbitToInterest: string;
+    reportedEvToEbitda: string;
+    reportedPb: string;
+
+    // R&D Capitalization
+    rdCapitalizationAdjustment: string;
+    adjustedOperatingIncome: string;
+    adjustedInvestedCapital: string;
+    adjustedRoic: string;
+    adjustedSalesToCapital: string;
+    adjustedNetIncome: string;
+    adjustedMarginalTaxRate: string;
+    adjustedBookValueOfEquity: string;
+    adjustedNopat: string;
+    adjustedEps: string;
+    adjustedFreeCashFlow: string;
+    adjustedEbitda: string;
+    adjustedNetDebtToEbitda: string;
+    adjustedEbitToInterest: string;
+    adjustedPe: string;
+    adjustedEvToEbitda: string;
+    adjustedPb: string;
+  }
+
+  export interface FinancialAdjustment {
+    id: string;
+    symbol: string;
+    lastUpdated: string;
+    annualAdjustments: FinancialAdjustmentReport[];
+  }
   

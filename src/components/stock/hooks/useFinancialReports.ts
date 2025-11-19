@@ -222,6 +222,40 @@ export const useEarningsHistory = (
     };
   };
 
+  export const useFinancialAdjustments = (
+    { symbol, baseURL = 'http://localhost:8080/stocks' }: { symbol: string; baseURL?: string }
+  ) => {
+    const [adjustments, setAdjustments] = useState<import('../shared/types/stockFinancials').FinancialAdjustment | null>(null);
+    const [loading, setLoading] = useState<boolean>(true);
+    const [error, setError] = useState<string | null>(null);
+
+    useEffect(() => {
+      (async () => {
+        setLoading(true);
+        setError(null);
+        try {
+          const upperCaseSymbol = symbol.toUpperCase();
+          const response = await fetch(`${baseURL}/adjustments/${upperCaseSymbol}`);
+          if (!response.ok) {
+            throw new Error(`HTTP error! status: ${response.status}`);
+          }
+          const data = await response.json();
+          setAdjustments(data);
+        } catch (e: any) {
+          setError(e.message);
+        } finally {
+          setLoading(false);
+        }
+      })();
+    }, [symbol, baseURL]);
+
+    return {
+      adjustments,
+      loading,
+      error,
+    };
+  };
+
   export const useGlobalQuote = (
     { symbol, baseURL = 'http://localhost:8080/stocks' }: { symbol: string; baseURL?: string }
   ) => {

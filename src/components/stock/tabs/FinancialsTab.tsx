@@ -3,6 +3,7 @@ import IncomeStatementTab from './IncomeStatementTab';
 import BalanceSheetTab from './BalanceSheetTab';
 import CashFlowTab from './CashFlowTab';
 import RatiosTab from './RatiosTab';
+import AdjustmentsBridgeTab from './AdjustmentsBridgeTab';
 import EarningsTab from './EarningsTab';
 
 interface FinancialsTabProps {
@@ -48,6 +49,14 @@ const FinancialsTab: React.FC<FinancialsTabProps> = ({ symbol, activeSubTab, onS
           Ratios
         </button>
         <button
+          className={`px-4 py-2 text-lg font-medium ${
+            activeSubTab === 'adjustmentsBridge' ? 'border-b-2 border-blue-500 text-blue-600' : 'text-gray-600 hover:text-blue-600'
+          }`}
+          onClick={() => onSubTabClick('adjustmentsBridge')}
+        >
+          Adjustments Bridge
+        </button>
+        <button
             className={`px-4 py-2 text-lg font-medium ${
                 activeSubTab === 'earnings' ? 'border-b-2 border-blue-500 text-blue-600' : 'text-gray-600 hover:text-blue-600'
             }`}
@@ -61,6 +70,7 @@ const FinancialsTab: React.FC<FinancialsTabProps> = ({ symbol, activeSubTab, onS
         {activeSubTab === 'balanceSheet' && <BalanceSheetTab symbol={symbol} />}
         {activeSubTab === 'cashFlow' && <CashFlowTab symbol={symbol} />}
         {activeSubTab === 'ratios' && <RatiosTab symbol={symbol} />}
+        {activeSubTab === 'adjustmentsBridge' && <AdjustmentsBridgeTab symbol={symbol} />}
         {activeSubTab === 'earnings' && <EarningsTab symbol={symbol} />}
       </div>
     </div>
