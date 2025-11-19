@@ -1,10 +1,11 @@
 import React, { useState, useEffect, Suspense, lazy, useRef } from 'react';
-import { useParams, Link } from 'react-router-dom';
+import { useParams } from 'react-router-dom';
 import { StockData } from '../components/stock/shared/types/stockFinancials';
 import { useGlobalQuote } from '../components/stock/hooks/useFinancialReports';
 import FinancialDataStatus from '../components/stock/shared/components/FinancialDataStatus';
 import StockSummaryTable from '../components/stock/tables/StockSummaryTable';
 import NotesDialog from '../components/stock/shared/components/NotesDialog';
+import Menu from '../components/Menu';
 
 // Lazy load tab components for code splitting and progressive loading
 const OverviewTab = lazy(() => import('../components/stock/tabs/OverviewTab'));
@@ -276,6 +277,7 @@ const StockPage: React.FC = () => {
   if (!symbol) {
     return (
       <div className="container mx-auto p-4">
+        <Menu />
         <StockSummaryTable />
       </div>
     );
@@ -310,13 +312,7 @@ const StockPage: React.FC = () => {
           “Let us fall back on the principle that when any rule or formula become a substitute for thought rather than an aid to thinking, it is dangerous and should be discarded.”
         </i>
       </h2>
-      <div className="text-center mb-4">
-        <Link to="/stocks">
-          <button className="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded">
-            Home
-          </button>
-        </Link>
-      </div>
+      <Menu />
       <div className="flex justify-between items-center mb-4">
         <h2 className="text-2xl font-bold">
           Stock Details for {symbol?.toUpperCase()}

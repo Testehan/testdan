@@ -3,6 +3,7 @@ import { Suspense, lazy } from 'react';
 import HomePage from './pages/homePage';
 import QuotesPage from './pages/quotesPage';
 import MentalModelsPage from './pages/mentalModelsPage.tsx';
+import AlertsPage from './pages/alertsPage';
 
 // Lazy load heavy components to reduce initial bundle size
 const MentalModelsList = lazy(() => import("./components/mentalModelsList.tsx"));
@@ -37,6 +38,7 @@ function App() {
               <Route path="/mental/:category" element={<MentalModelsList />} />
               <Route path="/stocks" element={<StockPage />} />
               <Route path="/stocks/:symbol" element={<StockPage />} />
+              <Route path="/alerts" element={<AlertsPage />} />
           </Routes>
         </Suspense>
       </Router>

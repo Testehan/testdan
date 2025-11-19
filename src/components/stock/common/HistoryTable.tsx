@@ -75,8 +75,35 @@ export function HistoryTable<T extends HistoryEntry>({
   };
 
   const getCommentsFromEntry = (entry: T): string => {
-    const entryAny = entry as unknown as { userComments?: string };
-    return entryAny.userComments || '';
+    const entryAny = entry as unknown as Record<string, unknown>;
+    
+    // Support nested paths for comments (e.g., 'growthUserInput.userComments')
+    const commentPaths = ['userComments', 'growthUserInput.userComments', 'dcfUserInput.userComments', 'reverseDcfUserInput.userComments'];
+    
+    for (const path of commentPaths) {
+      if (path.includes('.')) {
+        const parts = path.split('.');
+        let current: unknown = entryAny;
+        for (const part of parts) {
+          if (current && typeof current === 'object') {
+            current = (current as Record<string, unknown>)[part];
+          } else {
+            current = undefined;
+            break;
+          }
+        }
+        if (current && typeof current === 'string' && current.length > 0) {
+          return current;
+        }
+      } else {
+        const value = entryAny[path];
+        if (value && typeof value === 'string' && value.length > 0) {
+          return value;
+        }
+      }
+    }
+    
+    return '';
   };
 
   return (
@@ -129,13 +156,12 @@ export function HistoryTable<T extends HistoryEntry>({
                     </td>
                   )}
                   <td 
-                    onClick={() => onLoadEntry(entry)}
                     className="px-6 py-4 text-sm text-gray-500 truncate max-w-xs"
                     title={comments}
                   >
                     {comments.length > 50 
                       ? `${comments.substring(0, 47)}...` 
-                      : comments}
+                      : comments || '-'}
                   </td>
                   <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
                     <button
