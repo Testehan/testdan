@@ -72,23 +72,24 @@ function AlertsPage() {
                     setTickerAlerts(prevMap => {
                         const newMap = new Map(prevMap);
                         const existing = newMap.get(data.ticker);
-                        
+                        const timestamp = data.valuationData?.valuationDate as string || data.timestamp;
+
                         if (existing) {
                             const updatedValuations = existing.valuations.filter(v => v.valuationType !== data.valuationType);
                             updatedValuations.push(data);
                             newMap.set(data.ticker, {
                                 ...existing,
-                                latestTimestamp: data.timestamp,
+                                latestTimestamp: timestamp,
                                 valuations: updatedValuations,
                             });
                         } else {
                             newMap.set(data.ticker, {
                                 ticker: data.ticker,
-                                latestTimestamp: data.timestamp,
+                                latestTimestamp: timestamp,
                                 valuations: [data],
                             });
                         }
-                        
+
                         return newMap;
                     });
                 } catch (e) {
