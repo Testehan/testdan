@@ -54,11 +54,15 @@ const StockSummaryTable: React.FC = React.memo(() => {
     'PASS',
   ];
 
-  const fetchSummaryData = async (page: number, size: number) => {
+  const fetchSummaryData = async (page: number, size: number, sortCol: SortColumn, sortDir: SortDirection, status: string) => {
     setLoading(true);
     setError(null);
     try {
-      const response = await fetch(`http://localhost:8080/stocks/reporting/checklist/summary/dante?page=${page}&size=${size}`);
+      let url = `http://localhost:8080/stocks/reporting/checklist/summary/dante?page=${page}&size=${size}&sort=${sortCol},${sortDir}`;
+      if (status !== 'All') {
+        url += `&status=${status}`;
+      }
+      const response = await fetch(url);
       if (!response.ok) {
         throw new Error(`HTTP error! status: ${response.status}`);
       }
@@ -67,16 +71,16 @@ const StockSummaryTable: React.FC = React.memo(() => {
       setTotalPages(data.totalPages);
       setTotalElements(data.totalElements);
       setCurrentPage(data.number);
-    } catch (e: any) {
-      setError(e.message);
+    } catch (e: unknown) {
+      setError((e as Error).message);
     } finally {
       setLoading(false);
     }
   };
 
   useEffect(() => {
-    fetchSummaryData(currentPage, pageSize);
-  }, [currentPage, pageSize]);
+    fetchSummaryData(currentPage, pageSize, sortColumn, sortDirection, statusFilter);
+  }, [currentPage, pageSize, sortColumn, sortDirection, statusFilter]);
 
 
   const handleContextMenu = (event: React.MouseEvent, ticker: string) => {
@@ -108,7 +112,7 @@ const StockSummaryTable: React.FC = React.memo(() => {
     };
   }, [contextMenu]);
 
-  const handleDeleteClick = (symbol: string, e: React.MouseEvent) => {
+  const handleDeleteClick = (symbol: string, e: React.MouseEvent<HTMLButtonElement>) => {
     e.stopPropagation();
     setStockToDelete(symbol);
     setIsConfirmOpen(true);
@@ -124,8 +128,8 @@ const StockSummaryTable: React.FC = React.memo(() => {
           throw new Error(`HTTP error! status: ${response.status}`);
         }
         window.location.reload();
-      } catch (e: any) {
-        setError(e.message);
+      } catch (e: unknown) {
+        setError((e as Error).message);
       } finally {
         setIsConfirmOpen(false);
         setStockToDelete(null);
@@ -146,26 +150,6 @@ const StockSummaryTable: React.FC = React.memo(() => {
       setSortDirection('asc');
     }
   };
-
-  const sortedData = [...summaryData]
-    .filter((summary) => statusFilter === 'All' || summary.status === statusFilter)
-    .sort((a, b) => {
-      const aValue = a[sortColumn];
-      const bValue = b[sortColumn];
-
-      if (sortColumn === 'totalFerolScore' || sortColumn === 'total100BaggerScore') {
-        return sortDirection === 'asc' ? (aValue as number) - (bValue as number) : (bValue as number) - (aValue as number);
-      } else if (sortColumn === 'generationFerolDate' || sortColumn === 'generation100BaggerDate') {
-        const dateA = new Date(aValue as string).getTime();
-        const dateB = new Date(bValue as string).getTime();
-        return sortDirection === 'asc' ? dateA - dateB : dateB - dateA;
-      } else {
-        // Default to string comparison for other columns like 'ticker'
-        if (aValue < bValue) return sortDirection === 'asc' ? -1 : 1;
-        if (aValue > bValue) return sortDirection === 'asc' ? 1 : -1;
-        return 0;
-      }
-    });
 
   if (loading) {
     return <div className="text-center p-4">Loading stock summaries...</div>;
@@ -233,7 +217,7 @@ const StockSummaryTable: React.FC = React.memo(() => {
           </tr>
         </thead>
         <tbody className="bg-white divide-y divide-gray-200">
-          {sortedData.map((summary, index) => (
+          {summaryData.map((summary, index) => (
             <tr
               key={summary.ticker}
               onClick={() => navigate(`/stocks/${summary.ticker}#overview`)}
