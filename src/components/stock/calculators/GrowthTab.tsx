@@ -742,7 +742,7 @@ const GrowthTab: React.FC<GrowthTabProps> = ({ symbol }) => {  const [growthData
           onLoadEntry={loadHistoricalValuation}
           onDelete={(entry) => openDeleteDialog(entry.valuationDate)}
           showVerdict={true}
-          verdictField="verdict"
+          verdictField="growthOutput.verdict"
           columns={[
             {
               key: 'intrinsicValue',

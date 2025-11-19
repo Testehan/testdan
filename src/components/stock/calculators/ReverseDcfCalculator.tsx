@@ -60,6 +60,7 @@ interface ReverseDcfUserInput {
 
 interface ReverseDcfOutput {
     impliedFCFGrowthRate: number;
+    verdict: string;
 }
 
 interface ReverseDcfHistoryEntry {
@@ -83,6 +84,7 @@ interface ReverseDcfValuation {
 // Interface for Reverse DCF calculation response
 interface ReverseDcfCalculationOutput {
     impliedFCFGrowthRate: number;
+    verdict: string;
 }
 
 const ReverseDcfCalculator: React.FC<ReverseDcfCalculatorProps> = ({ symbol }) => {
@@ -99,6 +101,7 @@ const ReverseDcfCalculator: React.FC<ReverseDcfCalculatorProps> = ({ symbol }) =
 
     // State for the calculated implied growth rate
     const [impliedGrowthRate, setImpliedGrowthRate] = useState<number | null>(null);
+    const [verdict, setVerdict] = useState<string>('');
 
     // States for saving Reverse DCF
     const [isSaving, setIsSaving] = useState<boolean>(false);
@@ -215,6 +218,7 @@ const ReverseDcfCalculator: React.FC<ReverseDcfCalculatorProps> = ({ symbol }) =
 
             const result: ReverseDcfCalculationOutput = await response.json();
             setImpliedGrowthRate(result.impliedFCFGrowthRate);
+            setVerdict(result.verdict);
         } catch (error) {
             console.error('Failed to calculate Reverse DCF:', error);
         }
@@ -235,11 +239,12 @@ const ReverseDcfCalculator: React.FC<ReverseDcfCalculatorProps> = ({ symbol }) =
         setProjectionYears(entry.reverseDcfUserInput.projectionYears);
         setUserComments(entry.reverseDcfUserInput.userComments);
         setData(entry.dcfCalculationData); // Update the main data state
+        setVerdict(entry.reverseDcfOutput.verdict);
 
         // Explicitly re-run calculations with the loaded historical data
         // No need to call calculateImpliedGrowth directly here as updating
         // 'data' and other states will trigger the useEffect that calls it.
-    }, [setData, setWacc, setPerpetualGrowthRate, setProjectionYears, setUserComments]);
+    }, [setData, setWacc, setPerpetualGrowthRate, setProjectionYears, setUserComments, setVerdict]);
 
     const resetCalculator = useCallback(() => {
         if (!originalData) return;
@@ -281,6 +286,7 @@ const ReverseDcfCalculator: React.FC<ReverseDcfCalculatorProps> = ({ symbol }) =
 
         const reverseDcfOutput = {
             impliedFCFGrowthRate: impliedGrowthRate,
+            verdict: verdict,
         };
 
         const reverseDcfValuation = {
@@ -422,6 +428,12 @@ const ReverseDcfCalculator: React.FC<ReverseDcfCalculatorProps> = ({ symbol }) =
                                 <p className="text-gray-500">Could not calculate. Check assumptions (WACC must be {'>'} Perpetual Growth Rate).</p>
                             )}
                         </div>
+                        {verdict && (
+                            <div>
+                                <p className="text-gray-600">Verdict</p>
+                                <p className="text-xl font-semibold">{verdict}</p>
+                            </div>
+                        )}
                         <div className="pt-4 border-t">
                             <p className="text-sm text-gray-600">
                                 This is the compound annual growth rate (CAGR) for free cash flow over the next {projectionYears} years that the market is currently pricing into the stock.
@@ -440,6 +452,8 @@ const ReverseDcfCalculator: React.FC<ReverseDcfCalculatorProps> = ({ symbol }) =
                     error={historyError}
                     onLoadEntry={loadHistoricalReverseDcfValuation}
                     onDelete={(entry) => openDeleteDialog(entry.valuationDate)}
+                    showVerdict={true}
+                    verdictField="reverseDcfOutput.verdict"
                     columns={[
                         {
                             key: 'sharePrice',

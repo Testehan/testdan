@@ -100,7 +100,7 @@ export const FinancialStatementTable = <T extends { date: string }>(
                             <th key={report.date} scope="col" className="px-6 py-2 whitespace-nowrap">{formatMonthYear(report.date)}</th>
                         ))}
                     </tr>
-</thead>                <tbody>
+                </thead><tbody>
                     {allKeys.map((key, index) => {
                         if (key === 'date' || key === 'reportedCurrency') return null;
                         if (!reportsToDisplay.some(report => Object.prototype.hasOwnProperty.call(report, key))) {

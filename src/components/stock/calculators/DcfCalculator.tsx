@@ -653,7 +653,7 @@ const DcfCalculator: React.FC<DcfCalculatorProps> = ({ symbol }) => {
           onLoadEntry={loadHistoricalValuation}
           onDelete={(entry) => openDeleteDialog(entry.valuationDate)}
           showVerdict={true}
-          verdictField="verdict"
+          verdictField="dcfOutput.verdict"
           columns={[
             {
               key: 'intrinsicValue',

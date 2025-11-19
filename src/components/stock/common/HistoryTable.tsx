@@ -1,6 +1,5 @@
 import React from 'react';
 import { HistoryEntry } from '../shared/types/valuation';
-import { getVerdictStyling } from '../shared/utils/valuation';
 
 export interface ColumnConfig {
   key: string;
@@ -20,8 +19,6 @@ interface HistoryTableProps<T extends HistoryEntry> {
   emptyMessage?: string;
   showVerdict?: boolean;
   verdictField?: string;
-  intrinsicValueField?: string;
-  sharePriceField?: string;
 }
 
 export function HistoryTable<T extends HistoryEntry>({
@@ -35,8 +32,6 @@ export function HistoryTable<T extends HistoryEntry>({
   emptyMessage = 'No valuation history found.',
   showVerdict = false,
   verdictField = 'verdict',
-  intrinsicValueField = 'intrinsicValuePerShare',
-  sharePriceField = 'currentSharePrice',
 }: HistoryTableProps<T>) {
   if (loading) {
     return <p>{loadingMessage}</p>;
@@ -49,15 +44,32 @@ export function HistoryTable<T extends HistoryEntry>({
   const getVerdictFromEntry = (entry: T): { verdict: string; bgColorClass: string } => {
     if (showVerdict) {
       const entryAny = entry as unknown as Record<string, unknown>;
-      const verdict = (entryAny[verdictField] as string) || 'Neutral';
       
-      const intrinsicValuePerShare = (entryAny[intrinsicValueField] as number) || 0;
+      // Support dot notation for nested verdict fields (e.g., 'reverseDcfOutput.verdict')
+      let verdict: string;
+      if (verdictField.includes('.')) {
+        const parts = verdictField.split('.');
+        let current: unknown = entryAny;
+        for (const part of parts) {
+          if (current && typeof current === 'object') {
+            current = (current as Record<string, unknown>)[part];
+          } else {
+            current = undefined;
+            break;
+          }
+        }
+        verdict = (current as string) || 'Neutral';
+      } else {
+        verdict = (entryAny[verdictField] as string) || 'Neutral';
+      }
       
-      const valuationData = entryAny.valuationData as { meta?: { currentSharePrice?: number } } | undefined;
-      const currentSharePrice = valuationData?.meta?.[sharePriceField as keyof typeof valuationData.meta] as number || 0;
+      // Use the saved verdict string to determine background color
+      const bgColorClass = 
+        verdict === 'Undervalued' ? 'bg-green-200 text-green-800' :
+        verdict === 'Overvalued' ? 'bg-red-200 text-red-800' :
+        'bg-yellow-200 text-yellow-800';
       
-      const styling = getVerdictStyling(intrinsicValuePerShare, currentSharePrice);
-      return { verdict, bgColorClass: styling.bgColorClass };
+      return { verdict, bgColorClass };
     }
     return { verdict: 'Neutral', bgColorClass: '' };
   };
