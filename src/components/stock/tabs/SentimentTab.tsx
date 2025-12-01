@@ -12,6 +12,7 @@ const SentimentTab: React.FC<SentimentTabProps> = ({ symbol }) => {
   const [regenerating, setRegenerating] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [elapsedTime, setElapsedTime] = useState(0);
+  const [sourcesOpen, setSourcesOpen] = useState(false);
 
   useEffect(() => {
     let timer: number | undefined;
@@ -37,10 +38,17 @@ const SentimentTab: React.FC<SentimentTabProps> = ({ symbol }) => {
         throw new Error(`Failed to fetch sentiment: ${response.statusText}`);
       }
       const result = await response.json();
+      if (result.label === 'IN_PROGRESS') {
+        setTimeout(() => {
+          fetchSentiment(regenerate);
+        }, 5000);
+        return;
+      }
       setData(result);
+      setLoading(false);
+      setRegenerating(false);
     } catch (err: any) {
       setError(err.message || 'An error occurred');
-    } finally {
       setLoading(false);
       setRegenerating(false);
     }
@@ -126,7 +134,7 @@ const SentimentTab: React.FC<SentimentTabProps> = ({ symbol }) => {
           <h3 className="text-2xl font-bold text-gray-900">Market Sentiment for {data.ticker}</h3>
           <div className="flex items-center gap-3 mt-1">
             <p className="text-gray-500 text-sm">
-              Last analyzed on {new Date(data.date).toLocaleDateString()} • Based on {data.sourcesAnalyzed} sources
+              Last analyzed on {new Date(data.date).toLocaleDateString()} • Based on {data.sources?.length ?? data.sourcesAnalyzed} sources
             </p>
             <button
               onClick={handleRegenerate}
@@ -167,6 +175,41 @@ const SentimentTab: React.FC<SentimentTabProps> = ({ symbol }) => {
           <div className="prose prose-blue max-w-none text-gray-600 leading-relaxed bg-gray-50/50 rounded-xl p-5 border border-gray-100">
             {data.summary}
           </div>
+          {data.sources && data.sources.length > 0 && (
+            <div className="mt-4">
+              <button
+                onClick={() => setSourcesOpen(!sourcesOpen)}
+                className="flex items-center gap-2 text-sm font-semibold text-gray-700 hover:text-gray-900"
+              >
+                <svg
+                  className={`w-4 h-4 transition-transform ${sourcesOpen ? 'rotate-90' : ''}`}
+                  fill="none"
+                  stroke="currentColor"
+                  viewBox="0 0 24 24"
+                >
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
+                </svg>
+                Sources ({data.sources.length})
+              </button>
+              {sourcesOpen && (
+                <ul className="mt-2 ml-6 space-y-1">
+                  {data.sources.map((source, index) => (
+                    <li key={index} className="text-xs text-gray-500 flex items-start gap-2">
+                      <span className="text-gray-400">•</span>
+                      <a
+                        href={source}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="hover:text-gray-700 hover:underline"
+                      >
+                        {source}
+                      </a>
+                    </li>
+                  ))}
+                </ul>
+              )}
+            </div>
+          )}
         </div>
 
         {/* Catalysts Section */}
@@ -178,7 +221,7 @@ const SentimentTab: React.FC<SentimentTabProps> = ({ symbol }) => {
             Key Catalysts
           </h4>
           <ul className="space-y-3">
-            {data.catalysts.map((catalyst, index) => (
+            {data.catalysts?.map((catalyst, index) => (
               <li 
                 key={index} 
                 className="flex items-start gap-3 p-3 bg-white border border-gray-100 rounded-lg hover:border-orange-200 transition-colors group"

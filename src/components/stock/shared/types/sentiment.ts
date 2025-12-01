@@ -5,5 +5,6 @@ export interface SentimentData {
   sourcesAnalyzed: number;
   summary: string;
   catalysts: string[];
+  sources: string[];
   date: string; // LocalDate from Java usually comes as ISO string
 }
