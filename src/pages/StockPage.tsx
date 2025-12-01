@@ -13,6 +13,7 @@ const FinancialsTab = lazy(() => import('../components/stock/tabs/FinancialsTab'
 const ChecklistTab = lazy(() => import('../components/stock/tabs/ChecklistTab'));
 const ValuationTab = lazy(() => import('../components/stock/tabs/ValuationTab'));
 const BusinessAnalysisTab = lazy(() => import('../components/stock/tabs/BusinessAnalysisTab'));
+const SentimentTab = lazy(() => import('../components/stock/tabs/SentimentTab'));
 
 // Loading fallback for lazy components
 const TabLoader: React.FC<{ message?: string }> = ({ message = 'Loading...' }) => (
@@ -54,6 +55,7 @@ const StockPage: React.FC = () => {
     checklist: boolean;
     valuation: boolean;
     businessAnalysis: boolean;
+    sentiment: boolean;
   }>({
     overview: true,
     status: false,
@@ -62,6 +64,7 @@ const StockPage: React.FC = () => {
     checklist: false,
     valuation: false,
     businessAnalysis: false,
+    sentiment: false,
   });
 
   // Error states
@@ -73,6 +76,7 @@ const StockPage: React.FC = () => {
     checklist?: string;
     valuation?: string;
     businessAnalysis?: string;
+    sentiment?: string;
   }>({});
 
   const [isNotesDialogOpen, setIsNotesDialogOpen] = useState(false);
@@ -269,6 +273,8 @@ const StockPage: React.FC = () => {
         return dataLoading.valuation;
       case 'businessAnalysis':
         return dataLoading.businessAnalysis;
+      case 'sentiment':
+        return dataLoading.sentiment;
       default:
         return false;
     }
@@ -379,6 +385,14 @@ const StockPage: React.FC = () => {
         </button>
         <button
           className={`px-4 py-2 text-lg font-medium ${
+            activeTab === 'sentiment' ? 'border-b-2 border-blue-500 text-blue-600' : 'text-gray-600 hover:text-blue-600'
+          }`}
+          onClick={() => handleTabClick('sentiment')}
+        >
+          Sentiment
+        </button>
+        <button
+          className={`px-4 py-2 text-lg font-medium ${
             activeTab === 'financials' ? 'border-b-2 border-blue-500 text-blue-600' : 'text-gray-600 hover:text-blue-600'
           }`}
           onClick={() => handleTabClick('financials')}
@@ -411,6 +425,11 @@ const StockPage: React.FC = () => {
         {activeTab === 'businessAnalysis' && (
           <Suspense fallback={<TabLoader message="Loading business analysis..." />}>
             <BusinessAnalysisTab symbol={symbol || ''} />
+          </Suspense>
+        )}
+        {activeTab === 'sentiment' && (
+          <Suspense fallback={<TabLoader message="Loading sentiment..." />}>
+            <SentimentTab symbol={symbol || ''} />
           </Suspense>
         )}
         {activeTab === 'financials' && (
