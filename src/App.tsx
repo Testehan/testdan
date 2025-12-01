@@ -4,6 +4,7 @@ import HomePage from './pages/homePage';
 import QuotesPage from './pages/quotesPage';
 import MentalModelsPage from './pages/mentalModelsPage.tsx';
 import AlertsPage from './pages/alertsPage';
+import LLMCaptureTool from './components/LLMCaptureTool';
 
 // Lazy load heavy components to reduce initial bundle size
 const MentalModelsList = lazy(() => import("./components/mentalModelsList.tsx"));
@@ -41,6 +42,7 @@ function App() {
               <Route path="/alerts" element={<AlertsPage />} />
           </Routes>
         </Suspense>
+        <LLMCaptureTool />
       </Router>
     </>
   )
