@@ -240,11 +240,12 @@ const ReverseDcfCalculator: React.FC<ReverseDcfCalculatorProps> = ({ symbol }) =
         setUserComments(entry.reverseDcfUserInput.userComments);
         setData(entry.dcfCalculationData); // Update the main data state
         setVerdict(entry.reverseDcfOutput.verdict);
+        setImpliedGrowthRate(entry.reverseDcfOutput.impliedFCFGrowthRate);
 
         // Explicitly re-run calculations with the loaded historical data
         // No need to call calculateImpliedGrowth directly here as updating
         // 'data' and other states will trigger the useEffect that calls it.
-    }, [setData, setWacc, setPerpetualGrowthRate, setProjectionYears, setUserComments, setVerdict]);
+    }, [setData, setWacc, setPerpetualGrowthRate, setProjectionYears, setUserComments, setVerdict, setImpliedGrowthRate]);
 
     const resetCalculator = useCallback(() => {
         if (!originalData) return;

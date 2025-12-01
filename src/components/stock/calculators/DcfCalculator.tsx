@@ -328,6 +328,28 @@ const DcfCalculator: React.FC<DcfCalculatorProps> = ({ symbol }) => {
     setUserComments(entry.dcfUserInput.userComments);
 
     setDcfData(entry.dcfCalculationData);
+    setIntrinsicValue(entry.dcfOutput.equityValue);
+    setIntrinsicValuePerShare(entry.dcfOutput.intrinsicValuePerShare);
+    setWacc(entry.dcfOutput.wacc);
+
+    // Derive projected FCFs from the available fields
+    const { operatingCashFlow, capitalExpenditure, stockBasedCompensation } = entry.dcfCalculationData.cashFlow;
+    let initialOperatingCashFlow = operatingCashFlow;
+    if (entry.dcfUserInput.sbcAdjustmentToggle) {
+      initialOperatingCashFlow -= stockBasedCompensation;
+    }
+    const projectionYears = 5;
+    const fcfProjections: ProjectedFcf[] = [];
+    let currentOperatingCashFlow = initialOperatingCashFlow;
+    let currentCapitalExpenditure = capitalExpenditure;
+
+    for (let i = 1; i <= projectionYears; i++) {
+      currentOperatingCashFlow *= (1 + entry.dcfUserInput.fcfGrowthRate);
+      currentCapitalExpenditure *= (1 + entry.dcfUserInput.fcfGrowthRate);
+      const fcf = currentOperatingCashFlow - Math.abs(currentCapitalExpenditure);
+      fcfProjections.push({ year: i, fcf });
+    }
+    setProjectedFcfs(fcfProjections);
 
     // User must click Calculate button to see updated results
   }, [
@@ -337,7 +359,7 @@ const DcfCalculator: React.FC<DcfCalculatorProps> = ({ symbol }) => {
     setInputTerminalMultiple,
     setUserInputTerminalMultiple,
     setSbcAdjustmentToggle,
-    setUserComments, setDcfData,
+    setUserComments, setDcfData, setIntrinsicValue, setIntrinsicValuePerShare, setWacc, setProjectedFcfs,
   ]);
 
   const handleSaveDcf = async () => {
