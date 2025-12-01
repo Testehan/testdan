@@ -5,6 +5,7 @@ import HistoryTable from '../common/HistoryTable';
 import { useDeleteConfirmation } from '../common/DeleteConfirmationDialog';
 import { useValuationHistory } from '../hooks/useValuation';
 import { formatLargeNumber } from '../shared/utils/valuation';
+import Spinner from '../shared/components/Spinner';
 
 interface IncomeStatement {
   fiscalYear: number;
@@ -130,6 +131,93 @@ const GrowthTab: React.FC<GrowthTabProps> = ({ symbol }) => {  const [growthData
   const [marginalTaxRateInput, setMarginalTaxRateInput] = useState<number>(0.25);
   const [userComments, setUserComments] = useState<string>('');
   const [calculatedPricePerShare, setCalculatedPricePerShare] = useState<number | null>(null);
+
+  // AI recommendation states
+  const [aiLoading, setAiLoading] = useState(false);
+  const [aiElapsedTime, setAiElapsedTime] = useState(0);
+  const [aiExplanations, setAiExplanations] = useState<Record<string, string>>({});
+  const [aiScenario, setAiScenario] = useState<'bear' | 'base' | 'bull'>('base');
+
+  // Helper to render description with AI explanation if available
+  const renderDescription = (key: string, baseDescription: string) => {
+    const aiExp = aiExplanations[key];
+    if (aiExp) {
+      return (
+        <div className="max-w-xs">
+          <p>{baseDescription}</p>
+          <div className="mt-2 pt-2 border-t border-purple-500/30">
+            <p className="text-purple-600 font-bold flex items-center gap-1 mb-1">
+              <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 10V3L4 14h7v7l9-11h-7z" />
+              </svg>
+              AI Recommendation
+            </p>
+            <p className="italic text-white font-medium text-xs leading-relaxed">{aiExp}</p>
+          </div>
+        </div>
+      );
+    }
+    return baseDescription;
+  };
+
+  const handleAiCompletion = async () => {
+    if (!symbol) return;
+    setAiLoading(true);
+    setAiElapsedTime(0);
+    setSaveError(null);
+    
+    // Start elapsed time counter
+    const startTime = Date.now();
+    const timer = setInterval(() => {
+      setAiElapsedTime(Math.floor((Date.now() - startTime) / 1000));
+    }, 1000);
+
+    try {
+      const response = await fetch(`http://localhost:8080/stock/valuation/growth/recommendation/${symbol.toUpperCase()}/${aiScenario}`);
+      if (!response.ok) {
+        throw new Error(`AI recommendation HTTP error! status: ${response.status}`);
+      }
+      const data = await response.json();
+
+      // Update input fields
+      setInitialRevenueGrowthRate(data.initialRevenueGrowthRate);
+      setGrowthFadePeriod(data.growthFadePeriod);
+      setTerminalGrowthRate(data.terminalGrowthRate);
+      setYearsToProject(data.yearsToProject);
+      setTargetOperatingMargin(data.targetOperatingMargin);
+      setYearsToReachTargetMargin(data.yearsToReachTargetMargin);
+      setReinvestmentRate(data.reinvestmentAsPctOfRevenue);
+      setInitialCostOfCapital(data.initialCostOfCapital);
+      setTerminalCostOfCapital(data.terminalCostOfCapital);
+      setYearsOfRiskConvergence(data.yearsOfRiskConvergence);
+      setProbabilityOfFailure(data.probabilityOfFailure);
+      setDistressProceeds(data.distressProceedsPctOfBookOrRevenue);
+      setMarginalTaxRateInput(data.marginalTaxRate / 100);
+      setUserComments(data.userComments || '');
+
+      // Store explanations
+      setAiExplanations({
+        initialRevenueGrowthRate: data.initialRevenueGrowthRateExplanation,
+        growthFadePeriod: data.growthFadePeriodExplanation,
+        terminalGrowthRate: data.terminalGrowthRateExplanation,
+        yearsToProject: data.yearsToProjectExplanation,
+        targetOperatingMargin: data.targetOperatingMarginExplanation,
+        yearsToReachTargetMargin: data.yearsToReachTargetMarginExplanation,
+        reinvestmentRate: data.reinvestmentAsPctOfRevenueExplanation,
+        initialCostOfCapital: data.initialCostOfCapitalExplanation,
+        terminalCostOfCapital: data.terminalCostOfCapitalExplanation,
+        yearsOfRiskConvergence: data.yearsOfRiskConvergenceExplanation,
+        probabilityOfFailure: data.probabilityOfFailureExplanation,
+        distressProceeds: data.distressProceedsPctOfBookOrRevenueExplanation,
+        marginalTaxRate: data.marginalTaxRateExplanation
+      });
+    } catch (e: unknown) {
+      setSaveError(`AI error: ${(e as Error).message}`);
+    } finally {
+      clearInterval(timer);
+      setAiLoading(false);
+    }
+  };
   
   // Store original server values for reset
   const [serverGrowthUserInput, setServerGrowthUserInput] = useState<GrowthValuationResponse['growthUserInput'] | null>(null);
@@ -162,6 +250,7 @@ const GrowthTab: React.FC<GrowthTabProps> = ({ symbol }) => {  const [growthData
   });
 
   const resetCalculator = () => {
+    setAiExplanations({}); // Clear AI explanations on reset
     if (serverGrowthUserInput) {
       // Reset to server values
       setInitialRevenueGrowthRate(serverGrowthUserInput.initialRevenueGrowthRate);
@@ -373,8 +462,8 @@ const GrowthTab: React.FC<GrowthTabProps> = ({ symbol }) => {  const [growthData
         setDistressProceeds(responseData.growthUserInput.distressProceedsPctOfBookOrRevenue);
         setMarginalTaxRateInput(responseData.growthUserInput.marginalTaxRate);
         setUserComments(responseData.growthUserInput.userComments || ''); // Populate userComments on initial load
-      } catch (e: any) {
-        setError(e.message);
+      } catch (e: unknown) {
+        setError((e as Error).message);
       } finally {
         setLoading(false);
       }
@@ -382,7 +471,7 @@ const GrowthTab: React.FC<GrowthTabProps> = ({ symbol }) => {  const [growthData
 
     fetchGrowthData();
     fetchValuationHistory(symbol);
-  }, [symbol]);
+  }, [symbol, fetchValuationHistory]); // Added fetchValuationHistory to dependencies to fix lint warning
 
   if (loading) {
     return (
@@ -459,13 +548,18 @@ const GrowthTab: React.FC<GrowthTabProps> = ({ symbol }) => {  const [growthData
         <div><strong>Risk-Free Rate:</strong> {(growthData.riskFreeRate * 100).toFixed(2)}%</div>
       </div>
 
-      <div className="mt-8 bg-white p-6 rounded-lg border border-gray-200">
+      <div className="mt-8 bg-white p-6 rounded-lg border border-gray-200 relative">
+        {aiLoading && (
+          <div className="absolute inset-0 bg-white/80 z-10 flex items-center justify-center rounded-lg">
+            <Spinner elapsedTime={aiElapsedTime} />
+          </div>
+        )}
         <h3 className="text-xl font-bold mb-4">Growth Valuation Parameters</h3>
         <div className="grid grid-cols-2 gap-6">
           <div>
             <label className="flex items-center text-sm font-medium text-gray-700 mb-1">
               Marginal Tax Rate (%)
-              <InfoIcon description="The tax rate applied to the company's last dollar of income. Used to calculate the after-tax cost of debt and other tax-adjusted metrics." />
+              <InfoIcon description={renderDescription('marginalTaxRate', "The tax rate applied to the company's last dollar of income. Used to calculate the after-tax cost of debt and other tax-adjusted metrics.")} />
             </label>
             <input
               type="number"
@@ -479,7 +573,7 @@ const GrowthTab: React.FC<GrowthTabProps> = ({ symbol }) => {  const [growthData
           <div>
             <label className="flex items-center text-sm font-medium text-gray-700 mb-1">
               Initial Revenue Growth Rate (%)
-              <InfoIcon description={metricDescriptions.growthInputs.initialRevenueGrowthRate} />
+              <InfoIcon description={renderDescription('initialRevenueGrowthRate', metricDescriptions.growthInputs.initialRevenueGrowthRate)} />
             </label>
             <input
               type="number"
@@ -493,7 +587,7 @@ const GrowthTab: React.FC<GrowthTabProps> = ({ symbol }) => {  const [growthData
           <div>
             <label className="flex items-center text-sm font-medium text-gray-700 mb-1">
               Growth Fade Period (years)
-              <InfoIcon description={metricDescriptions.growthInputs.growthFadePeriod} />
+              <InfoIcon description={renderDescription('growthFadePeriod', metricDescriptions.growthInputs.growthFadePeriod)} />
             </label>
             <input
               type="number"
@@ -506,7 +600,7 @@ const GrowthTab: React.FC<GrowthTabProps> = ({ symbol }) => {  const [growthData
           <div>
             <label className="flex items-center text-sm font-medium text-gray-700 mb-1">
               Terminal Growth Rate (%)
-              <InfoIcon description={`${metricDescriptions.growthInputs.terminalGrowthRate} Must be ≤ risk-free rate (${(growthData.riskFreeRate * 100).toFixed(2)}%)`} />
+              <InfoIcon description={renderDescription('terminalGrowthRate', `${metricDescriptions.growthInputs.terminalGrowthRate} Must be ≤ risk-free rate (${(growthData.riskFreeRate * 100).toFixed(2)}%)`)} />
             </label>
             <input
               type="number"
@@ -521,7 +615,7 @@ const GrowthTab: React.FC<GrowthTabProps> = ({ symbol }) => {  const [growthData
           <div>
             <label className="flex items-center text-sm font-medium text-gray-700 mb-1">
               Years to Project
-              <InfoIcon description={metricDescriptions.growthInputs.yearsToProject} />
+              <InfoIcon description={renderDescription('yearsToProject', metricDescriptions.growthInputs.yearsToProject)} />
             </label>
             <input
               type="number"
@@ -534,7 +628,7 @@ const GrowthTab: React.FC<GrowthTabProps> = ({ symbol }) => {  const [growthData
           <div>
             <label className="flex items-center text-sm font-medium text-gray-700 mb-1">
               Target Operating Margin (%)
-              <InfoIcon description={metricDescriptions.growthInputs.targetOperatingMargin} />
+              <InfoIcon description={renderDescription('targetOperatingMargin', metricDescriptions.growthInputs.targetOperatingMargin)} />
             </label>
             <input
               type="number"
@@ -548,7 +642,7 @@ const GrowthTab: React.FC<GrowthTabProps> = ({ symbol }) => {  const [growthData
           <div>
             <label className="flex items-center text-sm font-medium text-gray-700 mb-1">
               Years to Reach Target Margin
-              <InfoIcon description={metricDescriptions.growthInputs.yearsToReachTargetMargin} />
+              <InfoIcon description={renderDescription('yearsToReachTargetMargin', metricDescriptions.growthInputs.yearsToReachTargetMargin)} />
             </label>
             <input
               type="number"
@@ -561,7 +655,7 @@ const GrowthTab: React.FC<GrowthTabProps> = ({ symbol }) => {  const [growthData
           <div>
             <label className="flex items-center text-sm font-medium text-gray-700 mb-1">
               Reinvestment Rate (%)
-              <InfoIcon description={metricDescriptions.growthInputs.reinvestmentRate} />
+              <InfoIcon description={renderDescription('reinvestmentRate', metricDescriptions.growthInputs.reinvestmentRate)} />
             </label>
             <input
               type="number"
@@ -575,7 +669,7 @@ const GrowthTab: React.FC<GrowthTabProps> = ({ symbol }) => {  const [growthData
           <div>
             <label className="flex items-center text-sm font-medium text-gray-700 mb-1">
               Initial Cost of Capital (%)
-              <InfoIcon description={metricDescriptions.growthInputs.initialCostOfCapital} />
+              <InfoIcon description={renderDescription('initialCostOfCapital', metricDescriptions.growthInputs.initialCostOfCapital)} />
             </label>
             <input
               type="number"
@@ -589,7 +683,7 @@ const GrowthTab: React.FC<GrowthTabProps> = ({ symbol }) => {  const [growthData
           <div>
             <label className="flex items-center text-sm font-medium text-gray-700 mb-1">
               Terminal Cost of Capital (%)
-              <InfoIcon description={metricDescriptions.growthInputs.terminalCostOfCapital} />
+              <InfoIcon description={renderDescription('terminalCostOfCapital', metricDescriptions.growthInputs.terminalCostOfCapital)} />
             </label>
             <input
               type="number"
@@ -603,7 +697,7 @@ const GrowthTab: React.FC<GrowthTabProps> = ({ symbol }) => {  const [growthData
           <div>
             <label className="flex items-center text-sm font-medium text-gray-700 mb-1">
               Years of Risk Convergence
-              <InfoIcon description={metricDescriptions.growthInputs.yearsOfRiskConvergence} />
+              <InfoIcon description={renderDescription('yearsOfRiskConvergence', metricDescriptions.growthInputs.yearsOfRiskConvergence)} />
             </label>
             <input
               type="number"
@@ -616,7 +710,7 @@ const GrowthTab: React.FC<GrowthTabProps> = ({ symbol }) => {  const [growthData
           <div>
             <label className="flex items-center text-sm font-medium text-gray-700 mb-1">
               Probability of Failure (%)
-              <InfoIcon description={metricDescriptions.growthInputs.probabilityOfFailure} />
+              <InfoIcon description={renderDescription('probabilityOfFailure', metricDescriptions.growthInputs.probabilityOfFailure)} />
             </label>
             <input
               type="number"
@@ -632,7 +726,7 @@ const GrowthTab: React.FC<GrowthTabProps> = ({ symbol }) => {  const [growthData
           <div>
             <label className="flex items-center text-sm font-medium text-gray-700 mb-1">
               Distress Proceeds (% of book or revenue)
-              <InfoIcon description={metricDescriptions.growthInputs.distressProceeds} />
+              <InfoIcon description={renderDescription('distressProceeds', metricDescriptions.growthInputs.distressProceeds)} />
             </label>
             <input
               type="number"
@@ -668,6 +762,35 @@ const GrowthTab: React.FC<GrowthTabProps> = ({ symbol }) => {  const [growthData
             className="px-4 py-2 bg-gray-500 text-white rounded-md hover:bg-gray-600 focus:outline-none focus:ring-2 focus:ring-gray-500 focus:ring-opacity-50"
           >
             Reset Calculator
+          </button>
+          <div className="flex items-center gap-2 border border-purple-200 rounded-md p-1 bg-purple-50">
+            {(['bear', 'base', 'bull'] as const).map((scenario) => (
+              <button
+                key={scenario}
+                onClick={() => setAiScenario(scenario)}
+                className={`px-3 py-2 rounded-md text-sm font-medium transition-colors ${
+                  aiScenario === scenario
+                    ? 'bg-purple-600 text-white'
+                    : 'text-purple-600 hover:bg-purple-100'
+                }`}
+              >
+                {scenario.charAt(0).toUpperCase() + scenario.slice(1)}
+              </button>
+            ))}
+          </div>
+          <button
+            onClick={handleAiCompletion}
+            disabled={aiLoading}
+            className="px-4 py-2 bg-purple-600 text-white rounded-md hover:bg-purple-700 focus:outline-none focus:ring-2 focus:ring-purple-500 focus:ring-opacity-50 disabled:bg-purple-300 flex items-center gap-2"
+          >
+            {aiLoading ? (
+              <>
+                <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin"></div>
+                AI Processing...
+              </>
+            ) : (
+              'AI completion'
+            )}
           </button>
           <button
             onClick={handleSaveGrowth}

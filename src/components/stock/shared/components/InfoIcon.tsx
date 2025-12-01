@@ -2,7 +2,7 @@ import React, { useState, useRef } from 'react';
 import { createPortal } from 'react-dom';
 
 // InfoIcon component for displaying tooltips with portal rendering
-const InfoIcon: React.FC<{ description: string | undefined }> = ({ description }) => {
+const InfoIcon: React.FC<{ description: React.ReactNode | undefined }> = ({ description }) => {
     const [isVisible, setIsVisible] = useState(false);
     const [tooltipPosition, setTooltipPosition] = useState({ top: 0, left: 0 });
     const iconRef = useRef<HTMLDivElement>(null);
