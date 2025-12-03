@@ -1,4 +1,5 @@
 import React from 'react';
+import TipTapEditor from './TipTapEditor';
 
 const NotesDialog: React.FC<{
   isOpen: boolean;
@@ -10,14 +11,12 @@ const NotesDialog: React.FC<{
   if (!isOpen) return null;
 
   return (
-      <div className="fixed inset-0 bg-opacity-50 flex items-center justify-center z-50">
-          <div className="bg-white p-6 rounded-lg shadow-xl w-full max-w-lg">
+      <div className="fixed inset-0 bg-black/30 bg-opacity-50 flex items-center justify-center z-50">
+          <div className="bg-white p-6 rounded-lg shadow-xl w-full max-w-2xl max-h-[90vh] overflow-y-auto">
               <h3 className="text-lg font-semibold mb-4">Personal Notes</h3>
-              <textarea
-                  value={notes}
-                  onChange={(e) => onNotesChange(e.target.value)}
-                  className="w-full p-2 border rounded-md"
-                  rows={10}
+              <TipTapEditor
+                content={notes}
+                onChange={onNotesChange}
               />
               <div className="mt-4 flex justify-end space-x-2">
                   <button onClick={onClose} className="bg-gray-300 hover:bg-gray-400 text-gray-800 font-bold py-2 px-4 rounded">

@@ -13,6 +13,12 @@
   "dependencies": {
     "@emailjs/browser": "^4.4.1",
     "@tailwindcss/postcss": "^4.1.17",
+    "@tiptap/extension-color": "^3.20.4",
+    "@tiptap/extension-link": "^3.20.4",
+    "@tiptap/extension-text-style": "^3.20.4",
+    "@tiptap/pm": "^3.20.4",
+    "@tiptap/react": "^3.20.4",
+    "@tiptap/starter-kit": "^3.20.4",
     "html-to-image": "^1.11.13",
     "joi-browser": "^13.4.0",
     "react": "^19.2.0",
