@@ -21,6 +21,7 @@ interface FinancialReportData<T> {
     handlePeriodRangeChange: (start: string, end: string) => void;
     reportsToDisplay: T[];
     allKeys: (keyof T)[];
+    lastUpdated: string | null;
 }
 
 // ... other interfaces and code ...
@@ -39,6 +40,7 @@ export const useFinancialReports = <T extends { date: string }>(
     const [availableQuarters, setAvailableQuarters] = useState<string[]>([]);
     const [selectedStartPeriod, setSelectedStartPeriod] = useState<string>('');
     const [selectedEndPeriod, setSelectedEndPeriod] = useState<string>('');
+    const [lastUpdated, setLastUpdated] = useState<string | null>(null);
 
     useEffect(() => {
         (async () => {
@@ -60,6 +62,9 @@ export const useFinancialReports = <T extends { date: string }>(
 
                 setAnnualReports(data.annualReports);
                 setQuarterlyReports(data.quarterlyReports);
+                if (data.lastUpdated) {
+                    setLastUpdated(data.lastUpdated);
+                }
             } catch (e: any) {
                 setError(e.message);
             } finally {
@@ -185,15 +190,17 @@ export const useFinancialReports = <T extends { date: string }>(
         handlePeriodRangeChange,
         reportsToDisplay,
         allKeys,
+        lastUpdated,
     };
 };
 
-export const useEarningsHistory = (
+  export const useEarningsHistory = (
     { symbol, baseURL = 'http://localhost:8080/stocks' }: { symbol: string; baseURL?: string }
   ) => {
     const [earningsHistory, setEarningsHistory] = useState<any | null>(null);
     const [loading, setLoading] = useState<boolean>(true);
     const [error, setError] = useState<string | null>(null);
+    const [lastUpdated, setLastUpdated] = useState<string | null>(null);
   
     useEffect(() => {
       (async () => {
@@ -207,6 +214,9 @@ export const useEarningsHistory = (
           }
           const data = await response.json();
           setEarningsHistory(data);
+          if (data.lastUpdated) {
+            setLastUpdated(data.lastUpdated);
+          }
         } catch (e: any) {
           setError(e.message);
         } finally {
@@ -219,6 +229,7 @@ export const useEarningsHistory = (
       earningsHistory,
       loading,
       error,
+      lastUpdated,
     };
   };
 

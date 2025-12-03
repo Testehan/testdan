@@ -1,9 +1,9 @@
-import React, { useState } from 'react';
+import React from 'react';
 import { useEarningsHistory } from '../hooks/useFinancialReports';
 import EarningsHistoryTable from '../tables/EarningsHistoryTable';
 
 const EarningsTab: React.FC<{ symbol: string }> = ({ symbol }) => {
-  const { earningsHistory, loading, error } = useEarningsHistory({ symbol });
+  const { earningsHistory, loading, error, lastUpdated } = useEarningsHistory({ symbol });
 
   if (loading) {
     return <div>Loading...</div>;
@@ -14,7 +14,15 @@ const EarningsTab: React.FC<{ symbol: string }> = ({ symbol }) => {
   }
 
   return (
-    <div>
+    <div className="p-4 bg-white shadow rounded-lg">
+      <div className="flex justify-between items-center mb-4">
+        <h2 className="text-xl font-semibold">Earnings</h2>
+        {lastUpdated && (
+          <span className="text-sm text-gray-600">
+            Last Updated: {new Date(lastUpdated).toLocaleString()}
+          </span>
+        )}
+      </div>
       {earningsHistory && (
         <EarningsHistoryTable
           title="Quarterly Earnings"

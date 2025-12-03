@@ -69,6 +69,7 @@ const BalanceSheetTab: React.FC<{ symbol: string }> = ({ symbol }) => {
         selectedEndPeriod,
         handlePeriodRangeChange,
         reportsToDisplay,
+        lastUpdated,
     } = useFinancialReports<BalanceSheetReport>({
         symbol: symbol,
         reportEndpoint: 'balance-sheet',
@@ -90,6 +91,14 @@ const BalanceSheetTab: React.FC<{ symbol: string }> = ({ symbol }) => {
 
     return (
         <div className="p-4 bg-white shadow rounded-lg space-y-6">
+            <div className="flex justify-between items-center">
+                <h2 className="text-xl font-semibold">Balance Sheet</h2>
+                {lastUpdated && (
+                    <span className="text-sm text-gray-600">
+                        Last Updated: {new Date(lastUpdated).toLocaleString()}
+                    </span>
+                )}
+            </div>
             <div className="flex items-center mb-4 flex-wrap space-x-2">
                 <div className="flex space-x-1 border rounded-lg px-1 py-0.5">
                     <button

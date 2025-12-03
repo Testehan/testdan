@@ -24,6 +24,7 @@ const IncomeStatementTab: React.FC<{ symbol: string }> = ({ symbol }) => {
         handlePeriodRangeChange,
         reportsToDisplay,
         allKeys,
+        lastUpdated,
     } = useFinancialReports<IncomeStatementReport>({
         symbol: symbol,
         reportEndpoint: 'income-statement',
@@ -83,6 +84,14 @@ const IncomeStatementTab: React.FC<{ symbol: string }> = ({ symbol }) => {
 
     return (
         <div className="p-4 bg-white shadow rounded-lg">
+            <div className="flex justify-between items-center mb-4">
+                <h2 className="text-xl font-semibold">Income Statement</h2>
+                {lastUpdated && (
+                    <span className="text-sm text-gray-600">
+                        Last Updated: {new Date(lastUpdated).toLocaleString()}
+                    </span>
+                )}
+            </div>
             <div className="flex items-center mb-4 flex-wrap space-x-2">
                 <div className="flex space-x-1 border rounded-lg px-1 py-0.5">
                     <button
