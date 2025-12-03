@@ -214,7 +214,7 @@ const BusinessAnalysisTab: React.FC<BusinessAnalysisTabProps> = ({ symbol }) => 
                 </div>
 
                 {(currentAnswer?.answer || (isAnswering && inProgress) || (isAiLoading && inProgress)) && (
-                  <div className="text-md text-gray-800 mt-2 flex flex-col">
+                  <div className="text-md text-gray-800 mt-2 flex flex-col" onClick={(e) => e.stopPropagation()}>
                     {dateStr && (
                       <div className="flex items-center gap-3 mb-2 text-sm text-gray-500 font-medium">
                         <span>{dateStr}</span>
@@ -230,14 +230,14 @@ const BusinessAnalysisTab: React.FC<BusinessAnalysisTabProps> = ({ symbol }) => 
                       </div>
                     )}
                     {content && (
-                      <div className="markdown-answer">
+                      <div className="markdown-answer user-select-text cursor-text">
                         <ReactMarkdown>{content}</ReactMarkdown>
                       </div>
                     )}
                     {!dateStr && currentAnswer?.answer && (
-                       <div className="markdown-answer">
+                       <div className="markdown-answer user-select-text cursor-text">
                         <ReactMarkdown>{currentAnswer.answer}</ReactMarkdown>
-                      </div>
+                       </div>
                     )}
 
                     {(isAnswering || isAiLoading) && inProgress && (
