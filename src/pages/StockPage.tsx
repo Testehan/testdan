@@ -12,6 +12,7 @@ const OverviewTab = lazy(() => import('../components/stock/tabs/OverviewTab'));
 const FinancialsTab = lazy(() => import('../components/stock/tabs/FinancialsTab'));
 const ChecklistTab = lazy(() => import('../components/stock/tabs/ChecklistTab'));
 const ValuationTab = lazy(() => import('../components/stock/tabs/ValuationTab'));
+const TranscriptsTab = lazy(() => import('../components/stock/tabs/TranscriptsTab'));
 const BusinessAnalysisTab = lazy(() => import('../components/stock/tabs/BusinessAnalysisTab'));
 const SentimentTab = lazy(() => import('../components/stock/tabs/SentimentTab'));
 
@@ -345,14 +346,6 @@ const StockPage: React.FC = () => {
 
           <button
               onClick={() => setIsNotesDialogOpen(true)}
-              onMouseOver={(e) => {
-                e.stopPropagation();
-                if (personalNotes) {
-                  handleMouseOver(e, personalNotes);
-                } else {
-                  handleMouseOut();
-                }
-              }}
               className={`mr-4 p-2 rounded-md hover:bg-gray-200 ${personalNotes ? 'text-blue-500' : ''}`}
           >
             <svg xmlns="http://www.w3.org/2000/svg" className="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
@@ -401,6 +394,14 @@ const StockPage: React.FC = () => {
         </button>
         <button
           className={`px-4 py-2 text-lg font-medium ${
+            activeTab === 'transcripts' ? 'border-b-2 border-blue-500 text-blue-600' : 'text-gray-600 hover:text-blue-600'
+          }`}
+          onClick={() => handleTabClick('transcripts')}
+        >
+          Transcripts
+        </button>
+        <button
+          className={`px-4 py-2 text-lg font-medium ${
             activeTab === 'checklist' ? 'border-b-2 border-blue-500 text-blue-600' : 'text-gray-600 hover:text-blue-600'
           }`}
           onClick={() => handleTabClick('checklist')}
@@ -435,6 +436,11 @@ const StockPage: React.FC = () => {
         {activeTab === 'financials' && (
           <Suspense fallback={<TabLoader message="Loading financials..." />}>
             <FinancialsTab symbol={symbol || ''} activeSubTab={activeSubTab} onSubTabClick={handleSubTabClick} />
+          </Suspense>
+        )}
+        {activeTab === 'transcripts' && (
+          <Suspense fallback={<TabLoader message="Loading transcripts..." />}>
+            <TranscriptsTab symbol={symbol || ''} />
           </Suspense>
         )}
         {activeTab === 'checklist' && (
