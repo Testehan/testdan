@@ -378,19 +378,19 @@ const StockPage: React.FC = () => {
         </button>
         <button
           className={`px-4 py-2 text-lg font-medium ${
-            activeTab === 'sentiment' ? 'border-b-2 border-blue-500 text-blue-600' : 'text-gray-600 hover:text-blue-600'
-          }`}
-          onClick={() => handleTabClick('sentiment')}
-        >
-          Sentiment
-        </button>
-        <button
-          className={`px-4 py-2 text-lg font-medium ${
             activeTab === 'financials' ? 'border-b-2 border-blue-500 text-blue-600' : 'text-gray-600 hover:text-blue-600'
           }`}
           onClick={() => handleTabClick('financials')}
         >
           Financials
+        </button>
+        <button
+          className={`px-4 py-2 text-lg font-medium ${
+            activeTab === 'sentiment' ? 'border-b-2 border-blue-500 text-blue-600' : 'text-gray-600 hover:text-blue-600'
+          }`}
+          onClick={() => handleTabClick('sentiment')}
+        >
+          Sentiment
         </button>
         <button
           className={`px-4 py-2 text-lg font-medium ${

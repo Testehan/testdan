@@ -74,7 +74,7 @@ const BusinessAnalysisTab: React.FC<BusinessAnalysisTabProps> = ({ symbol }) => 
       setLoading(true);
       setError(null);
       try {
-        const response = await fetch(`http://localhost:8080/stocks/questions`);
+        const response = await fetch(`http://localhost:8080/stocks/questions/business`);
         if (!response.ok) {
           throw new Error(`HTTP error! status: ${response.status}`);
         }
