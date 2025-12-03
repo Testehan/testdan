@@ -4,6 +4,7 @@ import HomePage from './pages/homePage';
 import QuotesPage from './pages/quotesPage';
 import MentalModelsPage from './pages/mentalModelsPage.tsx';
 import AlertsPage from './pages/alertsPage';
+import UsagePage from './pages/UsagePage';
 import LLMCaptureTool from './components/LLMCaptureTool';
 
 // Lazy load heavy components to reduce initial bundle size
@@ -40,6 +41,7 @@ function App() {
               <Route path="/stocks" element={<StockPage />} />
               <Route path="/stocks/:symbol" element={<StockPage />} />
               <Route path="/alerts" element={<AlertsPage />} />
+              <Route path="/usage" element={<UsagePage />} />
           </Routes>
         </Suspense>
         <LLMCaptureTool />
