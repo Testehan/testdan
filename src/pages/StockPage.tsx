@@ -15,6 +15,7 @@ const ValuationTab = lazy(() => import('../components/stock/tabs/ValuationTab'))
 const TranscriptsTab = lazy(() => import('../components/stock/tabs/TranscriptsTab'));
 const BusinessAnalysisTab = lazy(() => import('../components/stock/tabs/BusinessAnalysisTab'));
 const SentimentTab = lazy(() => import('../components/stock/tabs/SentimentTab'));
+const GurusTab = lazy(() => import('../components/stock/tabs/GurusTab'));
 
 // Loading fallback for lazy components
 const TabLoader: React.FC<{ message?: string }> = ({ message = 'Loading...' }) => (
@@ -386,6 +387,22 @@ const StockPage: React.FC = () => {
         </button>
         <button
           className={`px-4 py-2 text-lg font-medium ${
+            activeTab === 'valuation' ? 'border-b-2 border-blue-500 text-blue-600' : 'text-gray-600 hover:text-blue-600'
+          }`}
+          onClick={() => handleTabClick('valuation')}
+        >
+          Valuation
+        </button>
+        <button
+          className={`px-4 py-2 text-lg font-medium ${
+            activeTab === 'gurus' ? 'border-b-2 border-blue-500 text-blue-600' : 'text-gray-600 hover:text-blue-600'
+          }`}
+          onClick={() => handleTabClick('gurus')}
+        >
+          Gurus
+        </button>
+        <button
+          className={`px-4 py-2 text-lg font-medium ${
             activeTab === 'sentiment' ? 'border-b-2 border-blue-500 text-blue-600' : 'text-gray-600 hover:text-blue-600'
           }`}
           onClick={() => handleTabClick('sentiment')}
@@ -408,14 +425,6 @@ const StockPage: React.FC = () => {
         >
           Checklist
         </button>
-        <button
-          className={`px-4 py-2 text-lg font-medium ${
-            activeTab === 'valuation' ? 'border-b-2 border-blue-500 text-blue-600' : 'text-gray-600 hover:text-blue-600'
-          }`}
-          onClick={() => handleTabClick('valuation')}
-        >
-          Valuation
-        </button>
       </div>
       <div>
         {activeTab === 'overview' && stockData && (
@@ -428,14 +437,24 @@ const StockPage: React.FC = () => {
             <BusinessAnalysisTab symbol={symbol || ''} />
           </Suspense>
         )}
-        {activeTab === 'sentiment' && (
-          <Suspense fallback={<TabLoader message="Loading sentiment..." />}>
-            <SentimentTab symbol={symbol || ''} />
-          </Suspense>
-        )}
         {activeTab === 'financials' && (
           <Suspense fallback={<TabLoader message="Loading financials..." />}>
             <FinancialsTab symbol={symbol || ''} activeSubTab={activeSubTab} onSubTabClick={handleSubTabClick} />
+          </Suspense>
+        )}
+        {activeTab === 'valuation' && (
+          <Suspense fallback={<TabLoader message="Loading valuation..." />}>
+            <ValuationTab symbol={symbol || ''} activeSubTab={activeSubTab} onSubTabClick={handleSubTabClick} />
+          </Suspense>
+        )}
+        {activeTab === 'gurus' && (
+          <Suspense fallback={<TabLoader message="Loading gurus..." />}>
+            <GurusTab symbol={symbol || ''} />
+          </Suspense>
+        )}
+        {activeTab === 'sentiment' && (
+          <Suspense fallback={<TabLoader message="Loading sentiment..." />}>
+            <SentimentTab symbol={symbol || ''} />
           </Suspense>
         )}
         {activeTab === 'transcripts' && (
@@ -446,11 +465,6 @@ const StockPage: React.FC = () => {
         {activeTab === 'checklist' && (
           <Suspense fallback={<TabLoader message="Loading checklist..." />}>
             <ChecklistTab symbol={symbol || ''} activeSubTab={activeSubTab} onSubTabClick={handleSubTabClick} />
-          </Suspense>
-        )}
-        {activeTab === 'valuation' && (
-          <Suspense fallback={<TabLoader message="Loading valuation..." />}>
-            <ValuationTab symbol={symbol || ''} activeSubTab={activeSubTab} onSubTabClick={handleSubTabClick} />
           </Suspense>
         )}
       </div>
