@@ -6,6 +6,7 @@ import FinancialDataStatus from '../components/stock/shared/components/Financial
 import StockSummaryTable from '../components/stock/tables/StockSummaryTable';
 import NotesDialog from '../components/stock/shared/components/NotesDialog';
 import Menu from '../components/Menu';
+import { API_BASE_URL, USERS_ENDPOINT } from '../config';
 
 // Lazy load tab components for code splitting and progressive loading
 const OverviewTab = lazy(() => import('../components/stock/tabs/OverviewTab'));
@@ -117,7 +118,7 @@ const StockPage: React.FC = () => {
   const fetchOverviewData = async (): Promise<StockData | null> => {
     if (!symbol) return null;
     try {
-      const response = await fetch(`http://localhost:8080/stocks/overview/${symbol}`);
+      const response = await fetch(`${API_BASE_URL}/stocks/overview/${symbol}`);
       if (!response.ok) throw new Error(`HTTP error! status: ${response.status}`);
       return await response.json();
     } catch (e: any) {
@@ -129,7 +130,7 @@ const StockPage: React.FC = () => {
   const fetchStatusData = async (): Promise<string> => {
     if (!symbol) return 'NEW';
     try {
-      const response = await fetch(`http://localhost:8080/users/dante/stocks/${symbol}/status`);
+      const response = await fetch(`${USERS_ENDPOINT}/dante/stocks/${symbol}/status`);
       if (!response.ok) return 'NEW';
       const data = await response.json();
       return (data as string).toUpperCase() || 'NEW';
@@ -142,7 +143,7 @@ const StockPage: React.FC = () => {
   const fetchNotesData = async (): Promise<string> => {
     if (!symbol) return '';
     try {
-      const response = await fetch(`http://localhost:8080/users/dante/stocks/${symbol}/personalnotes`);
+      const response = await fetch(`${USERS_ENDPOINT}/dante/stocks/${symbol}/personalnotes`);
       if (!response.ok) return '';
       return await response.text();
     } catch (e: any) {
@@ -225,7 +226,7 @@ const StockPage: React.FC = () => {
   const handleSaveNotes = async () => {
     if (!symbol) return;
     try {
-      const response = await fetch(`http://localhost:8080/users/dante/stocks/${symbol}/personalnotes`, {
+      const response = await fetch(`${USERS_ENDPOINT}/dante/stocks/${symbol}/personalnotes`, {
         method: 'PUT',
         headers: { 'Content-Type': 'application/json' },
         body: personalNotes,
@@ -240,7 +241,7 @@ const StockPage: React.FC = () => {
   const handleStatusChange = async (newStatus: string) => {
     if (!symbol) return;
     try {
-      const response = await fetch(`http://localhost:8080/users/dante/stocks/${symbol}/status/${newStatus}`, {
+      const response = await fetch(`${USERS_ENDPOINT}/dante/stocks/${symbol}/status/${newStatus}`, {
         method: 'PUT',
         headers: { 'Content-Type': 'application/json' },
       });

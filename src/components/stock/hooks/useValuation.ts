@@ -1,5 +1,6 @@
 import { useState, useCallback } from 'react';
 import { HistoryEntry } from '../shared/types/valuation';
+import { STOCKS_ENDPOINT } from '../../../config';
 
 interface UseDeleteConfirmationReturn {
   isOpen: boolean;
@@ -37,7 +38,7 @@ export function useValuationHistory<T extends HistoryEntry>(
     setLoading(true);
     setError(null);
     try {
-      const response = await fetch(`http://localhost:8080${endpoint}/${symbol}`);
+      const response = await fetch(`${STOCKS_ENDPOINT}${endpoint}/${symbol}`);
       
       if (!response.ok && response.status !== 404) {
         throw new Error(`HTTP ${response.status}`);

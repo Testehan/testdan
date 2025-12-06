@@ -1,4 +1,6 @@
 import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
+
+const BASE_PATH = import.meta.env.VITE_BASE_PATH || '';
 import { Suspense, lazy } from 'react';
 import HomePage from './pages/homePage';
 import QuotesPage from './pages/quotesPage';
@@ -38,12 +40,15 @@ function App() {
               <Route path="/quotes" element={<QuotesPage />} />
               <Route path="/mental" element={<MentalModelsPage />} />
               <Route path="/mental/:category" element={<MentalModelsList />} />
-              <Route path="/stocks" element={<StockPage />} />
-              <Route path="/stocks/:symbol" element={<StockPage />} />
-              <Route path="/alerts" element={<AlertsPage />} />
-              <Route path="/usage" element={<UsagePage />} />
           </Routes>
         </Suspense>
+        <Routes>
+          <Route path={`${BASE_PATH}/`} element={<StockPage />} />
+          <Route path={`${BASE_PATH}/stocks`} element={<StockPage />} />
+          <Route path={`${BASE_PATH}/stocks/:symbol`} element={<StockPage />} />
+          <Route path={`${BASE_PATH}/alerts`} element={<AlertsPage />} />
+          <Route path={`${BASE_PATH}/usage`} element={<UsagePage />} />
+        </Routes>
         <LLMCaptureTool />
       </Router>
     </>

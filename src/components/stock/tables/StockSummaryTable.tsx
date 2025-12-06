@@ -2,6 +2,8 @@ import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import ConfirmDialog from '../common/ConfirmDialog';
 
+const BASE_PATH = import.meta.env.VITE_BASE_PATH || '';
+
 interface StockSummary {
   ticker: string;
   totalFerolScore: number;
@@ -220,7 +222,7 @@ const StockSummaryTable: React.FC = React.memo(() => {
           {summaryData.map((summary, index) => (
             <tr
               key={summary.ticker}
-              onClick={() => navigate(`/stocks/${summary.ticker}#overview`)}
+              onClick={() => navigate(`${BASE_PATH}/stocks/${summary.ticker}#overview`)}
               onContextMenu={(e) => handleContextMenu(e, summary.ticker)}
               className="cursor-pointer hover:bg-gray-100"
             >

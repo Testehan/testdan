@@ -6,6 +6,7 @@ import { useDeleteConfirmation } from '../common/DeleteConfirmationDialog';
 import { useValuationHistory } from '../hooks/useValuation';
 import { formatLargeNumber } from '../shared/utils/valuation';
 import Spinner from '../shared/components/Spinner';
+import { STOCKS_ENDPOINT } from '../../../config';
 
 interface IncomeStatement {
   fiscalYear: number;
@@ -173,7 +174,7 @@ const GrowthTab: React.FC<GrowthTabProps> = ({ symbol }) => {  const [growthData
     }, 1000);
 
     try {
-      const response = await fetch(`http://localhost:8080/stock/valuation/growth/recommendation/${symbol.toUpperCase()}/${aiScenario}`);
+      const response = await fetch(`${STOCKS_ENDPOINT}/valuation/growth/recommendation/${symbol.toUpperCase()}/${aiScenario}`);
       if (!response.ok) {
         throw new Error(`AI recommendation HTTP error! status: ${response.status}`);
       }
@@ -228,13 +229,13 @@ const GrowthTab: React.FC<GrowthTabProps> = ({ symbol }) => {  const [growthData
   const [saveSuccess, setSaveSuccess] = useState<boolean>(false);
 
   // History functionality
-  const { data: valuationHistory, loading: historyLoading, error: historyError, fetch: fetchValuationHistory } = useValuationHistory<GrowthHistoryEntry>('/stock/valuation/growth/history');
+  const { data: valuationHistory, loading: historyLoading, error: historyError, fetch: fetchValuationHistory } = useValuationHistory<GrowthHistoryEntry>('/valuation/growth/history');
   
   const { open: openDeleteDialog, Dialog: DeleteDialog } = useDeleteConfirmation(async (id: string) => {
     if (!symbol) return;
     
     try {
-      const response = await fetch(`http://localhost:8080/stock/valuation/growth/${symbol}?valuationDate=${encodeURIComponent(id)}`, {
+      const response = await fetch(`${STOCKS_ENDPOINT}/valuation/growth/${symbol}?valuationDate=${encodeURIComponent(id)}`, {
         method: 'DELETE',
       });
 
@@ -342,7 +343,7 @@ const GrowthTab: React.FC<GrowthTabProps> = ({ symbol }) => {  const [growthData
         }
       };
 
-      const response = await fetch(`http://localhost:8080/stock/valuation/growth`, {
+      const response = await fetch(`${STOCKS_ENDPOINT}/valuation/growth`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -405,7 +406,7 @@ const GrowthTab: React.FC<GrowthTabProps> = ({ symbol }) => {  const [growthData
         }
       };
 
-      const response = await fetch(`http://localhost:8080/stock/valuation/calculate/growth`, {
+      const response = await fetch(`${STOCKS_ENDPOINT}/valuation/calculate/growth`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -436,7 +437,7 @@ const GrowthTab: React.FC<GrowthTabProps> = ({ symbol }) => {  const [growthData
       setError(null);
       
       try {
-        const response = await fetch(`http://localhost:8080/stock/valuation/growth/${symbol.toUpperCase()}`);
+        const response = await fetch(`${STOCKS_ENDPOINT}/valuation/growth/${symbol.toUpperCase()}`);
         if (!response.ok) {
           throw new Error(`HTTP error! status: ${response.status}`);
         }

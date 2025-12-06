@@ -6,6 +6,7 @@ import HistoryTable from '../common/HistoryTable';
 import { useDeleteConfirmation } from '../common/DeleteConfirmationDialog';
 import { useValuationHistory } from '../hooks/useValuation';
 import { getVerdictStyling } from '../shared/utils/valuation';
+import { STOCKS_ENDPOINT } from '../../../config';
 
 interface DcfData {
   meta: {
@@ -122,13 +123,13 @@ const DcfCalculator: React.FC<DcfCalculatorProps> = ({ symbol }) => {
   const [userInputTerminalMultiple, setUserInputTerminalMultiple] = useState<number>(15);
   const [sbcAdjustmentToggle, setSbcAdjustmentToggle] = useState<boolean>(true);
   const [userComments, setUserComments] = useState<string>('');
-  const { data: valuationHistory, loading: historyLoading, error: historyError, fetch: fetchValuationHistory } = useValuationHistory<DcfHistoryEntry>('/stock/valuation/dcf/history');
+  const { data: valuationHistory, loading: historyLoading, error: historyError, fetch: fetchValuationHistory } = useValuationHistory<DcfHistoryEntry>('/valuation/dcf/history');
   
   const { open: openDeleteDialog, Dialog: DeleteDialog } = useDeleteConfirmation(async (id: string) => {
     if (!symbol) return;
     
     try {
-      const response = await fetch(`http://localhost:8080/stock/valuation/dcf/${symbol}?valuationDate=${encodeURIComponent(id)}`, {
+      const response = await fetch(`${STOCKS_ENDPOINT}/valuation/dcf/${symbol}?valuationDate=${encodeURIComponent(id)}`, {
         method: 'DELETE',
       });
 
@@ -150,7 +151,7 @@ const DcfCalculator: React.FC<DcfCalculatorProps> = ({ symbol }) => {
       setLoading(true);
       setError(null);
       try {
-        const dcfResponse = await fetch(`http://localhost:8080/stock/valuation/dcf/${symbol}`);
+        const dcfResponse = await fetch(`${STOCKS_ENDPOINT}/valuation/dcf/${symbol}`);
 
         if (!dcfResponse.ok) {
           throw new Error(`DCF data HTTP error! status: ${dcfResponse.status}`);
@@ -235,7 +236,7 @@ const DcfCalculator: React.FC<DcfCalculatorProps> = ({ symbol }) => {
         },
       };
 
-      const response = await fetch('http://localhost:8080/stock/valuation/calculate/dcf', {
+      const response = await fetch(`${STOCKS_ENDPOINT}/valuation/calculate/dcf`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -401,7 +402,7 @@ const DcfCalculator: React.FC<DcfCalculatorProps> = ({ symbol }) => {
     };
 
     try {
-      const response = await fetch('http://localhost:8080/stock/valuation/dcf', {
+      const response = await fetch('${STOCKS_ENDPOINT}/valuation/dcf', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',

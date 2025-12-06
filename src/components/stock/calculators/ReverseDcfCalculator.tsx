@@ -5,6 +5,7 @@ import InfoIcon from '../shared/components/InfoIcon';
 import HistoryTable from '../common/HistoryTable';
 import { useDeleteConfirmation } from '../common/DeleteConfirmationDialog';
 import { useValuationHistory } from '../hooks/useValuation';
+import { STOCKS_ENDPOINT } from '../../../config';
 
 // Using the full DcfData structure as confirmed by the user
 interface DcfData {
@@ -108,14 +109,14 @@ const ReverseDcfCalculator: React.FC<ReverseDcfCalculatorProps> = ({ symbol }) =
     const [saveError, setSaveError] = useState<string | null>(null);
     const [saveSuccess, setSaveSuccess] = useState<boolean>(false);
 
-    const { data: reverseDcfValuationHistory, loading: historyLoading, error: historyError, fetch: fetchReverseDcfHistory } = useValuationHistory<ReverseDcfHistoryEntry>('/stock/valuation/reverse-dcf/history');
+    const { data: reverseDcfValuationHistory, loading: historyLoading, error: historyError, fetch: fetchReverseDcfHistory } = useValuationHistory<ReverseDcfHistoryEntry>('/valuation/reverse-dcf/history');
     const initialCalculationDone = useRef(false);
 
     const { open: openDeleteDialog, Dialog: DeleteDialog } = useDeleteConfirmation(async (id: string) => {
       if (!symbol) return;
       
       try {
-        const response = await fetch(`http://localhost:8080/stock/valuation/reverse-dcf/${symbol}?valuationDate=${encodeURIComponent(id)}`, {
+        const response = await fetch(`${STOCKS_ENDPOINT}/valuation/reverse-dcf/${symbol}?valuationDate=${encodeURIComponent(id)}`, {
           method: 'DELETE',
         });
 
@@ -162,7 +163,7 @@ const ReverseDcfCalculator: React.FC<ReverseDcfCalculatorProps> = ({ symbol }) =
             setLoading(true);
             setError(null);
             try {
-                const response = await fetch(`http://localhost:8080/stock/valuation/reverse-dcf/${symbol}`);
+                const response = await fetch(`${STOCKS_ENDPOINT}/valuation/reverse-dcf/${symbol}`);
                 if (!response.ok) {
                     throw new Error(`HTTP error! status: ${response.status}`);
                 }
@@ -204,7 +205,7 @@ const ReverseDcfCalculator: React.FC<ReverseDcfCalculatorProps> = ({ symbol }) =
                 },
             };
 
-            const response = await fetch('http://localhost:8080/stock/valuation/calculate/reverse-dcf', {
+            const response = await fetch(`${STOCKS_ENDPOINT}/valuation/calculate/reverse-dcf`, {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',
@@ -297,7 +298,7 @@ const ReverseDcfCalculator: React.FC<ReverseDcfCalculatorProps> = ({ symbol }) =
         };
 
         try {
-            const response = await fetch('http://localhost:8080/stock/valuation/reverse-dcf', {
+            const response = await fetch('${STOCKS_ENDPOINT}/valuation/reverse-dcf', {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',

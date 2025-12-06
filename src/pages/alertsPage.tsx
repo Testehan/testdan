@@ -1,6 +1,7 @@
 import { useState, useEffect, useRef } from 'react';
 import { Link } from 'react-router-dom';
 import Menu from '../components/Menu';
+import { STOCKS_ENDPOINT } from '../config';
 
 interface ValuationAlert {
     ticker: string;
@@ -28,7 +29,7 @@ function AlertsPage() {
     useEffect(() => {
         const connectToAlerts = () => {
             setError(null);
-            const eventSource = new EventSource('http://localhost:8080/stock/valuation/alerts/dante');
+            const eventSource = new EventSource(`${STOCKS_ENDPOINT}/valuation/alerts/dante`);
             eventSourceRef.current = eventSource;
 
             eventSource.onopen = () => {

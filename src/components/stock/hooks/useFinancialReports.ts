@@ -1,4 +1,5 @@
 import { useState, useEffect, useMemo, useCallback } from 'react';
+import { STOCKS_ENDPOINT } from '../../../config';
 
 interface UseFinancialReportsProps<T> {
     symbol: string;
@@ -27,7 +28,7 @@ interface FinancialReportData<T> {
 // ... other interfaces and code ...
 
 export const useFinancialReports = <T extends { date: string }>(
-    { symbol, reportEndpoint, fieldOrder, baseURL = 'http://localhost:8080/stocks' }: UseFinancialReportsProps<T>
+    { symbol, reportEndpoint, fieldOrder, baseURL = STOCKS_ENDPOINT }: UseFinancialReportsProps<T>
 ): FinancialReportData<T> => {
     const [annualReports, setAnnualReports] = useState<T[]>([]);
     const [quarterlyReports, setQuarterlyReports] = useState<T[]>([]);
@@ -195,7 +196,7 @@ export const useFinancialReports = <T extends { date: string }>(
 };
 
   export const useEarningsHistory = (
-    { symbol, baseURL = 'http://localhost:8080/stocks' }: { symbol: string; baseURL?: string }
+    { symbol, baseURL = STOCKS_ENDPOINT }: { symbol: string; baseURL?: string }
   ) => {
     const [earningsHistory, setEarningsHistory] = useState<any | null>(null);
     const [loading, setLoading] = useState<boolean>(true);
@@ -234,7 +235,7 @@ export const useFinancialReports = <T extends { date: string }>(
   };
 
   export const useFinancialAdjustments = (
-    { symbol, baseURL = 'http://localhost:8080/stocks' }: { symbol: string; baseURL?: string }
+    { symbol, baseURL = STOCKS_ENDPOINT }: { symbol: string; baseURL?: string }
   ) => {
     const [adjustments, setAdjustments] = useState<import('../shared/types/stockFinancials').FinancialAdjustment | null>(null);
     const [loading, setLoading] = useState<boolean>(true);
@@ -268,7 +269,7 @@ export const useFinancialReports = <T extends { date: string }>(
   };
 
   export const useGlobalQuote = (
-    { symbol, baseURL = 'http://localhost:8080/stocks' }: { symbol: string; baseURL?: string }
+    { symbol, baseURL = STOCKS_ENDPOINT }: { symbol: string; baseURL?: string }
   ) => {
     const [quote, setQuote] = useState<any | null>(null);
     const [loading, setLoading] = useState<boolean>(true);
