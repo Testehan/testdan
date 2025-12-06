@@ -11,6 +11,7 @@ import Menu from '../components/Menu';
 const OverviewTab = lazy(() => import('../components/stock/tabs/OverviewTab'));
 const FinancialsTab = lazy(() => import('../components/stock/tabs/FinancialsTab'));
 const ChecklistTab = lazy(() => import('../components/stock/tabs/ChecklistTab'));
+const NewsTab = lazy(() => import('../components/stock/tabs/NewsTab'));
 const ValuationTab = lazy(() => import('../components/stock/tabs/ValuationTab'));
 const TranscriptsTab = lazy(() => import('../components/stock/tabs/TranscriptsTab'));
 const BusinessAnalysisTab = lazy(() => import('../components/stock/tabs/BusinessAnalysisTab'));
@@ -425,6 +426,16 @@ const StockPage: React.FC = () => {
         >
           Checklist
         </button>
+        {(status === 'OWNED' || status === 'BUY_CANDIDATE') && (
+          <button
+            className={`px-4 py-2 text-lg font-medium ${
+              activeTab === 'news' ? 'border-b-2 border-blue-500 text-blue-600' : 'text-gray-600 hover:text-blue-600'
+            }`}
+            onClick={() => handleTabClick('news')}
+          >
+            News
+          </button>
+        )}
       </div>
       <div>
         {activeTab === 'overview' && stockData && (
@@ -465,6 +476,11 @@ const StockPage: React.FC = () => {
         {activeTab === 'checklist' && (
           <Suspense fallback={<TabLoader message="Loading checklist..." />}>
             <ChecklistTab symbol={symbol || ''} activeSubTab={activeSubTab} onSubTabClick={handleSubTabClick} />
+          </Suspense>
+        )}
+        {activeTab === 'news' && (status === 'OWNED' || status === 'BUY_CANDIDATE') && (
+          <Suspense fallback={<TabLoader message="Loading news..." />}>
+            <NewsTab symbol={symbol || ''} />
           </Suspense>
         )}
       </div>
