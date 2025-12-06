@@ -284,18 +284,16 @@ const GurusTab: React.FC<GurusTabProps> = ({ symbol }) => {
 
                     {(currentAnswer?.answer || (isAnswering && inProgress) || (isAiLoading && inProgress)) && (
                       <div className="text-md text-gray-800 mt-2 flex flex-col" onClick={(e) => e.stopPropagation()}>
-                        {dateStr && (
+                        {(dateStr || currentAnswer?.answer) && (
                           <div className="flex items-center gap-3 mb-2 text-sm text-gray-500 font-medium">
-                            <span>{dateStr}</span>
-                            {isOlder && (
-                              <button
-                                onClick={(e) => handleAiClick(e, question.id)}
-                                disabled={isAiLoading || isAnswering}
-                                className="px-2 py-0.5 bg-purple-600 text-white rounded hover:bg-purple-700 focus:outline-none focus:ring-2 focus:ring-purple-500 focus:ring-opacity-50 disabled:bg-purple-300 transition-colors font-bold text-xs"
-                              >
-                                AI
-                              </button>
-                            )}
+                            {dateStr && <span>{dateStr}</span>}
+                            <button
+                              onClick={(e) => handleAiClick(e, question.id)}
+                              disabled={isAiLoading || isAnswering}
+                              className="px-2 py-0.5 bg-purple-600 text-white rounded hover:bg-purple-700 focus:outline-none focus:ring-2 focus:ring-purple-500 focus:ring-opacity-50 disabled:bg-purple-300 transition-colors font-bold text-xs"
+                            >
+                              AI
+                            </button>
                           </div>
                         )}
                         {content && (
@@ -358,18 +356,16 @@ const GurusTab: React.FC<GurusTabProps> = ({ symbol }) => {
 
                     {(currentAnswer?.answer || (isAnswering && inProgress) || (isAiLoading && inProgress)) && (
                       <div className="text-md text-gray-800 mt-2 flex flex-col" onClick={(e) => e.stopPropagation()}>
-                        {dateStr && (
+                        {(dateStr || currentAnswer?.answer) && (
                           <div className="flex items-center gap-3 mb-2 text-sm text-gray-500 font-medium">
-                            <span>{dateStr}</span>
-                            {isOlder && (
-                              <button
-                                onClick={(e) => handleAiClick(e, question.id)}
-                                disabled={isAiLoading || isAnswering}
-                                className="px-2 py-0.5 bg-purple-600 text-white rounded hover:bg-purple-700 focus:outline-none focus:ring-2 focus:ring-purple-500 focus:ring-opacity-50 disabled:bg-purple-300 transition-colors font-bold text-xs"
-                              >
-                                AI
-                              </button>
-                            )}
+                            {dateStr && <span>{dateStr}</span>}
+                            <button
+                              onClick={(e) => handleAiClick(e, question.id)}
+                              disabled={isAiLoading || isAnswering}
+                              className="px-2 py-0.5 bg-purple-600 text-white rounded hover:bg-purple-700 focus:outline-none focus:ring-2 focus:ring-purple-500 focus:ring-opacity-50 disabled:bg-purple-300 transition-colors font-bold text-xs"
+                            >
+                              AI
+                            </button>
                           </div>
                         )}
                         {content && (
@@ -432,18 +428,16 @@ const GurusTab: React.FC<GurusTabProps> = ({ symbol }) => {
 
                     {(currentAnswer?.answer || (isAnswering && inProgress) || (isAiLoading && inProgress)) && (
                       <div className="text-md text-gray-800 mt-2 flex flex-col" onClick={(e) => e.stopPropagation()}>
-                        {dateStr && (
+                        {(dateStr || currentAnswer?.answer) && (
                           <div className="flex items-center gap-3 mb-2 text-sm text-gray-500 font-medium">
-                            <span>{dateStr}</span>
-                            {isOlder && (
-                              <button
-                                onClick={(e) => handleAiClick(e, question.id)}
-                                disabled={isAiLoading || isAnswering}
-                                className="px-2 py-0.5 bg-purple-600 text-white rounded hover:bg-purple-700 focus:outline-none focus:ring-2 focus:ring-purple-500 focus:ring-opacity-50 disabled:bg-purple-300 transition-colors font-bold text-xs"
-                              >
-                                AI
-                              </button>
-                            )}
+                            {dateStr && <span>{dateStr}</span>}
+                            <button
+                              onClick={(e) => handleAiClick(e, question.id)}
+                              disabled={isAiLoading || isAnswering}
+                              className="px-2 py-0.5 bg-purple-600 text-white rounded hover:bg-purple-700 focus:outline-none focus:ring-2 focus:ring-purple-500 focus:ring-opacity-50 disabled:bg-purple-300 transition-colors font-bold text-xs"
+                            >
+                              AI
+                            </button>
                           </div>
                         )}
                         {content && (
@@ -506,18 +500,16 @@ const GurusTab: React.FC<GurusTabProps> = ({ symbol }) => {
 
                     {(currentAnswer?.answer || (isAnswering && inProgress) || (isAiLoading && inProgress)) && (
                       <div className="text-md text-gray-800 mt-2 flex flex-col" onClick={(e) => e.stopPropagation()}>
-                        {dateStr && (
+                        {(dateStr || currentAnswer?.answer) && (
                           <div className="flex items-center gap-3 mb-2 text-sm text-gray-500 font-medium">
-                            <span>{dateStr}</span>
-                            {isOlder && (
-                              <button
-                                onClick={(e) => handleAiClick(e, question.id)}
-                                disabled={isAiLoading || isAnswering}
-                                className="px-2 py-0.5 bg-purple-600 text-white rounded hover:bg-purple-700 focus:outline-none focus:ring-2 focus:ring-purple-500 focus:ring-opacity-50 disabled:bg-purple-300 transition-colors font-bold text-xs"
-                              >
-                                AI
-                              </button>
-                            )}
+                            {dateStr && <span>{dateStr}</span>}
+                            <button
+                              onClick={(e) => handleAiClick(e, question.id)}
+                              disabled={isAiLoading || isAnswering}
+                              className="px-2 py-0.5 bg-purple-600 text-white rounded hover:bg-purple-700 focus:outline-none focus:ring-2 focus:ring-purple-500 focus:ring-opacity-50 disabled:bg-purple-300 transition-colors font-bold text-xs"
+                            >
+                              AI
+                            </button>
                           </div>
                         )}
                         {content && (
@@ -596,18 +588,16 @@ const GurusTab: React.FC<GurusTabProps> = ({ symbol }) => {
 
                     {(currentAnswer?.answer || (isAnswering && inProgress) || (isAiLoading && inProgress)) && (
                       <div className="text-md text-gray-800 mt-2 flex flex-col" onClick={(e) => e.stopPropagation()}>
-                        {dateStr && (
+                        {(dateStr || currentAnswer?.answer) && (
                           <div className="flex items-center gap-3 mb-2 text-sm text-gray-500 font-medium">
-                            <span>{dateStr}</span>
-                            {isOlder && (
-                              <button
-                                onClick={(e) => handleAiClick(e, question.id)}
-                                disabled={isAiLoading || isAnswering}
-                                className="px-2 py-0.5 bg-purple-600 text-white rounded hover:bg-purple-700 focus:outline-none focus:ring-2 focus:ring-purple-500 focus:ring-opacity-50 disabled:bg-purple-300 transition-colors font-bold text-xs"
-                              >
-                                AI
-                              </button>
-                            )}
+                            {dateStr && <span>{dateStr}</span>}
+                            <button
+                              onClick={(e) => handleAiClick(e, question.id)}
+                              disabled={isAiLoading || isAnswering}
+                              className="px-2 py-0.5 bg-purple-600 text-white rounded hover:bg-purple-700 focus:outline-none focus:ring-2 focus:ring-purple-500 focus:ring-opacity-50 disabled:bg-purple-300 transition-colors font-bold text-xs"
+                            >
+                              AI
+                            </button>
                           </div>
                         )}
                         {content && (

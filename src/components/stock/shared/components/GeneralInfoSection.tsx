@@ -24,6 +24,23 @@ const GeneralInfoSection: React.FC<GeneralInfoSectionProps> = ({ stockData }) =>
     "Last Updated": stockData.lastUpdated,
   };
 
+  const renderValue = (key: string, value: string | undefined) => {
+    if (key === 'Website' && value) {
+      const url = value.startsWith('http') ? value : `https://${value}`;
+      return (
+        <a
+          href={url}
+          target="_blank"
+          rel="noopener noreferrer"
+          className="text-blue-600 hover:text-blue-800 hover:underline"
+        >
+          {value}
+        </a>
+      );
+    }
+    return <span className="text-gray-800">{value || 'N/A'}</span>;
+  };
+
   return (
     <div className="p-4 bg-gray-50 shadow rounded-lg mb-4">
       <h4 className="text-lg font-semibold mb-3">General Information</h4>
@@ -31,7 +48,7 @@ const GeneralInfoSection: React.FC<GeneralInfoSectionProps> = ({ stockData }) =>
         {Object.entries(generalInfo).map(([key, value]) => (
           <div key={key} className="flex justify-between items-center border-b border-gray-200 py-2">
             <span className="font-medium text-gray-600">{key}:</span>
-            <span className="text-gray-800">{value}</span>
+            {key === 'Website' ? renderValue(key, value as string | undefined) : <span className="text-gray-800">{value || 'N/A'}</span>}
           </div>
         ))}
       </div>
