@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useCallback } from 'react';
-import { NEXTSTEP_ENDPOINT } from '../config';
-import { Goal, Priority, ProjectStatus, Project, NextAction, ActionContext, ActionStatus, DashboardData, WeeklyReviewData, ActionCreateRequest, ActionPatchRequest, GoalPatchRequest, ProjectPatchRequest } from '../types/nextstep';
+import { NEXTSTEP_ENDPOINT } from '../../config';
+import { Goal, Priority, ProjectStatus, Project, NextAction, ActionContext, ActionStatus, DashboardData, WeeklyReviewData, ActionCreateRequest, ActionPatchRequest, GoalPatchRequest, ProjectPatchRequest } from '../../types/nextstep';
 
 type View = 'execution' | 'weeklyReview' | 'goals' | 'projects' | 'archive';
 
@@ -60,6 +60,7 @@ const NextStepPage: React.FC = () => {
   const [selectedGoalId, setSelectedGoalId] = useState<string | null>(null);
   const [selectedProjectIdForActions, setSelectedProjectIdForActions] = useState<string | null>(null);
   const [projectActions, setProjectActions] = useState<NextAction[]>([]);
+  const [actionFilter, setActionFilter] = useState<'ALL' | ActionContext>('ALL');
   const [deleteConfirm, setDeleteConfirm] = useState<{ type: 'goal' | 'project' | 'action'; id: string; name: string } | null>(null);
   const [editingGoal, setEditingGoal] = useState<Goal | null>(null);
   const [editingProject, setEditingProject] = useState<Project | null>(null);
@@ -544,7 +545,6 @@ const NextStepPage: React.FC = () => {
   const renderExecutionView = () => {
     const allActions: NextAction[] = dashboardData?.nextActions || [];
     const currentActions = allActions.filter(a => a.status === 'CURRENT');
-    const activeProjects = (projects || []).filter(p => p.status === 'ACTIVE');
 
     return (
       <main className="ml-64 mt-16 p-10 min-h-screen">
@@ -557,18 +557,34 @@ const NextStepPage: React.FC = () => {
                   <p className="text-[#434655] font-medium uppercase text-xs tracking-widest mt-1">Current Actions</p>
                 </div>
                 <div className="flex gap-2">
-                  <span className="px-3 py-1 bg-[#0051d5] text-white rounded-full text-xs font-bold tracking-tight uppercase">Deep Work</span>
-                  <span className="px-3 py-1 bg-[#e2e7ff] text-[#4d556a] rounded-full text-xs font-bold tracking-tight uppercase">Quick</span>
+                  <button 
+                    onClick={() => setActionFilter('ALL')}
+                    className={`px-3 py-1 rounded-full text-xs font-bold tracking-tight uppercase transition-colors ${actionFilter === 'ALL' ? 'bg-[#0051d5] text-white' : 'bg-[#e2e7ff] text-[#4d556a] hover:bg-[#0051d5] hover:text-white'}`}
+                  >
+                    All
+                  </button>
+                  <button 
+                    onClick={() => setActionFilter('DEEP_WORK')}
+                    className={`px-3 py-1 rounded-full text-xs font-bold tracking-tight uppercase transition-colors ${actionFilter === 'DEEP_WORK' ? 'bg-[#0051d5] text-white' : 'bg-[#e2e7ff] text-[#4d556a] hover:bg-[#0051d5] hover:text-white'}`}
+                  >
+                    Deep Work
+                  </button>
+                  <button 
+                    onClick={() => setActionFilter('QUICK')}
+                    className={`px-3 py-1 rounded-full text-xs font-bold tracking-tight uppercase transition-colors ${actionFilter === 'QUICK' ? 'bg-[#0051d5] text-white' : 'bg-[#e2e7ff] text-[#4d556a] hover:bg-[#0051d5] hover:text-white'}`}
+                  >
+                    Quick
+                  </button>
                 </div>
               </div>
 
               <div className="space-y-4">
-                {currentActions.length === 0 ? (
+                {(actionFilter === 'ALL' ? currentActions : currentActions.filter(a => a.context === actionFilter)).length === 0 ? (
                   <div className="p-5 bg-white rounded-xl text-[#434655]">
                     No current actions. Add tasks via quick capture or check your backlog.
                   </div>
                 ) : (
-                  currentActions.map(action => (
+                  (actionFilter === 'ALL' ? currentActions : currentActions.filter(a => a.context === actionFilter)).map(action => (
                     <div 
                       key={action.id}
                       className="group flex items-center gap-4 p-5 bg-white rounded-xl hover:bg-white transition-all border-l-4 border-[#0051d5]"
@@ -601,31 +617,6 @@ const NextStepPage: React.FC = () => {
                       </button>
                     </div>
                   ))
-                )}
-              </div>
-            </div>
-
-            <div className="space-y-6">
-              <h2 className="text-xl font-bold tracking-tight">Active Projects</h2>
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                {activeProjects.map(project => (
-                  <div key={project.id} className="bg-white p-6 rounded-xl space-y-4">
-                    <div className="flex justify-between items-start">
-                      <div className="w-12 h-12 bg-[#0051d5]/10 text-[#0051d5] rounded-xl flex items-center justify-center">
-                        <span className="material-symbols-outlined">rocket_launch</span>
-                      </div>
-                      <span className="px-2 py-1 bg-[#e2e7ff] text-[#4d556a] rounded text-xs font-bold uppercase">Active</span>
-                    </div>
-                    <div>
-                      <h3 className="font-bold text-lg text-[#131b2e]">{project.title}</h3>
-                      <p className="text-sm text-[#434655] mt-1">{project.outcome || 'No outcome set'}</p>
-                    </div>
-                  </div>
-                ))}
-                {activeProjects.length === 0 && (
-                  <div className="col-span-2 p-6 text-[#434655] text-center">
-                    No active projects. Create one in Projects view.
-                  </div>
                 )}
               </div>
             </div>

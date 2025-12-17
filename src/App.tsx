@@ -7,7 +7,7 @@ import QuotesPage from './pages/quotesPage';
 import MentalModelsPage from './pages/mentalModelsPage.tsx';
 import AlertsPage from './pages/alertsPage';
 import UsagePage from './pages/UsagePage';
-import NextStepPage from './pages/NextStepPage';
+import NextStepPage from './pages/nextstep/NextStepPage';
 import LLMCaptureTool from './components/LLMCaptureTool';
 
 // Lazy load heavy components to reduce initial bundle size
