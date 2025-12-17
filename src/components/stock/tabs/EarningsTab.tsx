@@ -1,4 +1,5 @@
 import React, { useState } from 'react';
+import { STOCKS_ENDPOINT } from '../../../config';
 import { useEarningsHistory } from '../hooks/useFinancialReports';
 import EarningsHistoryTable from '../tables/EarningsHistoryTable';
 import Spinner from '../shared/components/Spinner';
@@ -69,7 +70,7 @@ const EarningsTab: React.FC<{ symbol: string }> = ({ symbol }) => {
     setEstimatesLoading(true);
     setEstimatesError(null);
     try {
-      const response = await fetch(`http://localhost:8080/stocks/earnings-estimates/${symbol}`);
+      const response = await fetch(`${STOCKS_ENDPOINT}/earnings-estimates/${symbol}`);
       if (!response.ok) {
         throw new Error(`Failed to fetch estimates: ${response.statusText}`);
       }

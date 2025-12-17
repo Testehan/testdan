@@ -1,5 +1,6 @@
 import React, { useState, useEffect, useRef } from 'react';
 import ReactMarkdown from 'react-markdown';
+import { STOCKS_ENDPOINT } from '../../../config';
 
 interface TranscriptItem {
   speaker: string;
@@ -105,8 +106,8 @@ const TranscriptsTab: React.FC<TranscriptsTabProps> = ({ symbol }) => {
       setError(null);
       try {
         const [quartersRes, latestRes] = await Promise.all([
-          fetch(`http://localhost:8080/stocks/earnings-call-transcript/${symbol}/quarters`),
-          fetch(`http://localhost:8080/stocks/earnings-call-transcript/${symbol}/latest`),
+          fetch(`${STOCKS_ENDPOINT}/earnings-call-transcript/${symbol}/quarters`),
+          fetch(`${STOCKS_ENDPOINT}/earnings-call-transcript/${symbol}/latest`),
         ]);
 
         if (!quartersRes.ok) {
@@ -155,7 +156,7 @@ const TranscriptsTab: React.FC<TranscriptsTabProps> = ({ symbol }) => {
     setQuestionsLoading(true);
     setError(null);
     try {
-      const response = await fetch(`http://localhost:8080/stocks/questions/transcript`);
+      const response = await fetch(`${STOCKS_ENDPOINT}/questions/transcript`);
       if (!response.ok) {
         throw new Error(`HTTP error! status: ${response.status}`);
       }
@@ -186,7 +187,7 @@ const TranscriptsTab: React.FC<TranscriptsTabProps> = ({ symbol }) => {
     
     setAnswers(prevAnswers => new Map(prevAnswers).set(questionId, { status: 'IN_PROGRESS', answer: null }));
 
-    const baseUrl = `http://localhost:8080/stocks/questions/answer`;
+    const baseUrl = `${STOCKS_ENDPOINT}/questions/answer`;
     const additionalInfo = selectedQuarter || '';
     
     const url = regenerate
@@ -271,7 +272,7 @@ const TranscriptsTab: React.FC<TranscriptsTabProps> = ({ symbol }) => {
     setTranscriptData(null);
     setAnswers(new Map());
     try {
-      const response = await fetch(`http://localhost:8080/stocks/earnings-call-transcript/${symbol}/${quarter}`);
+      const response = await fetch(`${STOCKS_ENDPOINT}/earnings-call-transcript/${symbol}/${quarter}`);
       if (!response.ok) {
         throw new Error(`Failed to fetch transcript: ${response.statusText}`);
       }

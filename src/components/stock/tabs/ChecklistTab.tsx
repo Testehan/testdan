@@ -1,5 +1,6 @@
 import React, { useState, useEffect, useRef, useCallback } from 'react';
 import Spinner from '../shared/components/Spinner';
+import { STOCKS_ENDPOINT } from '../../../config';
 import {
   financialItems,
   moatItems,
@@ -129,7 +130,7 @@ const ChecklistTab: React.FC<ChecklistTabProps> = ({ symbol, activeSubTab, onSub
     }, 1000);
 
     const reportType = activeSubTab === '100 Bagger' ? 'ONE_HUNDRED_BAGGER' : activeSubTab;
-    const url = `http://localhost:8080/stocks/reporting/checklist/${symbol}?reportType=${reportType}&recreateReport=${
+    const url = `${STOCKS_ENDPOINT}/reporting/checklist/${symbol}?reportType=${reportType}&recreateReport=${
       regenerationCount > 0
     }`
 
@@ -240,7 +241,7 @@ const ChecklistTab: React.FC<ChecklistTabProps> = ({ symbol, activeSubTab, onSub
       }));
 
       const reportType = activeSubTab === '100 Bagger' ? 'ONE_HUNDRED_BAGGER' : activeSubTab;
-      const response = await fetch(`http://localhost:8080/stocks/reporting/checklist/${symbol}?reportType=${reportType}`, {
+      const response = await fetch(`${STOCKS_ENDPOINT}/reporting/checklist/${symbol}?reportType=${reportType}`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',

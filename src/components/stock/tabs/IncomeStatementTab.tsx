@@ -3,6 +3,7 @@ import { IncomeStatementReport } from '../shared/types/stockFinancials';
 import PeriodRangeSlider from '../shared/components/PeriodRangeSlider';
 import { useFinancialReports } from '../hooks/useFinancialReports';
 import { FinancialStatementTable } from '../tables/FinancialStatementTable';
+import { STOCKS_ENDPOINT } from '../../../config';
 
 import { incomeStatementFieldOrder } from '../shared/types/financialFieldOrders';
 
@@ -28,8 +29,7 @@ const IncomeStatementTab: React.FC<{ symbol: string }> = ({ symbol }) => {
     } = useFinancialReports<IncomeStatementReport>({
         symbol: symbol,
         reportEndpoint: 'income-statement',
-        fieldOrder: incomeStatementFieldOrder,
-        baseURL: 'http://localhost:8080/stocks' // Hardcoded for now, ideally from env variables
+        fieldOrder: incomeStatementFieldOrder
     });
 
     const handleNumberScaleChange = (scale: 'millions' | 'billions') => {
@@ -50,8 +50,8 @@ const IncomeStatementTab: React.FC<{ symbol: string }> = ({ symbol }) => {
         try {
             setRevenueDetailLoading(true);
             const [segmentationResponse, geographyResponse] = await Promise.all([
-                fetch(`http://localhost:8080/stocks/revenue-segmentation/${symbol}`),
-                fetch(`http://localhost:8080/stocks/revenue-geography/${symbol}`)
+                fetch(`${STOCKS_ENDPOINT}/revenue-segmentation/${symbol}`),
+                fetch(`${STOCKS_ENDPOINT}/revenue-geography/${symbol}`)
             ]);
 
             if (!segmentationResponse.ok) {

@@ -1,5 +1,6 @@
 import React, { useState, useEffect, useRef } from 'react';
 import ReactMarkdown from 'react-markdown';
+import { STOCKS_ENDPOINT } from '../../../config';
 
 interface BusinessAnalysisTabProps {
   symbol: string;
@@ -74,7 +75,7 @@ const BusinessAnalysisTab: React.FC<BusinessAnalysisTabProps> = ({ symbol }) => 
       setLoading(true);
       setError(null);
       try {
-        const response = await fetch(`http://localhost:8080/stocks/questions/business`);
+        const response = await fetch(`${STOCKS_ENDPOINT}/questions/business`);
         if (!response.ok) {
           throw new Error(`HTTP error! status: ${response.status}`);
         }
@@ -104,7 +105,7 @@ const BusinessAnalysisTab: React.FC<BusinessAnalysisTabProps> = ({ symbol }) => 
     
     setAnswers(prevAnswers => new Map(prevAnswers).set(questionId, { status: 'IN_PROGRESS', answer: null }));
 
-    const baseUrl = `http://localhost:8080/stocks/questions/answer`;
+    const baseUrl = `${STOCKS_ENDPOINT}/questions/answer`;
     
     const url = regenerate
       ? `${baseUrl}?stockId=${stockId}&questionId=${questionId}&regenerate=true`

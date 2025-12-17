@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react';
+import { API_ENDPOINT } from '../../../config';
 
 interface NewsTabProps {
   symbol: string;
@@ -40,7 +41,7 @@ const NewsTab: React.FC<NewsTabProps> = ({ symbol }) => {
       setError(null);
       
       try {
-        const response = await fetch(`http://localhost:8080/api/research/${symbol}`);
+        const response = await fetch(`${API_ENDPOINT}/research/${symbol}`);
         
         if (!response.ok) {
           throw new Error(`HTTP error! status: ${response.status}`);
@@ -89,7 +90,7 @@ const NewsTab: React.FC<NewsTabProps> = ({ symbol }) => {
         </div>
       )}
 
-      {data && data.status === 'COMPLETED' && data.report && (
+      {data && data.status === 'completed' && data.report && (
         <div className="space-y-6">
           <div className="p-4 bg-blue-50 border border-blue-200 rounded">
             <h4 className="font-bold text-lg mb-2">Executive Summary</h4>
@@ -159,7 +160,7 @@ const NewsTab: React.FC<NewsTabProps> = ({ symbol }) => {
         </div>
       )}
 
-      {data && data.status === 'COMPLETED' && !data.report && (
+      {data && data.status === 'completed' && !data.report && (
         <div className="p-4 bg-red-100 border border-red-400 text-red-700 rounded">
           No report data available
         </div>

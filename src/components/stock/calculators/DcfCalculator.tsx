@@ -402,7 +402,7 @@ const DcfCalculator: React.FC<DcfCalculatorProps> = ({ symbol }) => {
     };
 
     try {
-      const response = await fetch('${STOCKS_ENDPOINT}/valuation/dcf', {
+      const response = await fetch(`${STOCKS_ENDPOINT}/valuation/dcf`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',

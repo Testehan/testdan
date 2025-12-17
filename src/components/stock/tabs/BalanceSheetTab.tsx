@@ -73,8 +73,7 @@ const BalanceSheetTab: React.FC<{ symbol: string }> = ({ symbol }) => {
     } = useFinancialReports<BalanceSheetReport>({
         symbol: symbol,
         reportEndpoint: 'balance-sheet',
-        fieldOrder: balanceSheetFieldOrder,
-        baseURL: 'http://localhost:8080/stocks' // Hardcoded for now, ideally from env variables
+        fieldOrder: balanceSheetFieldOrder
     });
 
     const handleNumberScaleChange = (scale: 'millions' | 'billions') => {

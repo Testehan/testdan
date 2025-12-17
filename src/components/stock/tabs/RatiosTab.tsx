@@ -119,8 +119,7 @@ const RatiosTab: React.FC<{ symbol: string }> = ({ symbol }) => {
     } = useFinancialReports<FinancialRatioReport>({
         symbol: symbol,
         reportEndpoint: 'financial-ratios',
-        fieldOrder: [],
-        baseURL: 'http://localhost:8080/stocks'
+        fieldOrder: []
     });
 
     const handleNumberScaleChange = (scale: 'millions' | 'billions') => {

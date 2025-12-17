@@ -298,7 +298,7 @@ const ReverseDcfCalculator: React.FC<ReverseDcfCalculatorProps> = ({ symbol }) =
         };
 
         try {
-            const response = await fetch('${STOCKS_ENDPOINT}/valuation/reverse-dcf', {
+            const response = await fetch(`${STOCKS_ENDPOINT}/valuation/reverse-dcf`, {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',

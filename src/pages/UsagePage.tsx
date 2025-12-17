@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import Menu from '../components/Menu';
+import { API_ENDPOINT } from '../config';
 
 interface LlmUsage {
   id: string;
@@ -77,7 +78,7 @@ const UsagePage: React.FC = () => {
       if (filters.toDate) params.append('toDate', filters.toDate);
       params.append('page', filters.page.toString());
       params.append('size', filters.size.toString());
-      const response = await fetch(`http://localhost:8080/api/llm-usage?${params.toString()}`);
+      const response = await fetch(`${API_ENDPOINT}/llm-usage?${params.toString()}`);
       if (!response.ok) {
         throw new Error(`Failed to fetch usage data: ${response.statusText}`);
       }

@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { SentimentData } from '../shared/types/sentiment';
 import Spinner from '../shared/components/Spinner';
+import { STOCKS_ENDPOINT } from '../../../config';
 
 interface SentimentTabProps {
   symbol: string;
@@ -33,7 +34,7 @@ const SentimentTab: React.FC<SentimentTabProps> = ({ symbol }) => {
     
     setError(null);
     try {
-      const response = await fetch(`http://localhost:8080/stocks/questions/sentiment?stockId=${symbol}${regenerate ? '&regenerate=true' : ''}`);
+      const response = await fetch(`${STOCKS_ENDPOINT}/questions/sentiment?stockId=${symbol}${regenerate ? '&regenerate=true' : ''}`);
       if (!response.ok) {
         throw new Error(`Failed to fetch sentiment: ${response.statusText}`);
       }

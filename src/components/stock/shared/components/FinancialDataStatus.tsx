@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react';
+import { STOCKS_ENDPOINT } from '../../../../config';
 
 interface FinancialDataStatusProps {
     symbol: string;
@@ -15,7 +16,7 @@ const FinancialDataStatus: React.FC<FinancialDataStatusProps> = ({ symbol }) => 
             setLoading(true);
             setError(null);
             try {
-                const response = await fetch(`http://localhost:8080/stocks/presentfinancialdata/${symbol}`);
+                const response = await fetch(`${STOCKS_ENDPOINT}/presentfinancialdata/${symbol}`);
                 if (!response.ok) {
                     throw new Error(`HTTP error! status: ${response.status}`);
                 }

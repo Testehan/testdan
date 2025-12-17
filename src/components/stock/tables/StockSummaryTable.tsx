@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import ConfirmDialog from '../common/ConfirmDialog';
+import { STOCKS_ENDPOINT } from '../../../config';
 
 const BASE_PATH = import.meta.env.VITE_BASE_PATH || '';
 
@@ -60,7 +61,7 @@ const StockSummaryTable: React.FC = React.memo(() => {
     setLoading(true);
     setError(null);
     try {
-      let url = `http://localhost:8080/stocks/reporting/checklist/summary/dante?page=${page}&size=${size}&sort=${sortCol},${sortDir}`;
+      let url = `${STOCKS_ENDPOINT}/reporting/checklist/summary/dante?page=${page}&size=${size}&sort=${sortCol},${sortDir}`;
       if (status !== 'All') {
         url += `&status=${status}`;
       }
@@ -123,7 +124,7 @@ const StockSummaryTable: React.FC = React.memo(() => {
   const handleConfirmDelete = async () => {
     if (stockToDelete) {
       try {
-        const response = await fetch(`http://localhost:8080/stocks/delete/${stockToDelete}`, {
+        const response = await fetch(`${STOCKS_ENDPOINT}/delete/${stockToDelete}`, {
           method: 'DELETE',
         });
         if (!response.ok) {

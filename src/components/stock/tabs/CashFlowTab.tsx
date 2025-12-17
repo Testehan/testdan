@@ -72,8 +72,7 @@ const CashFlowTab: React.FC<{ symbol: string }> = ({ symbol }) => {
     } = useFinancialReports<CashFlowReport>({
         symbol: symbol,
         reportEndpoint: 'cash-flow',
-        fieldOrder: cashFlowFieldOrder,
-        baseURL: 'http://localhost:8080/stocks' // Hardcoded for now, ideally from env variables
+        fieldOrder: cashFlowFieldOrder
     });
 
     const handleNumberScaleChange = (scale: 'millions' | 'billions') => {
