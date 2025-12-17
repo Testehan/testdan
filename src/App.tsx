@@ -7,6 +7,7 @@ import QuotesPage from './pages/quotesPage';
 import MentalModelsPage from './pages/mentalModelsPage.tsx';
 import AlertsPage from './pages/alertsPage';
 import UsagePage from './pages/UsagePage';
+import NextStepPage from './pages/NextStepPage';
 import LLMCaptureTool from './components/LLMCaptureTool';
 
 // Lazy load heavy components to reduce initial bundle size
@@ -36,19 +37,18 @@ function App() {
         {/* Routes */}
         <Suspense fallback={<div className="text-center p-4">Loading...</div>}>
           <Routes>
-              <Route path="/" element={<HomePage />} />
-              <Route path="/quotes" element={<QuotesPage />} />
-              <Route path="/mental" element={<MentalModelsPage />} />
-              <Route path="/mental/:category" element={<MentalModelsList />} />
+            <Route path="/" element={<HomePage />} />
+            <Route path="/quotes" element={<QuotesPage />} />
+            <Route path="/mental" element={<MentalModelsPage />} />
+            <Route path="/mental/:category" element={<MentalModelsList />} />
+            <Route path="/nextstep" element={<NextStepPage />} />
+            <Route path={`${BASE_PATH}/`} element={<StockPage />} />
+            <Route path={`${BASE_PATH}/stocks`} element={<StockPage />} />
+            <Route path={`${BASE_PATH}/stocks/:symbol`} element={<StockPage />} />
+            <Route path={`${BASE_PATH}/alerts`} element={<AlertsPage />} />
+            <Route path={`${BASE_PATH}/usage`} element={<UsagePage />} />
           </Routes>
         </Suspense>
-        <Routes>
-          <Route path={`${BASE_PATH}/`} element={<StockPage />} />
-          <Route path={`${BASE_PATH}/stocks`} element={<StockPage />} />
-          <Route path={`${BASE_PATH}/stocks/:symbol`} element={<StockPage />} />
-          <Route path={`${BASE_PATH}/alerts`} element={<AlertsPage />} />
-          <Route path={`${BASE_PATH}/usage`} element={<UsagePage />} />
-        </Routes>
         <LLMCaptureTool />
       </Router>
     </>
