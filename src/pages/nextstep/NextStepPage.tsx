@@ -66,6 +66,42 @@ const NextStepPage: React.FC = () => {
   const [editingProject, setEditingProject] = useState<Project | null>(null);
   const [editGoalForm, setEditGoalForm] = useState({ title: '', priority: 'MEDIUM' as Priority, active: true });
   const [editProjectForm, setEditProjectForm] = useState({ goalId: '', title: '', outcome: '', status: 'BACKLOG' as ProjectStatus });
+  const [showConfetti, setShowConfetti] = useState(false);
+  const [showNewModal, setShowNewModal] = useState(false);
+
+  // Confetti component
+  const Confetti = () => {
+    const particles = Array.from({ length: 100 }, (_, i) => ({
+      id: i,
+      x: Math.random() * 100,
+      delay: Math.random() * 2,
+      duration: 2 + Math.random() * 2,
+      color: ['#0051d5', '#ffd700', '#ff6b6b', '#4ecdc4', '#45b7d1', '#96ceb4'][Math.floor(Math.random() * 6)],
+    }));
+
+    return (
+      <div className="fixed inset-0 pointer-events-none z-50 overflow-hidden">
+        {particles.map(p => (
+          <div
+            key={p.id}
+            className="absolute w-3 h-3 rounded-sm"
+            style={{
+              left: `${p.x}%`,
+              top: '-20px',
+              backgroundColor: p.color,
+              animation: `confetti-fall ${p.duration}s ease-out ${p.delay}s forwards`,
+            }}
+          />
+        ))}
+        <style>{`
+          @keyframes confetti-fall {
+            0% { transform: translateY(0) rotate(0deg); opacity: 1; }
+            100% { transform: translateY(100vh) rotate(720deg); opacity: 0; }
+          }
+        `}</style>
+      </div>
+    );
+  };
 
   // Fetch goals
   const fetchGoals = useCallback(async () => {
@@ -154,6 +190,9 @@ const NextStepPage: React.FC = () => {
         method: 'POST',
       });
       if (!response.ok) throw new Error('Failed to complete action');
+      
+      setShowConfetti(true);
+      setTimeout(() => setShowConfetti(false), 10000);
       
       // Refresh data after completion
       await fetchDashboard();
@@ -451,7 +490,7 @@ const NextStepPage: React.FC = () => {
   const renderSidebar = () => (
     <aside className="fixed left-0 top-0 h-screen w-64 bg-[#f2f3ff] border-r border-[#c3c6d7] z-50 flex flex-col">
       <div className="px-6 py-8">
-        <h1 className="text-lg font-bold tracking-tighter">The NextStep</h1>
+        <h1 className="text-lg font-bold tracking-tighter">NextStep</h1>
         <p className="text-sm font-medium tracking-tight uppercase text-[#4d556a]/60 mt-1">Deep Work Mode</p>
       </div>
       
@@ -495,16 +534,11 @@ const NextStepPage: React.FC = () => {
 
       <div className="px-4 py-6 border-t border-[#c3c6d7]/10">
         <button 
-          onClick={() => {
-            if (projects.length > 0) {
-              setSelectedProjectId(projects[0].id);
-              setShowAddActionModal(true);
-            }
-          }}
+          onClick={() => setShowNewModal(true)}
           className="w-full py-3 bg-[#0051d5] text-white rounded-xl font-bold flex items-center justify-center gap-2 hover:opacity-90 active:scale-95 transition-all"
         >
           <span className="material-symbols-outlined text-lg">add</span>
-          Quick Action
+          New
         </button>
       </div>
 
@@ -520,7 +554,7 @@ const NextStepPage: React.FC = () => {
   const renderHeader = () => (
     <header className="fixed top-0 left-64 right-0 h-16 bg-[#faf8ff] z-40 flex justify-between items-center px-8">
       <div className="flex items-center gap-4">
-        <span className="text-xl font-black">NextStep</span>
+
       </div>
       <div className="flex items-center gap-6">
         <div className="relative flex items-center bg-[#f2f3ff] px-4 py-2 rounded-xl">
@@ -1526,6 +1560,7 @@ const NextStepPage: React.FC = () => {
 
   return (
     <div className="min-h-screen bg-[#faf8ff] text-[#131b2e] font-sans">
+      {showConfetti && <Confetti />}
       {renderSidebar()}
       {renderHeader()}
       {activeView === 'execution' && renderExecutionView()}
@@ -1537,6 +1572,78 @@ const NextStepPage: React.FC = () => {
       {renderAddActionModal()}
       {renderAddProjectModal()}
       {renderAddGoalModal()}
+      {showNewModal && (
+        <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50" onClick={() => setShowNewModal(false)}>
+          <div className="bg-white rounded-2xl p-6 w-full max-w-md shadow-2xl" onClick={e => e.stopPropagation()}>
+            <div className="flex justify-between items-center mb-6">
+              <h3 className="text-xl font-bold text-[#131b2e]">Create New</h3>
+              <button onClick={() => setShowNewModal(false)} className="text-[#737686] hover:text-[#131b2e]">
+                <span className="material-symbols-outlined">close</span>
+              </button>
+            </div>
+            <div className="space-y-3">
+              <button
+                onClick={() => {
+                  setShowNewModal(false);
+                  setShowAddGoalModal(true);
+                }}
+                className="w-full p-4 bg-[#f2f3ff] rounded-xl flex items-center gap-4 hover:bg-[#e2e7ff] transition-colors"
+              >
+                <div className="w-10 h-10 bg-[#0051d5]/10 text-[#0051d5] rounded-lg flex items-center justify-center">
+                  <span className="material-symbols-outlined">flag</span>
+                </div>
+                <div className="text-left">
+                  <h4 className="font-bold text-[#131b2e]">Goal</h4>
+                  <p className="text-xs text-[#737686]">Create a new goal</p>
+                </div>
+              </button>
+              <button
+                onClick={() => {
+                  setShowNewModal(false);
+                  setShowAddProjectModal(true);
+                }}
+                className="w-full p-4 bg-[#f2f3ff] rounded-xl flex items-center gap-4 hover:bg-[#e2e7ff] transition-colors"
+              >
+                <div className="w-10 h-10 bg-[#0051d5]/10 text-[#0051d5] rounded-lg flex items-center justify-center">
+                  <span className="material-symbols-outlined">account_tree</span>
+                </div>
+                <div className="text-left">
+                  <h4 className="font-bold text-[#131b2e]">Project</h4>
+                  <p className="text-xs text-[#737686]">Create a new project</p>
+                </div>
+              </button>
+              {projects.length > 0 ? (
+                <button
+                  onClick={() => {
+                    setShowNewModal(false);
+                    setSelectedProjectId(projects[0].id);
+                    setShowAddActionModal(true);
+                  }}
+                  className="w-full p-4 bg-[#f2f3ff] rounded-xl flex items-center gap-4 hover:bg-[#e2e7ff] transition-colors"
+                >
+                  <div className="w-10 h-10 bg-[#0051d5]/10 text-[#0051d5] rounded-lg flex items-center justify-center">
+                    <span className="material-symbols-outlined">check_circle</span>
+                  </div>
+                  <div className="text-left">
+                    <h4 className="font-bold text-[#131b2e]">Action</h4>
+                    <p className="text-xs text-[#737686]">Add a new action</p>
+                  </div>
+                </button>
+              ) : (
+                <div className="w-full p-4 bg-gray-100 rounded-xl flex items-center gap-4 opacity-50">
+                  <div className="w-10 h-10 bg-gray-200 text-gray-400 rounded-lg flex items-center justify-center">
+                    <span className="material-symbols-outlined">check_circle</span>
+                  </div>
+                  <div className="text-left">
+                    <h4 className="font-bold text-gray-400">Action</h4>
+                    <p className="text-xs text-gray-400">Create a project first</p>
+                  </div>
+                </div>
+              )}
+            </div>
+          </div>
+        </div>
+      )}
       {selectedProjectIdForActions && renderProjectActionsModal()}
       {deleteConfirm && (
         <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50" onClick={() => setDeleteConfirm(null)}>
@@ -1691,7 +1798,7 @@ const NextStepPage: React.FC = () => {
                   disabled={activeProjectCount >= 3 && editProjectForm.status !== 'ACTIVE'}
                 >
                   <option value="BACKLOG">Backlog</option>
-                  <option value="ACTIVE">Active ({activeProjectCount}/3)</option>
+                  <option value="ACTIVE" disabled={activeProjectCount >= 3 && editProjectForm.status !== 'ACTIVE'}>Active ({projects.filter(p => p.status === 'ACTIVE').length}/3)</option>
                 </select>
               </div>
               <div className="flex gap-3 pt-4">
