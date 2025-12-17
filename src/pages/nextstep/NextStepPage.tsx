@@ -68,6 +68,7 @@ const NextStepPage: React.FC = () => {
   const [editProjectForm, setEditProjectForm] = useState({ goalId: '', title: '', outcome: '', status: 'BACKLOG' as ProjectStatus });
   const [showConfetti, setShowConfetti] = useState(false);
   const [showNewModal, setShowNewModal] = useState(false);
+  const [draggedAction, setDraggedAction] = useState<string | null>(null);
 
   // Confetti component
   const Confetti = () => {
@@ -299,6 +300,8 @@ const NextStepPage: React.FC = () => {
       }
       
       await fetchDashboard();
+      const text = await response.text();
+      return text ? JSON.parse(text) : null;
     } catch (e: any) {
       setError(e.message);
     } finally {
@@ -1468,10 +1471,35 @@ const NextStepPage: React.FC = () => {
 
             {queuedActions.length > 0 && (
               <div>
-                <h4 className="text-sm font-bold text-[#4d556a] uppercase tracking-widest mb-3">Queued</h4>
+                <h4 className="text-sm font-bold text-[#4d556a] uppercase tracking-widest mb-3">Queued (drag to reorder)</h4>
                 <div className="space-y-2">
-                  {queuedActions.map(action => (
-                    <div key={action.id} className="flex items-center gap-3 p-3 bg-[#f2f3ff] rounded-lg">
+                  {queuedActions.map((action) => (
+                    <div 
+                      key={action.id} 
+                      draggable
+                      onDragStart={() => setDraggedAction(action.id)}
+                      onDragOver={(e) => e.preventDefault()}
+                      onDrop={async (e) => {
+                        e.preventDefault();
+                        if (draggedAction && draggedAction !== action.id) {
+                          const targetCreatedAt = action.createdAt ? new Date(action.createdAt).getTime() : Date.now();
+                          const newCreatedAt = new Date(targetCreatedAt + 1000).toISOString();
+                          const projectId = selectedProjectIdForActions;
+                          await updateAction(draggedAction, { createdAt: newCreatedAt } as any);
+                          await fetchDashboard();
+                          const queued = await fetchActions({ status: 'QUEUED' });
+                          setQueuedActions([...queued]);
+                          if (projectId) {
+                            setSelectedProjectIdForActions(null);
+                            const newActions = await fetchActions({ projectId });
+                            setProjectActions(newActions);
+                            setSelectedProjectIdForActions(projectId);
+                          }
+                        }
+                        setDraggedAction(null);
+                      }}
+                      className={`flex items-center gap-3 p-3 bg-[#f2f3ff] rounded-lg cursor-move ${draggedAction === action.id ? 'opacity-50' : ''}`}
+                    >
                       <span className="material-symbols-outlined text-[#c3c6d7] text-sm">drag_indicator</span>
                       <div className="flex-1">
                         <span className="text-[#131b2e]">{action.description}</span>
