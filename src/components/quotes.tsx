@@ -12,6 +12,8 @@ const quotes = [
     { text: "Every time you find your drifting into self-pity, I don’t care what the cause, your child could be dying from cancer, self-pity is not going to improve the situation. It’s a ridiculous way to behave. Life will have terrible blows, horrible blows, unfair blows — it doesn’t matter. Some people recover and others don’t.", author: "Charlie Munger" },
     { text: "A hero can be anyone, even a man doing something as simple and reassuring as putting a coat on a young boy's shoulders to let him know that the world hadn't ended.", author: "Batman" },
     { text: "Ignorance more frequently begets confidence than does knowledge.", author: "Charles Darwin" },
+    { text: "If thou wilt make a man happy, add not unto his riches but take away from his desires.", author: "Epicurus" },
+    { text: "Never compare your inside with someone else's outside.", author: "Anne Lamott" },
     { text: "Discipline beats motivation.", author: "Jocko Willink" },
     { text: "The one who plants trees, knowing that he will never sit in their shade, has at least started to understand the meaning of life.", author: "Rabindranath Tagore" },
     { text: "Here lies Epictetus, a slave maimed in body, the ultimate in poverty, and favored by the gods.", author: "Epictetus" },
