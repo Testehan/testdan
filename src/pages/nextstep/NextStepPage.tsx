@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useCallback } from 'react';
-import { NEXTSTEP_ENDPOINT } from '../../config';
+import { NEXTSTEP_ENDPOINT, nextstepFetch } from '../../config';
 import { Goal, Priority, ProjectStatus, Project, NextAction, ActionContext, ActionStatus, DashboardData, WeeklyReviewData, ActionCreateRequest, ActionPatchRequest, GoalPatchRequest, ProjectPatchRequest } from '../../types/nextstep';
 
 type View = 'execution' | 'weeklyReview' | 'goals' | 'projects' | 'archive';
@@ -108,7 +108,7 @@ const NextStepPage: React.FC = () => {
   // Fetch goals
   const fetchGoals = useCallback(async () => {
     try {
-      const response = await fetch(`${NEXTSTEP_ENDPOINT}/goals`);
+      const response = await nextstepFetch(`${NEXTSTEP_ENDPOINT}/goals`);
       if (!response.ok) throw new Error('Failed to fetch goals');
       const data: Goal[] = await response.json();
       setGoals(data);
@@ -124,7 +124,7 @@ const NextStepPage: React.FC = () => {
       if (filters?.status) params.append('status', filters.status);
       if (filters?.projectId) params.append('projectId', filters.projectId);
       const queryString = params.toString();
-      const response = await fetch(`${NEXTSTEP_ENDPOINT}/actions${queryString ? `?${queryString}` : ''}`);
+      const response = await nextstepFetch(`${NEXTSTEP_ENDPOINT}/actions${queryString ? `?${queryString}` : ''}`);
       if (!response.ok) throw new Error('Failed to fetch actions');
       const data: NextAction[] = await response.json();
       return data;
@@ -137,7 +137,7 @@ const NextStepPage: React.FC = () => {
   // Fetch dashboard data
   const fetchDashboard = useCallback(async () => {
     try {
-      const response = await fetch(`${NEXTSTEP_ENDPOINT}/dashboard`);
+      const response = await nextstepFetch(`${NEXTSTEP_ENDPOINT}/dashboard`);
       if (!response.ok) throw new Error('Failed to fetch dashboard');
       const data: DashboardData = await response.json();
       setDashboardData(data);
@@ -154,7 +154,7 @@ const NextStepPage: React.FC = () => {
   const fetchProjects = useCallback(async (goalId?: string) => {
     try {
       const params = goalId ? `?goalId=${goalId}` : '';
-      const response = await fetch(`${NEXTSTEP_ENDPOINT}/projects${params}`);
+      const response = await nextstepFetch(`${NEXTSTEP_ENDPOINT}/projects${params}`);
       if (!response.ok) throw new Error('Failed to fetch projects');
       const data: Project[] = await response.json();
       setProjects(data);
@@ -167,7 +167,7 @@ const NextStepPage: React.FC = () => {
   // Fetch weekly review
   const fetchWeeklyReview = useCallback(async () => {
     try {
-      const response = await fetch(`${NEXTSTEP_ENDPOINT}/weekly-review`);
+      const response = await nextstepFetch(`${NEXTSTEP_ENDPOINT}/weekly-review`);
       if (!response.ok) throw new Error('Failed to fetch weekly review');
       const data: WeeklyReviewData = await response.json();
       setWeeklyReview(data);
@@ -188,7 +188,7 @@ const NextStepPage: React.FC = () => {
   const completeAction = async (actionId: string) => {
     try {
       setLoading(true);
-      const response = await fetch(`${NEXTSTEP_ENDPOINT}/actions/${actionId}/complete`, {
+      const response = await nextstepFetch(`${NEXTSTEP_ENDPOINT}/actions/${actionId}/complete`, {
         method: 'POST',
       });
       if (!response.ok) throw new Error('Failed to complete action');
@@ -214,7 +214,7 @@ const NextStepPage: React.FC = () => {
     
     try {
       setLoading(true);
-      const response = await fetch(`${NEXTSTEP_ENDPOINT}/capture`, {
+      const response = await nextstepFetch(`${NEXTSTEP_ENDPOINT}/capture`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ text: quickInput }),
@@ -235,7 +235,7 @@ const NextStepPage: React.FC = () => {
   const promoteProject = async (projectId: string) => {
     try {
       setLoading(true);
-      const response = await fetch(`${NEXTSTEP_ENDPOINT}/projects/${projectId}/promote`, {
+      const response = await nextstepFetch(`${NEXTSTEP_ENDPOINT}/projects/${projectId}/promote`, {
         method: 'POST',
       });
       if (!response.ok) {
@@ -256,7 +256,7 @@ const NextStepPage: React.FC = () => {
   const createAction = async (data: ActionCreateRequest) => {
     try {
       setLoading(true);
-      const response = await fetch(`${NEXTSTEP_ENDPOINT}/actions`, {
+      const response = await nextstepFetch(`${NEXTSTEP_ENDPOINT}/actions`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(data),
@@ -286,7 +286,7 @@ const NextStepPage: React.FC = () => {
   const updateAction = async (id: string, data: ActionPatchRequest) => {
     try {
       setLoading(true);
-      const response = await fetch(`${NEXTSTEP_ENDPOINT}/actions/${id}`, {
+      const response = await nextstepFetch(`${NEXTSTEP_ENDPOINT}/actions/${id}`, {
         method: 'PATCH',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(data),
@@ -315,7 +315,7 @@ const NextStepPage: React.FC = () => {
     try {
       setLoading(true);
       const body: Record<string, string> = { goalId, title, outcome, status };
-      const response = await fetch(`${NEXTSTEP_ENDPOINT}/projects`, {
+      const response = await nextstepFetch(`${NEXTSTEP_ENDPOINT}/projects`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(body),
@@ -343,7 +343,7 @@ const NextStepPage: React.FC = () => {
   const createGoal = async (title: string, priority: Priority, active: boolean) => {
     try {
       setLoading(true);
-      const response = await fetch(`${NEXTSTEP_ENDPOINT}/goals`, {
+      const response = await nextstepFetch(`${NEXTSTEP_ENDPOINT}/goals`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ title, priority, active }),
@@ -368,7 +368,7 @@ const NextStepPage: React.FC = () => {
   const deleteGoal = async (id: string) => {
     try {
       setLoading(true);
-      const response = await fetch(`${NEXTSTEP_ENDPOINT}/goals/${id}`, { method: 'DELETE' });
+      const response = await nextstepFetch(`${NEXTSTEP_ENDPOINT}/goals/${id}`, { method: 'DELETE' });
       if (!response.ok) {
         const err = await response.json();
         throw new Error(err.message || 'Failed to delete goal');
@@ -390,7 +390,7 @@ const NextStepPage: React.FC = () => {
   const deleteProject = async (id: string) => {
     try {
       setLoading(true);
-      const response = await fetch(`${NEXTSTEP_ENDPOINT}/projects/${id}`, { method: 'DELETE' });
+      const response = await nextstepFetch(`${NEXTSTEP_ENDPOINT}/projects/${id}`, { method: 'DELETE' });
       if (!response.ok) {
         const err = await response.json();
         throw new Error(err.message || 'Failed to delete project');
@@ -409,7 +409,7 @@ const NextStepPage: React.FC = () => {
   const deleteAction = async (id: string) => {
     try {
       setLoading(true);
-      const response = await fetch(`${NEXTSTEP_ENDPOINT}/actions/${id}`, { method: 'DELETE' });
+      const response = await nextstepFetch(`${NEXTSTEP_ENDPOINT}/actions/${id}`, { method: 'DELETE' });
       if (!response.ok) {
         const err = await response.json();
         throw new Error(err.message || 'Failed to delete action');
@@ -432,7 +432,7 @@ const NextStepPage: React.FC = () => {
   const updateGoal = async (id: string, data: GoalPatchRequest) => {
     try {
       setLoading(true);
-      const response = await fetch(`${NEXTSTEP_ENDPOINT}/goals/${id}`, {
+      const response = await nextstepFetch(`${NEXTSTEP_ENDPOINT}/goals/${id}`, {
         method: 'PATCH',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(data),
@@ -455,7 +455,7 @@ const NextStepPage: React.FC = () => {
   const updateProject = async (id: string, data: ProjectPatchRequest) => {
     try {
       setLoading(true);
-      const response = await fetch(`${NEXTSTEP_ENDPOINT}/projects/${id}`, {
+      const response = await nextstepFetch(`${NEXTSTEP_ENDPOINT}/projects/${id}`, {
         method: 'PATCH',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(data),
