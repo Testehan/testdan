@@ -588,7 +588,7 @@ const NextStepPage: React.FC = () => {
         >
           <span className="material-symbols-outlined text-[#4d556a]">menu</span>
         </button>
-        <h2 className="text-lg lg:text-xl font-bold text-[#131b2e] capitalize">{activeView.replace(/([A-Z])/g, ' $1').trim()}</h2>
+        <h2 className="text-lg lg:text-xl font-bold text-[#131b2e]">{activeView === 'weeklyReview' ? 'Weekly Review' : activeView.replace(/([A-Z])/g, ' $1').trim()}</h2>
       </div>
       <div className="flex items-center gap-2 lg:gap-6">
         <div className="relative hidden sm:flex items-center bg-[#f2f3ff] px-4 py-2 rounded-xl">
@@ -716,7 +716,7 @@ const NextStepPage: React.FC = () => {
     const backlogProjects = projects.filter(p => p.status === 'BACKLOG');
     
     return (
-      <main className="pt-20 p-4 lg:p-12 min-h-screen">
+      <main className="pt-20 lg:pt-24 p-4 lg:p-12 min-h-screen overflow-x-hidden">
         <div className="max-w-5xl mx-auto">
           <div className="flex justify-between items-end mb-8">
             <div>
