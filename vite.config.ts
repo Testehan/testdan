@@ -6,6 +6,5 @@ export default defineConfig({
   plugins: [react()],
   define: {
     'import.meta.env.VITE_NEXTSTEP_URL': JSON.stringify(process.env.VITE_NEXTSTEP_URL || 'http://localhost:8084'),
-    'import.meta.env.VITE_NEXTSTEP_API_SECRET_KEY': JSON.stringify(process.env.VITE_NEXTSTEP_API_SECRET_KEY || ''),
   },
 })

@@ -2,7 +2,7 @@ import React, { useState, useEffect, useCallback } from 'react';
 import { NEXTSTEP_ENDPOINT, nextstepFetch } from '../../config';
 import { Goal, Priority, ProjectStatus, Project, NextAction, ActionContext, ActionStatus, DashboardData, WeeklyReviewData, ActionCreateRequest, ActionPatchRequest, GoalPatchRequest, ProjectPatchRequest } from '../../types/nextstep';
 
-type View = 'execution' | 'weeklyReview' | 'goals' | 'projects' | 'archive';
+type View = 'execution' | 'weeklyReview' | 'actions' | 'projects' | 'goals' | 'archive';
 
 const contextLabels: Record<ActionContext, string> = {
   DEEP_WORK: 'Deep Work',
@@ -69,6 +69,7 @@ const NextStepPage: React.FC = () => {
   const [showConfetti, setShowConfetti] = useState(false);
   const [showNewModal, setShowNewModal] = useState(false);
   const [draggedAction, setDraggedAction] = useState<string | null>(null);
+  const [refreshKey, setRefreshKey] = useState(0);
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
 
   // Confetti component
@@ -537,6 +538,13 @@ const NextStepPage: React.FC = () => {
             <span className="hidden sm:inline">Weekly Review</span>
           </button>
           <button 
+            onClick={() => { setSelectedProjectIdForActions(null); setProjectActions([]); setActiveView('actions'); setMobileMenuOpen(false); }}
+            className={`w-full flex items-center gap-3 px-4 py-3 font-medium tracking-tight uppercase text-sm transition-all ${activeView === 'actions' ? 'text-[#0051d5] border-l-4 border-[#0051d5] bg-white' : 'text-[#434655] hover:bg-[#dae2fd]'}`}
+          >
+            <span className="material-symbols-outlined text-lg">check_circle</span>
+            <span className="hidden sm:inline">Actions</span>
+          </button>
+          <button 
             onClick={() => { setActiveView('projects'); setMobileMenuOpen(false); }}
             className={`w-full flex items-center gap-3 px-4 py-3 font-medium tracking-tight uppercase text-sm transition-all ${activeView === 'projects' ? 'text-[#0051d5] border-l-4 border-[#0051d5] bg-white' : 'text-[#434655] hover:bg-[#dae2fd]'}`}
           >
@@ -815,6 +823,314 @@ const NextStepPage: React.FC = () => {
     );
   };
 
+  const renderActionsView = () => {
+    const shouldFilterByProject = selectedProjectIdForActions !== null;
+    const allActions = shouldFilterByProject 
+      ? (projectActions.length > 0 ? projectActions : []) 
+      : (dashboardData?.nextActions || []);
+    
+    const currentActions = allActions.filter(a => a.status === 'CURRENT');
+    const queuedActionsList = allActions.filter(a => a.status === 'QUEUED');
+    const doneActions = allActions.filter(a => a.status === 'DONE');
+    
+    const selectedProject = selectedProjectIdForActions !== null
+      ? projects.find(p => p.id === selectedProjectIdForActions) 
+      : null;
+
+    return (
+      <main key={refreshKey} className="mt-16 p-4 lg:p-10 min-h-screen">
+        <div className="max-w-5xl mx-auto">
+          <div className="flex justify-between items-center mb-6 lg:mb-8">
+            <h2 className="text-2xl lg:text-3xl font-extrabold tracking-tight">
+              {selectedProject ? `Actions: ${selectedProject.title}` : 'All Actions'}
+            </h2>
+            <div className="flex items-center gap-2">
+              <select
+                value={selectedProjectIdForActions || ''}
+                onChange={async (e) => {
+                  const projectId = e.target.value;
+                  setSelectedProjectIdForActions(projectId || null);
+                  if (projectId) {
+                    const actions = await fetchActions({ projectId });
+                    setProjectActions(actions);
+                  } else {
+                    setProjectActions([]);
+                  }
+                }}
+                className="px-4 py-2 rounded-xl border border-[#c3c6d7] bg-white text-sm font-medium"
+              >
+                <option value="">All Projects</option>
+                {projects.map(p => (
+                  <option key={p.id} value={p.id}>{p.title}</option>
+                ))}
+              </select>
+            </div>
+          </div>
+          
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
+            {/* Current + Queued Column */}
+            <div className="space-y-6">
+              {selectedProject ? (
+                <>
+                  <div
+                    onDragOver={(e) => e.preventDefault()}
+                    onDrop={async () => {
+                      if (draggedAction && selectedProjectIdForActions) {
+                        const actionToMove = [...currentActions, ...queuedActionsList].find(a => a.id === draggedAction);
+                        if (actionToMove?.status === 'QUEUED') {
+                          await updateAction(draggedAction, { status: 'CURRENT' });
+                          setDraggedAction(null);
+                          fetchActions({ projectId: selectedProjectIdForActions }).then(setProjectActions);
+                          setRefreshKey(k => k + 1);
+                        }
+                      }
+                    }}
+                  >
+                    <h3 className="text-sm font-bold uppercase tracking-widest text-[#0051d5] mb-4">Current (drop queued here)</h3>
+                    <div className="space-y-3">
+                      {currentActions.length === 0 ? (
+                        <p className="text-sm text-[#737686] italic">No current action for {selectedProject.title}</p>
+                      ) : (
+                        currentActions.map(action => (
+                          <div 
+                            key={action.id}
+                            draggable
+                            onDragStart={() => setDraggedAction(action.id)}
+                            onDragEnd={() => setDraggedAction(null)}
+                            className="flex items-center gap-3 p-4 bg-white rounded-xl border-l-4 border-[#0051d5] cursor-move"
+                          >
+                            <button 
+                              onClick={() => completeAction(action.id)}
+                              className="px-3 py-1.5 bg-[#0051d5] text-white rounded-lg text-xs font-bold flex items-center gap-1 hover:opacity-90"
+                            >
+                              <span className="material-symbols-outlined text-sm">check</span>
+                              Done
+                            </button>
+                            <div className="flex-1">
+                              <p className="font-medium text-[#131b2e]">{action.description}</p>
+                            </div>
+                            {getContextBadge(action.context)}
+                            <button 
+                              onClick={() => {
+                                setEditingAction(action);
+                                setEditActionForm({
+                                  description: action.description,
+                                  context: action.context,
+                                  energy: action.energy,
+                                  status: action.status,
+                                });
+                              }}
+                              className="text-[#737686] hover:text-[#0051d5]"
+                            >
+                              <span className="material-symbols-outlined text-sm">edit</span>
+                            </button>
+                            <button 
+                              onClick={() => setDeleteConfirm({ type: 'action', id: action.id, name: action.description })}
+                              className="text-[#737686] hover:text-red-500"
+                            >
+                              <span className="material-symbols-outlined text-sm">delete</span>
+                            </button>
+                          </div>
+                        ))
+                      )}
+                    </div>
+                  </div>
+                  <div
+                    onDragOver={(e) => e.preventDefault()}
+                    onDrop={async () => {
+                      if (draggedAction && selectedProjectIdForActions) {
+                        const actionToMove = [...currentActions, ...queuedActionsList].find(a => a.id === draggedAction);
+                        if (actionToMove?.status === 'CURRENT') {
+                          await updateAction(draggedAction, { status: 'QUEUED' });
+                          setDraggedAction(null);
+                          fetchActions({ projectId: selectedProjectIdForActions }).then(setProjectActions);
+                          setRefreshKey(k => k + 1);
+                        }
+                      }
+                    }}
+                  >
+                    <h3 className="text-sm font-bold uppercase tracking-widest text-[#4d556a] mb-4">Queued (drop from Current here)</h3>
+                    <div className="space-y-3">
+                      {queuedActionsList.length === 0 ? (
+                        <p className="text-sm text-[#737686] italic">No queued actions for {selectedProject.title}</p>
+                      ) : (
+                        queuedActionsList.map((action, idx) => (
+                          <div 
+                            key={action.id}
+                            draggable
+                            onDragStart={() => setDraggedAction(action.id)}
+                            onDragOver={(e) => {
+                              e.preventDefault();
+                            }}
+                            onDrop={async () => {
+                              if (draggedAction && draggedAction !== action.id) {
+                                const newCreatedAt = new Date(Date.now() + (idx * 1000)).toISOString();
+                                await updateAction(draggedAction, { createdAt: newCreatedAt } as any);
+                                setDraggedAction(null);
+                                if (selectedProjectIdForActions) {
+                                  fetchActions({ projectId: selectedProjectIdForActions }).then(setProjectActions);
+                                } else {
+                                  fetchDashboard();
+                                }
+                                setRefreshKey(k => k + 1);
+                              }
+                            }}
+                            onDragEnd={() => setDraggedAction(null)}
+                            className={`flex items-center gap-3 p-4 bg-[#f2f3ff] rounded-xl cursor-move ${draggedAction === action.id ? 'opacity-50' : ''}`}
+                          >
+                            <span className="material-symbols-outlined text-[#c3c6d7] text-sm">drag_indicator</span>
+                            <div className="flex-1">
+                              <p className="font-medium text-[#131b2e]">{action.description}</p>
+                            </div>
+                            <span className="text-[10px] text-[#737686] uppercase">{contextLabels[action.context]}</span>
+                            <button 
+                              onClick={() => {
+                                setEditingAction(action);
+                                setEditActionForm({
+                                  description: action.description,
+                                  context: action.context,
+                                  energy: action.energy,
+                                  status: action.status,
+                                });
+                              }}
+                              className="text-[#737686] hover:text-[#0051d5]"
+                            >
+                              <span className="material-symbols-outlined text-sm">edit</span>
+                            </button>
+                            <button 
+                              onClick={() => setDeleteConfirm({ type: 'action', id: action.id, name: action.description })}
+                              className="text-[#737686] hover:text-red-500"
+                            >
+                              <span className="material-symbols-outlined text-sm">delete</span>
+                            </button>
+                          </div>
+                        ))
+                      )}
+                    </div>
+                  </div>
+                </>
+              ) : (
+                <div>
+                  <h3 className="text-sm font-bold uppercase tracking-widest text-[#4d556a] mb-4">All Actions (drag queued to reorder)</h3>
+                  <div className="space-y-3">
+                    {currentActions.length === 0 && queuedActionsList.length === 0 ? (
+                      <p className="text-sm text-[#737686] italic">No actions</p>
+                    ) : (
+                      <>
+                        {currentActions.map(action => (
+                          <div key={action.id} className="flex items-center gap-3 p-4 bg-white rounded-xl border-l-4 border-[#0051d5]">
+                            <button 
+                              onClick={() => completeAction(action.id)}
+                              className="px-3 py-1.5 bg-[#0051d5] text-white rounded-lg text-xs font-bold flex items-center gap-1 hover:opacity-90"
+                            >
+                              <span className="material-symbols-outlined text-sm">check</span>
+                              Done
+                            </button>
+                            <div className="flex-1">
+                              <p className="font-medium text-[#131b2e]">{action.description}</p>
+                              <p className="text-xs text-[#737686]">{projects.find(p => p.id === action.projectId)?.title || action.projectId}</p>
+                            </div>
+                            {getContextBadge(action.context)}
+                            <button 
+                              onClick={() => {
+                                setEditingAction(action);
+                                setEditActionForm({
+                                  description: action.description,
+                                  context: action.context,
+                                  energy: action.energy,
+                                  status: action.status,
+                                });
+                              }}
+                              className="text-[#737686] hover:text-[#0051d5]"
+                            >
+                              <span className="material-symbols-outlined text-sm">edit</span>
+                            </button>
+                            <button 
+                              onClick={() => setDeleteConfirm({ type: 'action', id: action.id, name: action.description })}
+                              className="text-[#737686] hover:text-red-500"
+                            >
+                              <span className="material-symbols-outlined text-sm">delete</span>
+                            </button>
+                          </div>
+                        ))}
+                        {queuedActionsList.map((action, idx) => (
+                          <div 
+                            key={action.id}
+                            draggable
+                            onDragStart={() => setDraggedAction(action.id)}
+                            onDragOver={(e) => e.preventDefault()}
+                            onDrop={async () => {
+                              if (draggedAction && draggedAction !== action.id) {
+                                const newCreatedAt = new Date(Date.now() + (idx * 1000)).toISOString();
+                                await updateAction(draggedAction, { createdAt: newCreatedAt } as any);
+                                setDraggedAction(null);
+                                fetchDashboard();
+                                setRefreshKey(k => k + 1);
+                              }
+                            }}
+                            onDragEnd={() => setDraggedAction(null)}
+                            className={`flex items-center gap-3 p-4 bg-[#f2f3ff] rounded-xl cursor-move ${draggedAction === action.id ? 'opacity-50' : ''}`}
+                          >
+                            <span className="material-symbols-outlined text-[#c3c6d7] text-sm">drag_indicator</span>
+                            <div className="flex-1">
+                              <p className="font-medium text-[#131b2e]">{action.description}</p>
+                              <p className="text-xs text-[#737686]">{projects.find(p => p.id === action.projectId)?.title || action.projectId}</p>
+                            </div>
+                            <span className="text-[10px] text-[#737686] uppercase">{contextLabels[action.context]}</span>
+                            <button 
+                              onClick={() => {
+                                setEditingAction(action);
+                                setEditActionForm({
+                                  description: action.description,
+                                  context: action.context,
+                                  energy: action.energy,
+                                  status: action.status,
+                                });
+                              }}
+                              className="text-[#737686] hover:text-[#0051d5]"
+                            >
+                              <span className="material-symbols-outlined text-sm">edit</span>
+                            </button>
+                            <button 
+                              onClick={() => setDeleteConfirm({ type: 'action', id: action.id, name: action.description })}
+                              className="text-[#737686] hover:text-red-500"
+                            >
+                              <span className="material-symbols-outlined text-sm">delete</span>
+                            </button>
+                          </div>
+                        ))}
+                      </>
+                    )}
+                  </div>
+                </div>
+              )}
+            </div>
+
+            {/* Done Column */}
+            <div>
+              <h3 className="text-sm font-bold uppercase tracking-widest text-[#737686] mb-4">Done</h3>
+              <div className="space-y-3">
+                {doneActions.length === 0 ? (
+                  <p className="text-sm text-[#737686] italic">{selectedProject ? `No completed actions for ${selectedProject.title}` : 'No completed actions'}</p>
+                ) : (
+                  doneActions.map(action => (
+                    <div key={action.id} className="flex items-center gap-3 p-4 bg-gray-100 rounded-xl">
+                      <span className="material-symbols-outlined text-[#737686]">check_circle</span>
+                      <div className="flex-1">
+                        <p className="font-medium text-[#737686] line-through">{action.description}</p>
+                        <p className="text-xs text-[#a0a0a8]">{projects.find(p => p.id === action.projectId)?.title || action.projectId}</p>
+                      </div>
+                    </div>
+                  ))
+                )}
+              </div>
+            </div>
+          </div>
+        </div>
+      </main>
+    );
+  };
+
   const renderProjectsView = () => {
     const activeProjects = projects.filter(p => p.status === 'ACTIVE');
     const backlogProjects = projects.filter(p => p.status === 'BACKLOG');
@@ -878,6 +1194,7 @@ const NextStepPage: React.FC = () => {
                   onClick={() => {
                     setSelectedProjectIdForActions(project.id);
                     fetchActions({ projectId: project.id }).then(setProjectActions);
+                    setActiveView('actions');
                   }}
                 >
                   <div className="flex justify-between items-start">
@@ -1428,193 +1745,6 @@ const NextStepPage: React.FC = () => {
     );
   };
 
-  const renderProjectActionsModal = () => {
-    const currentActions = projectActions.filter(a => a.status === 'CURRENT');
-    const queuedActions = projectActions.filter(a => a.status === 'QUEUED').sort((a, b) => {
-      const dateA = a.createdAt ? new Date(a.createdAt).getTime() : 0;
-      const dateB = b.createdAt ? new Date(b.createdAt).getTime() : 0;
-      return dateB - dateA;
-    });
-    const doneActions = projectActions.filter(a => a.status === 'DONE');
-    const project = projects.find(p => p.id === selectedProjectIdForActions);
-
-    return (
-      <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50" onClick={() => setSelectedProjectIdForActions(null)}>
-        <div className="bg-white rounded-2xl p-6 w-full max-w-[90vw] lg:max-w-lg shadow-2xl max-h-[80vh] overflow-y-auto" onClick={e => e.stopPropagation()}>
-          <div className="flex justify-between items-center mb-6">
-            <div>
-              <h3 className="text-xl font-bold text-[#131b2e]">{project?.title || 'Project'}</h3>
-              <p className="text-sm text-[#434655]">{project?.outcome || 'No outcome set'}</p>
-              {project?.updatedAt && (
-                <p className="text-xs text-[#737686] mt-1">Updated: {formatDate(project.updatedAt)}</p>
-              )}
-            </div>
-            <button onClick={() => setSelectedProjectIdForActions(null)} className="text-[#737686] hover:text-[#131b2e]">
-              <span className="material-symbols-outlined">close</span>
-            </button>
-          </div>
-
-          <div className="space-y-6">
-            {currentActions.length > 0 && (
-              <div>
-                <h4 className="text-sm font-bold text-[#0051d5] uppercase tracking-widest mb-3">Current</h4>
-                <div className="space-y-2">
-                  {currentActions.map(action => (
-                    <div key={action.id} className="flex items-center gap-3 p-3 bg-[#0051d5]/10 rounded-lg border-l-4 border-[#0051d5]">
-                      <button 
-                        onClick={() => completeAction(action.id)}
-                        className="px-3 py-1.5 bg-[#0051d5] text-white rounded-lg text-xs font-bold flex items-center gap-1 hover:opacity-90"
-                      >
-                        <span className="material-symbols-outlined text-sm">check</span>
-                        Done
-                      </button>
-                      <div className="flex-1">
-                        <span className="text-[#131b2e]">{action.description}</span>
-                        {action.updatedAt && <span className="block text-[10px] text-[#737686]">{formatDate(action.updatedAt)}</span>}
-                      </div>
-                      <button 
-                        onClick={() => {
-                          setEditingAction(action);
-                          setEditActionForm({
-                            description: action.description,
-                            context: action.context,
-                            energy: action.energy,
-                            status: action.status,
-                          });
-                        }}
-                        className="text-[#737686] hover:text-[#0051d5]"
-                      >
-                        <span className="material-symbols-outlined text-sm">edit</span>
-                      </button>
-                      <button 
-                        onClick={() => setDeleteConfirm({ type: 'action', id: action.id, name: action.description })}
-                        className="text-[#737686] hover:text-red-500"
-                      >
-                        <span className="material-symbols-outlined text-sm">delete</span>
-                      </button>
-                    </div>
-                  ))}
-                </div>
-              </div>
-            )}
-
-            {queuedActions.length > 0 && (
-              <div>
-                <h4 className="text-sm font-bold text-[#4d556a] uppercase tracking-widest mb-3">Queued (drag to reorder)</h4>
-                <div className="space-y-2">
-                  {queuedActions.map((action) => (
-                    <div 
-                      key={action.id} 
-                      draggable
-                      onDragStart={() => setDraggedAction(action.id)}
-                      onDragOver={(e) => e.preventDefault()}
-                      onDrop={async (e) => {
-                        e.preventDefault();
-                        if (draggedAction && draggedAction !== action.id) {
-                          const targetCreatedAt = action.createdAt ? new Date(action.createdAt).getTime() : Date.now();
-                          const newCreatedAt = new Date(targetCreatedAt + 1000).toISOString();
-                          const projectId = selectedProjectIdForActions;
-                          await updateAction(draggedAction, { createdAt: newCreatedAt } as any);
-                          await fetchDashboard();
-                          const queued = await fetchActions({ status: 'QUEUED' });
-                          setQueuedActions([...queued]);
-                          if (projectId) {
-                            setSelectedProjectIdForActions(null);
-                            const newActions = await fetchActions({ projectId });
-                            setProjectActions(newActions);
-                            setSelectedProjectIdForActions(projectId);
-                          }
-                        }
-                        setDraggedAction(null);
-                      }}
-                      className={`flex items-center gap-3 p-3 bg-[#f2f3ff] rounded-lg cursor-move ${draggedAction === action.id ? 'opacity-50' : ''}`}
-                    >
-                      <span className="material-symbols-outlined text-[#c3c6d7] text-sm">drag_indicator</span>
-                      <div className="flex-1">
-                        <span className="text-[#131b2e]">{action.description}</span>
-                        <span className="block text-[10px] text-[#737686]">{action.updatedAt ? formatDate(action.updatedAt) : action.context}</span>
-                      </div>
-                      <button 
-                        onClick={() => {
-                          setEditingAction(action);
-                          setEditActionForm({
-                            description: action.description,
-                            context: action.context,
-                            energy: action.energy,
-                            status: action.status,
-                          });
-                        }}
-                        className="text-[#737686] hover:text-[#0051d5]"
-                      >
-                        <span className="material-symbols-outlined text-sm">edit</span>
-                      </button>
-                      <button 
-                        onClick={() => setDeleteConfirm({ type: 'action', id: action.id, name: action.description })}
-                        className="text-[#737686] hover:text-red-500"
-                      >
-                        <span className="material-symbols-outlined text-sm">delete</span>
-                      </button>
-                    </div>
-                  ))}
-                </div>
-              </div>
-            )}
-
-            {doneActions.length > 0 && (
-              <div>
-                <h4 className="text-sm font-bold text-[#737686] uppercase tracking-widest mb-3">Completed</h4>
-                <div className="space-y-2">
-                  {doneActions.map(action => (
-                    <div key={action.id} className="flex items-center gap-3 p-3 bg-gray-50 rounded-lg opacity-60">
-                      <span className="material-symbols-outlined text-[#737686] text-sm">check_circle</span>
-                      <span className="flex-1 text-[#737686] line-through">{action.description}</span>
-                      <button 
-                        onClick={() => {
-                          setEditingAction(action);
-                          setEditActionForm({
-                            description: action.description,
-                            context: action.context,
-                            energy: action.energy,
-                            status: action.status,
-                          });
-                        }}
-                        className="text-[#737686] hover:text-[#0051d5]"
-                      >
-                        <span className="material-symbols-outlined text-sm">edit</span>
-                      </button>
-                      <button 
-                        onClick={() => setDeleteConfirm({ type: 'action', id: action.id, name: action.description })}
-                        className="text-[#737686] hover:text-red-500"
-                      >
-                        <span className="material-symbols-outlined text-sm">delete</span>
-                      </button>
-                    </div>
-                  ))}
-                </div>
-              </div>
-            )}
-
-            {projectActions.length === 0 && (
-              <p className="text-center text-[#434655] py-4">No actions yet. Add one!</p>
-            )}
-          </div>
-
-          <div className="mt-6 pt-4 border-t border-[#c3c6d7]">
-            <button 
-              onClick={() => {
-                setSelectedProjectId(selectedProjectIdForActions);
-                setShowAddActionModal(true);
-              }}
-              className="w-full py-3 bg-[#0051d5] text-white font-bold rounded-xl hover:opacity-90"
-            >
-              + Add Action
-            </button>
-          </div>
-        </div>
-      </div>
-    );
-  };
-
   return (
     <div className="min-h-screen bg-[#faf8ff] text-[#131b2e] font-sans">
       {showConfetti && <Confetti />}
@@ -1622,6 +1752,7 @@ const NextStepPage: React.FC = () => {
       {renderHeader()}
       {activeView === 'execution' && renderExecutionView()}
       {activeView === 'weeklyReview' && renderWeeklyReviewView()}
+      {activeView === 'actions' && renderActionsView()}
       {activeView === 'goals' && renderGoalsView()}
       {activeView === 'projects' && renderProjectsView()}
       {activeView === 'archive' && renderArchiveView()}
@@ -1701,7 +1832,7 @@ const NextStepPage: React.FC = () => {
           </div>
         </div>
       )}
-      {selectedProjectIdForActions && renderProjectActionsModal()}
+      
       {deleteConfirm && (
         <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50" onClick={() => setDeleteConfirm(null)}>
           <div className="bg-white rounded-2xl p-6 w-full max-w-[90vw] md:max-w-md shadow-2xl" onClick={e => e.stopPropagation()}>
