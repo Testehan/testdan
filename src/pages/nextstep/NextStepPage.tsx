@@ -69,6 +69,7 @@ const NextStepPage: React.FC = () => {
   const [showConfetti, setShowConfetti] = useState(false);
   const [showNewModal, setShowNewModal] = useState(false);
   const [draggedAction, setDraggedAction] = useState<string | null>(null);
+  const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
 
   // Confetti component
   const Confetti = () => {
@@ -491,87 +492,117 @@ const NextStepPage: React.FC = () => {
   );
 
   const renderSidebar = () => (
-    <aside className="fixed left-0 top-0 h-screen w-64 bg-[#f2f3ff] border-r border-[#c3c6d7] z-50 flex flex-col">
-      <div className="px-6 py-8">
-        <h1 className="text-lg font-bold tracking-tighter">NextStep</h1>
-        <p className="text-sm font-medium tracking-tight uppercase text-[#4d556a]/60 mt-1">Deep Work Mode</p>
-      </div>
+    <>
+      {/* Mobile overlay */}
+      {mobileMenuOpen && (
+        <div 
+          className="fixed inset-0 bg-black/50 z-40 lg:hidden"
+          onClick={() => setMobileMenuOpen(false)}
+        />
+      )}
       
-      <nav className="flex-1 px-2 space-y-1">
-        <button 
-          onClick={() => setActiveView('execution')}
-          className={`w-full flex items-center gap-3 px-4 py-3 font-medium tracking-tight uppercase text-sm transition-all ${activeView === 'execution' ? 'text-[#0051d5] border-l-4 border-[#0051d5] bg-white' : 'text-[#434655] hover:bg-[#dae2fd]'}`}
-        >
-          <span className="material-symbols-outlined text-lg">bolt</span>
-          Execution
-        </button>
-        <button 
-          onClick={() => setActiveView('weeklyReview')}
-          className={`w-full flex items-center gap-3 px-4 py-3 font-medium tracking-tight uppercase text-sm transition-all ${activeView === 'weeklyReview' ? 'text-[#0051d5] border-l-4 border-[#0051d5] bg-white' : 'text-[#434655] hover:bg-[#dae2fd]'}`}
-        >
-          <span className="material-symbols-outlined text-lg">calendar_view_week</span>
-          Weekly Review
-        </button>
-        <button 
-          onClick={() => setActiveView('projects')}
-          className={`w-full flex items-center gap-3 px-4 py-3 font-medium tracking-tight uppercase text-sm transition-all ${activeView === 'projects' ? 'text-[#0051d5] border-l-4 border-[#0051d5] bg-white' : 'text-[#434655] hover:bg-[#dae2fd]'}`}
-        >
-          <span className="material-symbols-outlined text-lg">account_tree</span>
-          Projects
-        </button>
-        <button 
-          onClick={() => setActiveView('goals')}
-          className={`w-full flex items-center gap-3 px-4 py-3 font-medium tracking-tight uppercase text-sm transition-all ${activeView === 'goals' ? 'text-[#0051d5] border-l-4 border-[#0051d5] bg-white' : 'text-[#434655] hover:bg-[#dae2fd]'}`}
-        >
-          <span className="material-symbols-outlined text-lg">flag</span>
-          Goals
-        </button>
-        <button 
-          onClick={() => setActiveView('archive')}
-          className={`w-full flex items-center gap-3 px-4 py-3 font-medium tracking-tight uppercase text-sm transition-all ${activeView === 'archive' ? 'text-[#0051d5] border-l-4 border-[#0051d5] bg-white' : 'text-[#434655] hover:bg-[#dae2fd]'}`}
-        >
-          <span className="material-symbols-outlined text-lg">inventory_2</span>
-          Archive
-        </button>
-      </nav>
+      {/* Sidebar - fixed on desktop, slide-out on mobile */}
+      <aside className={`
+        fixed top-0 h-screen bg-[#f2f3ff] border-r border-[#c3c6d7] z-50 flex flex-col
+        transition-transform duration-300 ease-in-out
+        w-64 left-0
+        ${mobileMenuOpen ? 'translate-x-0' : '-translate-x-full lg:translate-x-0'}
+      `}>
+        <div className="px-6 py-8">
+          <div className="flex items-center justify-between">
+            <h1 className="text-lg font-bold tracking-tighter">NextStep</h1>
+            <button 
+              onClick={() => setMobileMenuOpen(false)}
+              className="lg:hidden p-1"
+            >
+              <span className="material-symbols-outlined">close</span>
+            </button>
+          </div>
+          <p className="text-sm font-medium tracking-tight uppercase text-[#4d556a]/60 mt-1 hidden sm:block">Deep Work Mode</p>
+        </div>
+        
+        <nav className="flex-1 px-2 space-y-1 overflow-y-auto">
+          <button 
+            onClick={() => { setActiveView('execution'); setMobileMenuOpen(false); }}
+            className={`w-full flex items-center gap-3 px-4 py-3 font-medium tracking-tight uppercase text-sm transition-all ${activeView === 'execution' ? 'text-[#0051d5] border-l-4 border-[#0051d5] bg-white' : 'text-[#434655] hover:bg-[#dae2fd]'}`}
+          >
+            <span className="material-symbols-outlined text-lg">bolt</span>
+            <span className="hidden sm:inline">Execution</span>
+          </button>
+          <button 
+            onClick={() => { setActiveView('weeklyReview'); setMobileMenuOpen(false); }}
+            className={`w-full flex items-center gap-3 px-4 py-3 font-medium tracking-tight uppercase text-sm transition-all ${activeView === 'weeklyReview' ? 'text-[#0051d5] border-l-4 border-[#0051d5] bg-white' : 'text-[#434655] hover:bg-[#dae2fd]'}`}
+          >
+            <span className="material-symbols-outlined text-lg">calendar_view_week</span>
+            <span className="hidden sm:inline">Weekly Review</span>
+          </button>
+          <button 
+            onClick={() => { setActiveView('projects'); setMobileMenuOpen(false); }}
+            className={`w-full flex items-center gap-3 px-4 py-3 font-medium tracking-tight uppercase text-sm transition-all ${activeView === 'projects' ? 'text-[#0051d5] border-l-4 border-[#0051d5] bg-white' : 'text-[#434655] hover:bg-[#dae2fd]'}`}
+          >
+            <span className="material-symbols-outlined text-lg">account_tree</span>
+            <span className="hidden sm:inline">Projects</span>
+          </button>
+          <button 
+            onClick={() => { setActiveView('goals'); setMobileMenuOpen(false); }}
+            className={`w-full flex items-center gap-3 px-4 py-3 font-medium tracking-tight uppercase text-sm transition-all ${activeView === 'goals' ? 'text-[#0051d5] border-l-4 border-[#0051d5] bg-white' : 'text-[#434655] hover:bg-[#dae2fd]'}`}
+          >
+            <span className="material-symbols-outlined text-lg">flag</span>
+            <span className="hidden sm:inline">Goals</span>
+          </button>
+          <button 
+            onClick={() => { setActiveView('archive'); setMobileMenuOpen(false); }}
+            className={`w-full flex items-center gap-3 px-4 py-3 font-medium tracking-tight uppercase text-sm transition-all ${activeView === 'archive' ? 'text-[#0051d5] border-l-4 border-[#0051d5] bg-white' : 'text-[#434655] hover:bg-[#dae2fd]'}`}
+          >
+            <span className="material-symbols-outlined text-lg">inventory_2</span>
+            <span className="hidden sm:inline">Archive</span>
+          </button>
+        </nav>
 
-      <div className="px-4 py-6 border-t border-[#c3c6d7]/10">
-        <button 
-          onClick={() => setShowNewModal(true)}
-          className="w-full py-3 bg-[#0051d5] text-white rounded-xl font-bold flex items-center justify-center gap-2 hover:opacity-90 active:scale-95 transition-all"
-        >
-          <span className="material-symbols-outlined text-lg">add</span>
-          New
-        </button>
-      </div>
+        <div className="px-4 py-6 border-t border-[#c3c6d7]/10">
+          <button 
+            onClick={() => { setShowNewModal(true); setMobileMenuOpen(false); }}
+            className="w-full py-3 bg-[#0051d5] text-white rounded-xl font-bold flex items-center justify-center gap-2 hover:opacity-90 active:scale-95 transition-all"
+          >
+            <span className="material-symbols-outlined text-lg">add</span>
+            <span className="hidden sm:inline">New</span>
+          </button>
+        </div>
 
-      <div className="px-2 pb-8">
-        <button className="w-full flex items-center gap-3 px-4 py-3 text-[#434655] hover:bg-[#dae2fd] transition-colors font-medium tracking-tight uppercase text-sm">
-          <span className="material-symbols-outlined text-lg">settings</span>
-          Settings
-        </button>
-      </div>
-    </aside>
+        <div className="px-2 pb-8">
+          <button className="w-full flex items-center gap-3 px-4 py-3 text-[#434655] hover:bg-[#dae2fd] transition-colors font-medium tracking-tight uppercase text-sm">
+            <span className="material-symbols-outlined text-lg">settings</span>
+            <span className="hidden sm:inline">Settings</span>
+          </button>
+        </div>
+      </aside>
+    </>
   );
 
   const renderHeader = () => (
-    <header className="fixed top-0 left-64 right-0 h-16 bg-[#faf8ff] z-40 flex justify-between items-center px-8">
+    <header className="fixed top-0 left-0 right-0 lg:left-64 h-16 bg-[#faf8ff] z-40 flex justify-between items-center px-4 lg:px-8">
       <div className="flex items-center gap-4">
-
+        <button 
+          onClick={() => setMobileMenuOpen(true)}
+          className="lg:hidden p-2 -ml-2"
+        >
+          <span className="material-symbols-outlined text-[#4d556a]">menu</span>
+        </button>
+        <h2 className="text-lg lg:text-xl font-bold text-[#131b2e] capitalize">{activeView.replace(/([A-Z])/g, ' $1').trim()}</h2>
       </div>
-      <div className="flex items-center gap-6">
-        <div className="relative flex items-center bg-[#f2f3ff] px-4 py-2 rounded-xl">
+      <div className="flex items-center gap-2 lg:gap-6">
+        <div className="relative hidden sm:flex items-center bg-[#f2f3ff] px-4 py-2 rounded-xl">
           <span className="material-symbols-outlined text-[#737686]">search</span>
           <input 
-            className="bg-transparent border-none focus:ring-0 text-sm w-64 ml-2" 
-            placeholder="Search tasks..." 
+            className="bg-transparent border-none focus:ring-0 text-sm w-32 lg:w-64 ml-2" 
+            placeholder="Search..." 
             type="text"
           />
         </div>
-        <div className="flex items-center gap-3">
-          <span className="material-symbols-outlined text-[#4d556a] cursor-pointer hover:text-[#0051d5]">add_circle</span>
-          <span className="material-symbols-outlined text-[#4d556a] cursor-pointer hover:text-[#0051d5]">notifications</span>
-          <div className="w-8 h-8 rounded-full bg-[#dae2fd] overflow-hidden ml-2">
+        <div className="flex items-center gap-1 lg:gap-3">
+          <span className="material-symbols-outlined text-[#4d556a] cursor-pointer hover:text-[#0051d5] p-2">add_circle</span>
+          <span className="material-symbols-outlined text-[#4d556a] cursor-pointer hover:text-[#0051d5] p-2 hidden sm:inline">notifications</span>
+          <div className="w-8 h-8 rounded-full bg-[#dae2fd] overflow-hidden ml-1">
             <img className="w-full h-full object-cover" src="https://lh3.googleusercontent.com/aida-public/AB6AXuBZWAiJsPgH1QjIu-6IoZB38y7x32EPdJadYUSj0zsedJ6pHXXD1nUVZlc8wrHfenGWTOc_j2Z5D-zEN1E2PdcKfsRXUV-LuIUZfrGn2EAs-xeEfFa7Urfz1x_LYpLkfSls1Pg2KtC0WeSSEk_TNZQN19AtqUXG1x-Mw2tfCwW73FtcwSbbO5SL_iv9hRAttel2VcQd31utQZm7PCzqW8SZVdoqCWmKa6C2SyGAvF_-h8BDE4Fx7Q4aZkoSLN7hzPPxPY-QKYzQqJ9m" alt="Profile" />
           </div>
         </div>
@@ -584,36 +615,35 @@ const NextStepPage: React.FC = () => {
     const currentActions = allActions.filter(a => a.status === 'CURRENT');
 
     return (
-      <main className="ml-64 mt-16 p-10 min-h-screen">
-        <div className="max-w-6xl mx-auto grid grid-cols-12 gap-8">
-          <section className="col-span-12 lg:col-span-8 space-y-10">
-            <div className="flex flex-col gap-6">
-              <div className="flex justify-between items-end">
-                <div>
-                  <h2 className="text-3xl font-extrabold tracking-tight">Today Focus</h2>
-                  <p className="text-[#434655] font-medium uppercase text-xs tracking-widest mt-1">Current Actions</p>
-                </div>
-                <div className="flex gap-2">
-                  <button 
-                    onClick={() => setActionFilter('ALL')}
-                    className={`px-3 py-1 rounded-full text-xs font-bold tracking-tight uppercase transition-colors ${actionFilter === 'ALL' ? 'bg-[#0051d5] text-white' : 'bg-[#e2e7ff] text-[#4d556a] hover:bg-[#0051d5] hover:text-white'}`}
-                  >
-                    All
-                  </button>
-                  <button 
-                    onClick={() => setActionFilter('DEEP_WORK')}
-                    className={`px-3 py-1 rounded-full text-xs font-bold tracking-tight uppercase transition-colors ${actionFilter === 'DEEP_WORK' ? 'bg-[#0051d5] text-white' : 'bg-[#e2e7ff] text-[#4d556a] hover:bg-[#0051d5] hover:text-white'}`}
-                  >
-                    Deep Work
-                  </button>
-                  <button 
-                    onClick={() => setActionFilter('QUICK')}
-                    className={`px-3 py-1 rounded-full text-xs font-bold tracking-tight uppercase transition-colors ${actionFilter === 'QUICK' ? 'bg-[#0051d5] text-white' : 'bg-[#e2e7ff] text-[#4d556a] hover:bg-[#0051d5] hover:text-white'}`}
-                  >
-                    Quick
-                  </button>
-                </div>
+      <main className="mt-16 p-4 lg:p-10 min-h-screen">
+        <div className="max-w-6xl mx-auto grid grid-cols-1 lg:grid-cols-12 gap-4 lg:gap-8">
+          <section className="lg:col-span-8 space-y-6 lg:space-y-10">
+            <div className="flex flex-col sm:flex-row sm:justify-between sm:items-end gap-4">
+              <div>
+                <h2 className="text-2xl lg:text-3xl font-extrabold tracking-tight">Today Focus</h2>
+                <p className="text-[#434655] font-medium uppercase text-xs tracking-widest mt-1">Current Actions</p>
               </div>
+              <div className="flex gap-2">
+                <button 
+                  onClick={() => setActionFilter('ALL')}
+                  className={`px-3 py-1 rounded-full text-xs font-bold tracking-tight uppercase transition-colors ${actionFilter === 'ALL' ? 'bg-[#0051d5] text-white' : 'bg-[#e2e7ff] text-[#4d556a] hover:bg-[#0051d5] hover:text-white'}`}
+                >
+                  All
+                </button>
+                <button 
+                  onClick={() => setActionFilter('DEEP_WORK')}
+                  className={`px-3 py-1 rounded-full text-xs font-bold tracking-tight uppercase transition-colors ${actionFilter === 'DEEP_WORK' ? 'bg-[#0051d5] text-white' : 'bg-[#e2e7ff] text-[#4d556a] hover:bg-[#0051d5] hover:text-white'}`}
+                >
+                  Deep Work
+                </button>
+                <button 
+                  onClick={() => setActionFilter('QUICK')}
+                  className={`px-3 py-1 rounded-full text-xs font-bold tracking-tight uppercase transition-colors ${actionFilter === 'QUICK' ? 'bg-[#0051d5] text-white' : 'bg-[#e2e7ff] text-[#4d556a] hover:bg-[#0051d5] hover:text-white'}`}
+                >
+                  Quick
+                </button>
+              </div>
+            </div>
 
               <div className="space-y-4">
                 {(actionFilter === 'ALL' ? currentActions : currentActions.filter(a => a.context === actionFilter)).length === 0 ? (
@@ -656,10 +686,9 @@ const NextStepPage: React.FC = () => {
                   ))
                 )}
               </div>
-            </div>
-          </section>
+            </section>
 
-          <aside className="col-span-12 lg:col-span-4 space-y-8">
+          <aside className="lg:col-span-4 space-y-8 mt-8 lg:mt-0">
             <div className="bg-[#f2f3ff] p-6 rounded-xl">
               <h3 className="text-sm font-bold uppercase tracking-widest text-[#4d556a] mb-6">Queued Actions</h3>
               <div className="space-y-3">
@@ -687,7 +716,7 @@ const NextStepPage: React.FC = () => {
     const backlogProjects = projects.filter(p => p.status === 'BACKLOG');
     
     return (
-      <main className="ml-64 pt-20 p-12 min-h-screen">
+      <main className="pt-20 p-4 lg:p-12 min-h-screen">
         <div className="max-w-5xl mx-auto">
           <div className="flex justify-between items-end mb-8">
             <div>
@@ -709,7 +738,7 @@ const NextStepPage: React.FC = () => {
                   <span className="material-symbols-outlined text-[#0051d5]">delete_sweep</span>
                   Backlog Cleanup
                 </h3>
-                <p className="text-[#434655] mb-8 max-w-lg">Be ruthless. If it hasn't been touched in two weeks, archive it or promote it to ACTIVE.</p>
+                <p className="text-[#434655] mb-8 max-w-[90vw] lg:max-w-lg">Be ruthless. If it hasn't been touched in two weeks, archive it or promote it to ACTIVE.</p>
                 
                 {backlogProjects.length === 0 ? (
                   <p className="text-[#434655]">No backlog projects. Great job!</p>
@@ -792,11 +821,11 @@ const NextStepPage: React.FC = () => {
     const currentGoal = selectedGoalId ? goals.find(g => g.id === selectedGoalId) : null;
 
     return (
-      <main className="ml-64 mt-16 p-10 min-h-screen">
+      <main className="mt-16 p-4 lg:p-10 min-h-screen">
         <div className="max-w-4xl mx-auto">
-          <div className="flex justify-between items-center mb-8">
+          <div className="flex justify-between items-center mb-6 lg:mb-8">
             <div>
-              <h2 className="text-3xl font-extrabold tracking-tight">Projects</h2>
+              <h2 className="text-2xl lg:text-3xl font-extrabold tracking-tight">Projects</h2>
               {currentGoal && (
                 <p className="text-sm text-[#0051d5] font-medium mt-1">
                   Filtered by goal: {currentGoal.title}
@@ -952,9 +981,9 @@ const NextStepPage: React.FC = () => {
   };
 
   const renderArchiveView = () => (
-    <main className="ml-64 mt-16 p-10 min-h-screen">
+    <main className="mt-16 p-4 lg:p-10 min-h-screen">
       <div className="max-w-4xl mx-auto">
-        <h2 className="text-3xl font-extrabold tracking-tight mb-8">Archive</h2>
+        <h2 className="text-2xl lg:text-3xl font-extrabold tracking-tight mb-6 lg:mb-8">Archive</h2>
         <p className="text-[#434655]">Completed or archived projects will appear here.</p>
       </div>
     </main>
@@ -1023,7 +1052,7 @@ const NextStepPage: React.FC = () => {
 
     return (
       <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50" onClick={() => setShowAddActionModal(false)}>
-        <div className="bg-white rounded-2xl p-6 w-full max-w-md shadow-2xl" onClick={e => e.stopPropagation()}>
+        <div className="bg-white rounded-2xl p-6 w-full max-w-[90vw] md:max-w-md shadow-2xl" onClick={e => e.stopPropagation()}>
           <div className="flex justify-between items-center mb-6">
             <h3 className="text-xl font-bold text-[#131b2e]">Add Action</h3>
             <button onClick={() => setShowAddActionModal(false)} className="text-[#737686] hover:text-[#131b2e]">
@@ -1131,7 +1160,7 @@ const NextStepPage: React.FC = () => {
 
     return (
       <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50" onClick={() => setShowAddProjectModal(false)}>
-        <div className="bg-white rounded-2xl p-6 w-full max-w-md shadow-2xl" onClick={e => e.stopPropagation()}>
+        <div className="bg-white rounded-2xl p-6 w-full max-w-[90vw] md:max-w-md shadow-2xl" onClick={e => e.stopPropagation()}>
           <div className="flex justify-between items-center mb-6">
             <h3 className="text-xl font-bold text-[#131b2e]">Add Project</h3>
             <button onClick={() => setShowAddProjectModal(false)} className="text-[#737686] hover:text-[#131b2e]">
@@ -1222,16 +1251,16 @@ const NextStepPage: React.FC = () => {
     const inactiveGoals = goals.filter(g => !g.active);
 
     return (
-      <main className="ml-64 mt-16 p-10 min-h-screen">
+      <main className="mt-16 p-4 lg:p-10 min-h-screen">
         <div className="max-w-4xl mx-auto">
-          <div className="flex justify-between items-center mb-8">
-            <h2 className="text-3xl font-extrabold tracking-tight">Goals</h2>
+          <div className="flex justify-between items-center mb-6 lg:mb-8">
+            <h2 className="text-2xl lg:text-3xl font-extrabold tracking-tight">Goals</h2>
             <button 
               onClick={() => setShowAddGoalModal(true)}
-              className="px-4 py-2 bg-[#0051d5] text-white rounded-xl font-bold flex items-center gap-2 hover:opacity-90"
+              className="px-3 lg:px-4 py-2 bg-[#0051d5] text-white rounded-xl font-bold flex items-center gap-1 lg:gap-2 hover:opacity-90 text-sm lg:text-base"
             >
               <span className="material-symbols-outlined">add</span>
-              Add Goal
+              <span className="hidden sm:inline">Add Goal</span>
             </button>
           </div>
 
@@ -1332,7 +1361,7 @@ const NextStepPage: React.FC = () => {
 
     return (
       <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50" onClick={() => setShowAddGoalModal(false)}>
-        <div className="bg-white rounded-2xl p-6 w-full max-w-md shadow-2xl" onClick={e => e.stopPropagation()}>
+        <div className="bg-white rounded-2xl p-6 w-full max-w-[90vw] md:max-w-md shadow-2xl" onClick={e => e.stopPropagation()}>
           <div className="flex justify-between items-center mb-6">
             <h3 className="text-xl font-bold text-[#131b2e]">Add Goal</h3>
             <button onClick={() => setShowAddGoalModal(false)} className="text-[#737686] hover:text-[#131b2e]">
@@ -1411,7 +1440,7 @@ const NextStepPage: React.FC = () => {
 
     return (
       <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50" onClick={() => setSelectedProjectIdForActions(null)}>
-        <div className="bg-white rounded-2xl p-6 w-full max-w-lg shadow-2xl max-h-[80vh] overflow-y-auto" onClick={e => e.stopPropagation()}>
+        <div className="bg-white rounded-2xl p-6 w-full max-w-[90vw] lg:max-w-lg shadow-2xl max-h-[80vh] overflow-y-auto" onClick={e => e.stopPropagation()}>
           <div className="flex justify-between items-center mb-6">
             <div>
               <h3 className="text-xl font-bold text-[#131b2e]">{project?.title || 'Project'}</h3>
@@ -1602,7 +1631,7 @@ const NextStepPage: React.FC = () => {
       {renderAddGoalModal()}
       {showNewModal && (
         <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50" onClick={() => setShowNewModal(false)}>
-          <div className="bg-white rounded-2xl p-6 w-full max-w-md shadow-2xl" onClick={e => e.stopPropagation()}>
+          <div className="bg-white rounded-2xl p-6 w-full max-w-[90vw] md:max-w-md shadow-2xl" onClick={e => e.stopPropagation()}>
             <div className="flex justify-between items-center mb-6">
               <h3 className="text-xl font-bold text-[#131b2e]">Create New</h3>
               <button onClick={() => setShowNewModal(false)} className="text-[#737686] hover:text-[#131b2e]">
@@ -1675,7 +1704,7 @@ const NextStepPage: React.FC = () => {
       {selectedProjectIdForActions && renderProjectActionsModal()}
       {deleteConfirm && (
         <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50" onClick={() => setDeleteConfirm(null)}>
-          <div className="bg-white rounded-2xl p-6 w-full max-w-md shadow-2xl" onClick={e => e.stopPropagation()}>
+          <div className="bg-white rounded-2xl p-6 w-full max-w-[90vw] md:max-w-md shadow-2xl" onClick={e => e.stopPropagation()}>
             <div className="flex items-center gap-3 mb-4">
               <span className="material-symbols-outlined text-red-500 text-2xl">warning</span>
               <h3 className="text-xl font-bold text-[#131b2e]">Confirm Delete</h3>
@@ -1715,7 +1744,7 @@ const NextStepPage: React.FC = () => {
       )}
       {editingGoal && (
         <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50" onClick={() => setEditingGoal(null)}>
-          <div className="bg-white rounded-2xl p-6 w-full max-w-md shadow-2xl" onClick={e => e.stopPropagation()}>
+          <div className="bg-white rounded-2xl p-6 w-full max-w-[90vw] md:max-w-md shadow-2xl" onClick={e => e.stopPropagation()}>
             <div className="flex justify-between items-center mb-6">
               <h3 className="text-xl font-bold text-[#131b2e]">Edit Goal</h3>
               <button onClick={() => setEditingGoal(null)} className="text-[#737686] hover:text-[#131b2e]">
@@ -1778,7 +1807,7 @@ const NextStepPage: React.FC = () => {
       )}
       {editingProject && (
         <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50" onClick={() => setEditingProject(null)}>
-          <div className="bg-white rounded-2xl p-6 w-full max-w-md shadow-2xl" onClick={e => e.stopPropagation()}>
+          <div className="bg-white rounded-2xl p-6 w-full max-w-[90vw] md:max-w-md shadow-2xl" onClick={e => e.stopPropagation()}>
             <div className="flex justify-between items-center mb-6">
               <h3 className="text-xl font-bold text-[#131b2e]">Edit Project</h3>
               <button onClick={() => setEditingProject(null)} className="text-[#737686] hover:text-[#131b2e]">
@@ -1853,7 +1882,7 @@ const NextStepPage: React.FC = () => {
       )}
       {editingAction && (
         <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50" onClick={() => setEditingAction(null)}>
-          <div className="bg-white rounded-2xl p-6 w-full max-w-md shadow-2xl" onClick={e => e.stopPropagation()}>
+          <div className="bg-white rounded-2xl p-6 w-full max-w-[90vw] md:max-w-md shadow-2xl" onClick={e => e.stopPropagation()}>
             <div className="flex justify-between items-center mb-6">
               <h3 className="text-xl font-bold text-[#131b2e]">Edit Action</h3>
               <button onClick={() => setEditingAction(null)} className="text-[#737686] hover:text-[#131b2e]">

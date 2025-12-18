@@ -78,6 +78,7 @@ export interface ActionPatchRequest {
   status?: ActionStatus;
   context?: ActionContext;
   energy?: ActionEnergy;
+  createdAt?: string;
 }
 
 export interface GoalPatchRequest {
