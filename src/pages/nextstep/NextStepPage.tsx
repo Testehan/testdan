@@ -276,6 +276,10 @@ const NextStepPage: React.FC = () => {
       await fetchDashboard();
       const queued = await fetchActions({ status: 'QUEUED' });
       setQueuedActions(queued);
+      if (selectedProjectIdForActions) {
+        const actions = await fetchActions({ projectId: selectedProjectIdForActions });
+        setProjectActions(actions);
+      }
     } catch (e: any) {
       setError(e.message);
     } finally {
@@ -302,6 +306,10 @@ const NextStepPage: React.FC = () => {
       }
       
       await fetchDashboard();
+      if (selectedProjectIdForActions) {
+        const actions = await fetchActions({ projectId: selectedProjectIdForActions });
+        setProjectActions(actions);
+      }
       const text = await response.text();
       return text ? JSON.parse(text) : null;
     } catch (e: any) {
@@ -864,6 +872,20 @@ const NextStepPage: React.FC = () => {
                   <option key={p.id} value={p.id}>{p.title}</option>
                 ))}
               </select>
+              <button 
+                onClick={() => {
+                  if (selectedProjectIdForActions) {
+                    setSelectedProjectId(selectedProjectIdForActions);
+                  } else if (projects.length > 0) {
+                    setSelectedProjectId(projects[0].id);
+                  }
+                  setShowAddActionModal(true);
+                }}
+                className="px-4 py-2 bg-[#0051d5] text-white rounded-xl font-bold flex items-center gap-1 hover:opacity-90"
+              >
+                <span className="material-symbols-outlined">add</span>
+                Add Action
+              </button>
             </div>
           </div>
           
@@ -1221,16 +1243,6 @@ const NextStepPage: React.FC = () => {
                       >
                         <span className="material-symbols-outlined">delete</span>
                       </button>
-                      <button 
-                        onClick={(e) => {
-                          e.stopPropagation();
-                          setSelectedProjectId(project.id);
-                          setShowAddActionModal(true);
-                        }}
-                        className="text-xs font-bold px-3 py-1 rounded-full bg-[#e2e7ff] text-[#4d556a] hover:bg-[#0051d5] hover:text-white transition-colors"
-                      >
-                        + Action
-                      </button>
                     </div>
                   </div>
                   <div>
@@ -1259,12 +1271,18 @@ const NextStepPage: React.FC = () => {
                     <div className="flex gap-2">
                       <button 
                         onClick={() => {
-                          setSelectedProjectId(project.id);
-                          setShowAddActionModal(true);
+                          setEditingProject(project);
+                          setEditProjectForm({ goalId: project.goalId, title: project.title, outcome: project.outcome, status: project.status });
                         }}
-                        className="text-xs font-bold px-3 py-1 rounded-full bg-white text-[#4d556a] hover:bg-[#0051d5] hover:text-white transition-colors"
+                        className="text-[#737686] hover:text-[#0051d5]"
                       >
-                        + Action
+                        <span className="material-symbols-outlined">edit</span>
+                      </button>
+                      <button 
+                        onClick={() => setDeleteConfirm({ type: 'project', id: project.id, name: project.title })}
+                        className="text-[#737686] hover:text-red-500"
+                      >
+                        <span className="material-symbols-outlined">delete</span>
                       </button>
                       <button 
                         onClick={() => promoteProject(project.id)}
@@ -1922,8 +1940,9 @@ const NextStepPage: React.FC = () => {
                   Cancel
                 </button>
                 <button
-                  onClick={() => {
-                    updateGoal(editingGoal.id, { title: editGoalForm.title, priority: editGoalForm.priority, active: editGoalForm.active });
+                  onClick={async () => {
+                    await updateGoal(editingGoal.id, { title: editGoalForm.title, priority: editGoalForm.priority, active: editGoalForm.active });
+                    await fetchGoals();
                     setEditingGoal(null);
                   }}
                   disabled={loading || !editGoalForm.title.trim()}
@@ -1997,8 +2016,9 @@ const NextStepPage: React.FC = () => {
                   Cancel
                 </button>
                 <button
-                  onClick={() => {
-                    updateProject(editingProject.id, { goalId: editProjectForm.goalId, title: editProjectForm.title, outcome: editProjectForm.outcome, status: editProjectForm.status });
+                  onClick={async () => {
+                    await updateProject(editingProject.id, { goalId: editProjectForm.goalId, title: editProjectForm.title, outcome: editProjectForm.outcome, status: editProjectForm.status });
+                    await fetchProjects();
                     setEditingProject(null);
                   }}
                   disabled={loading || !editProjectForm.title.trim() || !editProjectForm.goalId}
@@ -2088,13 +2108,15 @@ const NextStepPage: React.FC = () => {
                 </button>
                 <button
                   type="button"
-                  onClick={() => {
-                    updateAction(editingAction.id, {
+                  onClick={async () => {
+                    await updateAction(editingAction.id, {
                       description: editActionForm.description,
                       context: editActionForm.context,
                       energy: editActionForm.energy,
                       status: editActionForm.status,
                     });
+                    const queued = await fetchActions({ status: 'QUEUED' });
+                    setQueuedActions(queued);
                     setEditingAction(null);
                   }}
                   disabled={loading || !editActionForm.description.trim()}
