@@ -52,7 +52,7 @@ const NextStepPage: React.FC = () => {
   const [projectForm, setProjectForm] = useState({ goalId: '', title: '', outcome: '', status: 'BACKLOG' as 'ACTIVE' | 'BACKLOG' });
   const [actionForm, setActionForm] = useState({ description: '', context: 'QUICK' as ActionContext, energy: 'LOW' as 'HIGH' | 'LOW', status: 'QUEUED' as ActionStatus });
   const [editingAction, setEditingAction] = useState<NextAction | null>(null);
-  const [editActionForm, setEditActionForm] = useState({ description: '', context: 'QUICK' as ActionContext, energy: 'LOW' as 'HIGH' | 'LOW', status: 'QUEUED' as ActionStatus });
+  const [editActionForm, setEditActionForm] = useState({ description: '', context: 'QUICK' as ActionContext, energy: 'LOW' as 'HIGH' | 'LOW', status: 'QUEUED' as ActionStatus, projectId: '' });
   const [goals, setGoals] = useState<Goal[]>([]);
   const [showAddGoalModal, setShowAddGoalModal] = useState(false);
   const [goalForm, setGoalForm] = useState({ title: '', priority: 'MEDIUM' as Priority, active: true });
@@ -189,6 +189,16 @@ const NextStepPage: React.FC = () => {
     });
   }, [fetchDashboard, fetchProjects, fetchGoals, fetchActions]);
 
+  // Load no-project actions when navigating to actions view
+  useEffect(() => {
+    if (activeView === 'actions') {
+      fetchActions({}).then((allActions) => {
+        const noProjectActions = allActions.filter((a: NextAction) => !a.projectId);
+        setProjectActions(noProjectActions);
+      });
+    }
+  }, [activeView, fetchActions]);
+
   // Toggle action completion
   const completeAction = async (actionId: string) => {
     try {
@@ -219,16 +229,27 @@ const NextStepPage: React.FC = () => {
     
     try {
       setLoading(true);
-      const response = await nextstepFetch(`${NEXTSTEP_ENDPOINT}/capture`, {
+      const response = await nextstepFetch(`${NEXTSTEP_ENDPOINT}/actions`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ text: quickInput }),
+        body: JSON.stringify({ 
+          description: quickInput,
+          context: 'QUICK',
+          energy: 'LOW',
+          status: 'QUEUED'
+        }),
       });
       if (!response.ok) throw new Error('Failed to capture');
       
       setQuickInput('');
       await fetchDashboard();
-      await fetchProjects();
+      const queued = await fetchActions({ status: 'QUEUED' });
+      setQueuedActions(queued);
+      if (selectedProjectIdForActions === 'no-project') {
+        const allActions = await fetchActions({});
+        const noProjectActions = allActions.filter((a: NextAction) => !a.projectId);
+        setProjectActions(noProjectActions);
+      }
     } catch (e: any) {
       setError(e.message);
     } finally {
@@ -427,7 +448,11 @@ const NextStepPage: React.FC = () => {
         const err = await response.json();
         throw new Error(err.message || 'Failed to delete action');
       }
-      if (selectedProjectIdForActions) {
+      if (selectedProjectIdForActions === 'no-project') {
+        const allActions = await fetchActions({});
+        const noProjectActions = allActions.filter((a: NextAction) => !a.projectId);
+        setProjectActions(noProjectActions);
+      } else if (selectedProjectIdForActions) {
         const actions = await fetchActions({ projectId: selectedProjectIdForActions });
         setProjectActions(actions);
       }
@@ -696,6 +721,7 @@ const NextStepPage: React.FC = () => {
                             context: action.context,
                             energy: action.energy,
                             status: action.status,
+                            projectId: action.projectId || '',
                           });
                         }}
                         className="material-symbols-outlined text-[#c3c6d7] opacity-0 group-hover:opacity-100 cursor-pointer hover:text-[#0051d5]"
@@ -943,12 +969,13 @@ const NextStepPage: React.FC = () => {
                             <button 
                               onClick={() => {
                                 setEditingAction(action);
-                                setEditActionForm({
-                                  description: action.description,
-                                  context: action.context,
-                                  energy: action.energy,
-                                  status: action.status,
-                                });
+setEditActionForm({
+                             description: action.description,
+                             context: action.context,
+                             energy: action.energy,
+                             status: action.status,
+                             projectId: action.projectId || '',
+                           });
                               }}
                               className="text-[#737686] hover:text-[#0051d5]"
                             >
@@ -1016,12 +1043,13 @@ const NextStepPage: React.FC = () => {
                             <button 
                               onClick={() => {
                                 setEditingAction(action);
-                                setEditActionForm({
-                                  description: action.description,
-                                  context: action.context,
-                                  energy: action.energy,
-                                  status: action.status,
-                                });
+setEditActionForm({
+                             description: action.description,
+                             context: action.context,
+                             energy: action.energy,
+                             status: action.status,
+                             projectId: action.projectId || '',
+                           });
                               }}
                               className="text-[#737686] hover:text-[#0051d5]"
                             >
@@ -1064,12 +1092,13 @@ const NextStepPage: React.FC = () => {
                             <button 
                               onClick={() => {
                                 setEditingAction(action);
-                                setEditActionForm({
-                                  description: action.description,
-                                  context: action.context,
-                                  energy: action.energy,
-                                  status: action.status,
-                                });
+setEditActionForm({
+                             description: action.description,
+                             context: action.context,
+                             energy: action.energy,
+                             status: action.status,
+                             projectId: action.projectId || '',
+                           });
                               }}
                               className="text-[#737686] hover:text-[#0051d5]"
                             >
@@ -1110,12 +1139,13 @@ const NextStepPage: React.FC = () => {
                             <button 
                               onClick={() => {
                                 setEditingAction(action);
-                                setEditActionForm({
-                                  description: action.description,
-                                  context: action.context,
-                                  energy: action.energy,
-                                  status: action.status,
-                                });
+setEditActionForm({
+                             description: action.description,
+                             context: action.context,
+                             energy: action.energy,
+                             status: action.status,
+                             projectId: action.projectId || '',
+                           });
                               }}
                               className="text-[#737686] hover:text-[#0051d5]"
                             >
@@ -2045,9 +2075,16 @@ const NextStepPage: React.FC = () => {
             <div className="space-y-4">
               <div>
                 <label className="block text-sm font-bold text-[#4d556a] mb-2">Project</label>
-                <div className="px-4 py-3 bg-[#f2f3ff] rounded-xl text-[#131b2e] font-medium">
-                  {projects.find(p => p.id === editingAction?.projectId)?.title || editingAction?.projectId}
-                </div>
+                <select
+                  value={editActionForm.projectId || ''}
+                  onChange={e => setEditActionForm({ ...editActionForm, projectId: e.target.value })}
+                  className="w-full px-4 py-3 rounded-xl border border-[#c3c6d7] focus:border-[#0051d5] focus:ring-0"
+                >
+                  <option value="">No project</option>
+                  {projects.map(p => (
+                    <option key={p.id} value={p.id}>{p.title}</option>
+                  ))}
+                </select>
               </div>
               <div>
                 <label className="block text-sm font-bold text-[#4d556a] mb-2">Description</label>
@@ -2115,9 +2152,15 @@ const NextStepPage: React.FC = () => {
                       context: editActionForm.context,
                       energy: editActionForm.energy,
                       status: editActionForm.status,
+                      projectId: editActionForm.projectId || null,
                     });
                     const queued = await fetchActions({ status: 'QUEUED' });
                     setQueuedActions(queued);
+                    if (selectedProjectIdForActions === 'no-project') {
+                      const allActions = await fetchActions({});
+                      const noProjectActions = allActions.filter((a: NextAction) => !a.projectId);
+                      setProjectActions(noProjectActions);
+                    }
                     setEditingAction(null);
                   }}
                   disabled={loading || !editActionForm.description.trim()}

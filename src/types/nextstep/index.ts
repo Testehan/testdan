@@ -66,7 +66,7 @@ export interface CreateProjectRequest {
 }
 
 export interface ActionCreateRequest {
-  projectId: string;
+  projectId?: string;
   description: string;
   context?: ActionContext;
   energy?: ActionEnergy;
@@ -79,6 +79,7 @@ export interface ActionPatchRequest {
   context?: ActionContext;
   energy?: ActionEnergy;
   createdAt?: string;
+  projectId?: string | null;
 }
 
 export interface GoalPatchRequest {
