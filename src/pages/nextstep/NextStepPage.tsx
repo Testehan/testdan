@@ -1,8 +1,8 @@
 import React, { useState, useEffect, useCallback } from 'react';
 import { NEXTSTEP_ENDPOINT, nextstepFetch } from '../../config';
-import { Goal, Priority, ProjectStatus, Project, NextAction, ActionContext, ActionStatus, DashboardData, WeeklyReviewData, ActionCreateRequest, ActionPatchRequest, GoalPatchRequest, ProjectPatchRequest } from '../../types/nextstep';
+import { Goal, Priority, ProjectStatus, Project, NextAction, ActionContext, ActionStatus, DashboardData, ActionCreateRequest, ActionPatchRequest, GoalPatchRequest, ProjectPatchRequest } from '../../types/nextstep';
 
-type View = 'execution' | 'weeklyReview' | 'actions' | 'projects' | 'goals' | 'archive';
+type View = 'execution' | 'actions' | 'projects' | 'goals' | 'archive';
 
 const contextLabels: Record<ActionContext, string> = {
   DEEP_WORK: 'Deep Work',
@@ -43,7 +43,6 @@ const NextStepPage: React.FC = () => {
   // Data state
   const [dashboardData, setDashboardData] = useState<DashboardData | null>(null);
   const [projects, setProjects] = useState<Project[]>([]);
-  const [_weeklyReview, setWeeklyReview] = useState<WeeklyReviewData | null>(null);
   const [quickInput, setQuickInput] = useState('');
   const [activeProjectCount, setActiveProjectCount] = useState(0);
   const [showAddActionModal, setShowAddActionModal] = useState(false);
@@ -165,18 +164,6 @@ const NextStepPage: React.FC = () => {
     }
   }, []);
 
-  // Fetch weekly review
-  const fetchWeeklyReview = useCallback(async () => {
-    try {
-      const response = await nextstepFetch(`${NEXTSTEP_ENDPOINT}/weekly-review`);
-      if (!response.ok) throw new Error('Failed to fetch weekly review');
-      const data: WeeklyReviewData = await response.json();
-      setWeeklyReview(data);
-    } catch (e) {
-      console.error('Weekly review fetch error:', e);
-    }
-  }, []);
-
   // Initial load
   useEffect(() => {
     fetchDashboard();
@@ -213,9 +200,6 @@ const NextStepPage: React.FC = () => {
       
       // Refresh data after completion
       await fetchDashboard();
-      if (activeView === 'weeklyReview') {
-        await fetchWeeklyReview();
-      }
     } catch (e: any) {
       setError(e.message);
     } finally {
@@ -516,13 +500,6 @@ const NextStepPage: React.FC = () => {
     }
   };
 
-  // Load weekly review when view changes
-  useEffect(() => {
-    if (activeView === 'weeklyReview') {
-      fetchWeeklyReview();
-    }
-  }, [activeView, fetchWeeklyReview]);
-
   const getContextBadge = (context: ActionContext) => (
     <span className={`px-2 py-0.5 rounded-full text-[10px] font-bold tracking-tight uppercase ${contextColors[context]}`}>
       {contextLabels[context]}
@@ -566,13 +543,6 @@ const NextStepPage: React.FC = () => {
           >
             <span className="material-symbols-outlined text-lg">bolt</span>
             <span className="hidden sm:inline">Execution</span>
-          </button>
-          <button 
-            onClick={() => { setActiveView('weeklyReview'); setMobileMenuOpen(false); }}
-            className={`w-full flex items-center gap-3 px-4 py-3 font-medium tracking-tight uppercase text-sm transition-all ${activeView === 'weeklyReview' ? 'text-[#0051d5] border-l-4 border-[#0051d5] bg-white' : 'text-[#434655] hover:bg-[#dae2fd]'}`}
-          >
-            <span className="material-symbols-outlined text-lg">calendar_view_week</span>
-            <span className="hidden sm:inline">Weekly Review</span>
           </button>
           <button 
             onClick={() => { setSelectedProjectIdForActions('no-project'); setProjectActions([]); setActiveView('actions'); setMobileMenuOpen(false); }}
@@ -633,7 +603,7 @@ const NextStepPage: React.FC = () => {
         >
           <span className="material-symbols-outlined text-[#4d556a]">menu</span>
         </button>
-        <h2 className="text-lg lg:text-xl font-bold text-[#131b2e]">{activeView === 'weeklyReview' ? 'Weekly Review' : activeView.replace(/([A-Z])/g, ' $1').trim()}</h2>
+        <h2 className="text-lg lg:text-xl font-bold text-[#131b2e]">{activeView.replace(/([A-Z])/g, ' $1').trim()}</h2>
       </div>
       <div className="flex items-center gap-2 lg:gap-6">
         <div className="relative hidden sm:flex items-center bg-[#f2f3ff] px-4 py-2 rounded-xl">
@@ -753,109 +723,6 @@ const NextStepPage: React.FC = () => {
               </div>
             </div>
           </aside>
-        </div>
-      </main>
-    );
-  };
-
-  const renderWeeklyReviewView = () => {
-    const backlogProjects = projects.filter(p => p.status === 'BACKLOG');
-    
-    return (
-      <main className="pt-20 lg:pt-24 p-4 lg:p-12 min-h-screen overflow-x-hidden">
-        <div className="max-w-5xl mx-auto">
-          <div className="flex justify-between items-end mb-8">
-            <div>
-              <h2 className="text-4xl font-black tracking-tight mb-2">Weekly Review</h2>
-              <p className="text-[#434655] font-medium">Step 2 of 4: Backlog Audit</p>
-            </div>
-            <div className="flex gap-2">
-              <div className="h-1.5 w-12 rounded-full bg-[#0051d5]"></div>
-              <div className="h-1.5 w-12 rounded-full bg-[#0051d5]"></div>
-              <div className="h-1.5 w-12 rounded-full bg-[#e2e7ff]"></div>
-              <div className="h-1.5 w-12 rounded-full bg-[#e2e7ff]"></div>
-            </div>
-          </div>
-
-          <div className="grid grid-cols-12 gap-6">
-            <div className="col-span-8 bg-[#f2f3ff] rounded-xl p-8 relative overflow-hidden">
-              <div className="relative z-10">
-                <h3 className="text-xl font-bold text-[#4d556a] mb-6 flex items-center gap-2">
-                  <span className="material-symbols-outlined text-[#0051d5]">delete_sweep</span>
-                  Backlog Cleanup
-                </h3>
-                <p className="text-[#434655] mb-8 max-w-[90vw] lg:max-w-lg">Be ruthless. If it hasn't been touched in two weeks, archive it or promote it to ACTIVE.</p>
-                
-                {backlogProjects.length === 0 ? (
-                  <p className="text-[#434655]">No backlog projects. Great job!</p>
-                ) : (
-                  <div className="space-y-4">
-                    {backlogProjects.map(project => (
-                      <div 
-                        key={project.id}
-                        className="flex items-center justify-between p-4 bg-white rounded-xl group hover:shadow-sm transition-all"
-                      >
-                        <div className="flex items-center gap-4">
-                          <div className="w-6 h-6 rounded-full border-2 border-[#c3c6d7] flex items-center justify-center hover:border-[#0051d5] cursor-pointer"
-                            onClick={() => promoteProject(project.id)}
-                          ></div>
-                          <div>
-                            <p className="font-semibold text-[#131b2e]">{project.title}</p>
-                            <p className="text-xs text-[#737686] uppercase tracking-widest font-bold mt-0.5">Backlog</p>
-                          </div>
-                        </div>
-                        <div className="flex gap-2 opacity-0 group-hover:opacity-100 transition-opacity">
-                          {activeProjectCount < 3 ? (
-                            <button 
-                              onClick={() => promoteProject(project.id)}
-                              className="p-2 text-[#434655] hover:text-[#0051d5]"
-                            >
-                              <span className="material-symbols-outlined">upload</span>
-                            </button>
-                          ) : (
-                            <span className="text-xs text-[#737686] px-2 py-1" title="Max 3 active projects">Max reached</span>
-                          )}
-                        </div>
-                      </div>
-                    ))}
-                  </div>
-                )}
-              </div>
-              <div className="absolute -right-16 -bottom-16 w-64 h-64 bg-[#0051d5]/5 rounded-full blur-3xl"></div>
-            </div>
-
-            <div className="col-span-4 space-y-6">
-              <div className="bg-[#e2e7ff] rounded-xl p-6">
-                <h4 className="text-sm font-bold text-[#4d556a] uppercase tracking-widest mb-4">Review Insight</h4>
-                <p className="text-sm text-[#434655] leading-relaxed italic">"Your backlog is a list of things you aren't doing. If it's not a 'hell yes', it's a 'no' for this week."</p>
-                <div className="mt-6 pt-6 border-t border-[#c3c6d7]/30">
-                  <div className="flex justify-between items-center mb-2">
-                    <span className="text-xs font-bold text-[#4d556a] uppercase">Active Projects</span>
-                    <span className="text-xs font-bold text-[#0051d5]">{activeProjectCount}/3</span>
-                  </div>
-                  <div className="h-2 w-full bg-white rounded-full overflow-hidden">
-                    <div className="h-full bg-[#0051d5] transition-all" style={{ width: `${(activeProjectCount / 3) * 100}%` }}></div>
-                  </div>
-                </div>
-              </div>
-            </div>
-
-            <div className="col-span-12 flex justify-between items-center mt-4">
-              <button className="px-6 py-3 text-[#0051d5] font-bold flex items-center gap-2 hover:bg-[#e2e7ff] rounded-xl transition-colors">
-                <span className="material-symbols-outlined">arrow_back</span>
-                Previous Step
-              </button>
-              <div className="flex gap-4">
-                <button className="px-8 py-3 bg-[#dae2fd] text-[#131b2e] font-bold rounded-xl hover:opacity-90">
-                  Save for Later
-                </button>
-                <button className="px-10 py-3 bg-gradient-to-r from-[#0051d5] to-[#316bf3] text-white font-bold rounded-xl flex items-center gap-2 shadow-lg shadow-[#0051d5]/30 hover:scale-[1.02] active:scale-[0.98] transition-all">
-                  Next: Prioritize
-                  <span className="material-symbols-outlined">arrow_forward</span>
-                </button>
-              </div>
-            </div>
-          </div>
         </div>
       </main>
     );
@@ -1800,7 +1667,6 @@ setEditActionForm({
       {renderSidebar()}
       {renderHeader()}
       {activeView === 'execution' && renderExecutionView()}
-      {activeView === 'weeklyReview' && renderWeeklyReviewView()}
       {activeView === 'actions' && renderActionsView()}
       {activeView === 'goals' && renderGoalsView()}
       {activeView === 'projects' && renderProjectsView()}
