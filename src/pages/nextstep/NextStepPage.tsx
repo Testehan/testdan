@@ -58,7 +58,7 @@ const NextStepPage: React.FC = () => {
   const [goalForm, setGoalForm] = useState({ title: '', priority: 'MEDIUM' as Priority, active: true });
   const [queuedActions, setQueuedActions] = useState<NextAction[]>([]);
   const [selectedGoalId, setSelectedGoalId] = useState<string | null>(null);
-  const [selectedProjectIdForActions, setSelectedProjectIdForActions] = useState<string | null>(null);
+  const [selectedProjectIdForActions, setSelectedProjectIdForActions] = useState<string>('no-project');
   const [projectActions, setProjectActions] = useState<NextAction[]>([]);
   const [actionFilter, setActionFilter] = useState<'ALL' | ActionContext>('ALL');
   const [deleteConfirm, setDeleteConfirm] = useState<{ type: 'goal' | 'project' | 'action'; id: string; name: string } | null>(null);
@@ -183,6 +183,10 @@ const NextStepPage: React.FC = () => {
     fetchProjects();
     fetchGoals();
     fetchActions({ status: 'QUEUED' }).then(setQueuedActions);
+    fetchActions({}).then((allActions) => {
+      const noProjectActions = allActions.filter((a: NextAction) => !a.projectId);
+      setProjectActions(noProjectActions);
+    });
   }, [fetchDashboard, fetchProjects, fetchGoals, fetchActions]);
 
   // Toggle action completion
@@ -546,7 +550,7 @@ const NextStepPage: React.FC = () => {
             <span className="hidden sm:inline">Weekly Review</span>
           </button>
           <button 
-            onClick={() => { setSelectedProjectIdForActions(null); setProjectActions([]); setActiveView('actions'); setMobileMenuOpen(false); }}
+            onClick={() => { setSelectedProjectIdForActions('no-project'); setProjectActions([]); setActiveView('actions'); setMobileMenuOpen(false); }}
             className={`w-full flex items-center gap-3 px-4 py-3 font-medium tracking-tight uppercase text-sm transition-all ${activeView === 'actions' ? 'text-[#0051d5] border-l-4 border-[#0051d5] bg-white' : 'text-[#434655] hover:bg-[#dae2fd]'}`}
           >
             <span className="material-symbols-outlined text-lg">check_circle</span>
@@ -850,15 +854,19 @@ const NextStepPage: React.FC = () => {
         <div className="max-w-5xl mx-auto">
           <div className="flex justify-between items-center mb-6 lg:mb-8">
             <h2 className="text-2xl lg:text-3xl font-extrabold tracking-tight">
-              {selectedProject ? `Actions: ${selectedProject.title}` : 'All Actions'}
+              {selectedProjectIdForActions === 'no-project' ? 'Actions: No project' : selectedProject ? `Actions: ${selectedProject.title}` : 'All Actions'}
             </h2>
             <div className="flex items-center gap-2">
               <select
                 value={selectedProjectIdForActions || ''}
                 onChange={async (e) => {
                   const projectId = e.target.value;
-                  setSelectedProjectIdForActions(projectId || null);
-                  if (projectId) {
+                  setSelectedProjectIdForActions(projectId);
+                  if (projectId === 'no-project') {
+                    const allActions = await fetchActions({});
+                    const noProjectActions = allActions.filter((a: NextAction) => !a.projectId);
+                    setProjectActions(noProjectActions);
+                  } else if (projectId) {
                     const actions = await fetchActions({ projectId });
                     setProjectActions(actions);
                   } else {
@@ -867,17 +875,17 @@ const NextStepPage: React.FC = () => {
                 }}
                 className="px-4 py-2 rounded-xl border border-[#c3c6d7] bg-white text-sm font-medium"
               >
-                <option value="">All Projects</option>
+                <option value="no-project">No project</option>
                 {projects.map(p => (
                   <option key={p.id} value={p.id}>{p.title}</option>
                 ))}
               </select>
               <button 
                 onClick={() => {
-                  if (selectedProjectIdForActions) {
+                  if (selectedProjectIdForActions === 'no-project') {
+                    setSelectedProjectId('');
+                  } else if (selectedProjectIdForActions) {
                     setSelectedProjectId(selectedProjectIdForActions);
-                  } else if (projects.length > 0) {
-                    setSelectedProjectId(projects[0].id);
                   }
                   setShowAddActionModal(true);
                 }}
@@ -1327,8 +1335,7 @@ const NextStepPage: React.FC = () => {
   const renderFloatingInput = () => (
     <div className="fixed bottom-10 left-1/2 -translate-x-1/2 w-full max-w-2xl px-6 z-50">
       <div className="bg-white/80 backdrop-blur-xl p-2 rounded-2xl shadow-2xl flex items-center gap-3 border border-white/20">
-        <div className="flex-1 flex items-center gap-3 px-4 py-2">
-          <span className="material-symbols-outlined text-[#0051d5]">chat_bubble</span>
+        <div className="flex-1 flex items-center px-4 py-2">
           <input 
             className="bg-transparent border-none focus:ring-0 text-[#131b2e] w-full font-medium" 
             placeholder="Add a task, idea, or reference..." 
@@ -1339,12 +1346,6 @@ const NextStepPage: React.FC = () => {
           />
         </div>
         <div className="flex items-center gap-2 p-1">
-          <button className="p-2 text-[#737686] hover:text-[#4d556a] transition-colors">
-            <span className="material-symbols-outlined">calendar_month</span>
-          </button>
-          <button className="p-2 text-[#737686] hover:text-[#4d556a] transition-colors">
-            <span className="material-symbols-outlined">tag</span>
-          </button>
           <button 
             onClick={handleQuickCapture}
             disabled={loading || !quickInput.trim()}
