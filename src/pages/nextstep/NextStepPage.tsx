@@ -46,7 +46,7 @@ const NextStepPage: React.FC = () => {
     mobileMenuOpen, setMobileMenuOpen,
     
     // Actions
-    fetchActions, fetchDashboard, fetchProjects, fetchGoals,
+    fetchActions, fetchProjects,
     completeAction, handleQuickCapture, promoteProject,
     createAction, updateAction, deleteAction,
     createProject, updateProject, deleteProject,

@@ -23,7 +23,6 @@ export const ActionsView: React.FC<ActionsViewProps> = ({
   refreshKey,
   selectedProjectIdForActions,
   projectActions,
-  dashboardData,
   projects,
   draggedAction,
   onProjectChange,

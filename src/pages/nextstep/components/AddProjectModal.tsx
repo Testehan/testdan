@@ -1,5 +1,5 @@
 import React from 'react';
-import { Goal, ProjectStatus } from '../types';
+import { Goal } from '../types';
 
 interface AddProjectModalProps {
   show: boolean;
