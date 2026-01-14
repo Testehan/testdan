@@ -4,18 +4,15 @@ export const STOCKS_ENDPOINT = `${API_BASE_URL}/stocks`;
 export const USERS_ENDPOINT = `${API_BASE_URL}/users`;
 export const API_ENDPOINT = `${API_BASE_URL}/api`;
 
-// NextStep (Productivity) API
 const nextstepUrl = import.meta.env.VITE_NEXTSTEP_URL || 'http://localhost:8084';
 export const NEXTSTEP_BASE_URL = nextstepUrl;
 export const NEXTSTEP_ENDPOINT = `${NEXTSTEP_BASE_URL}`;
 
 console.log('NEXTSTEP_BASE_URL:', nextstepUrl);
 
-// NextStep API secret key
 const secretKey = import.meta.env.VITE_NEXTSTEP_API_SECRET_KEY || '';
 export const NEXTSTEP_API_SECRET = secretKey;
 
-// Wrapper for NextStep API calls with authorization header
 export async function nextstepFetch(url: string, options: RequestInit = {}): Promise<Response> {
   const headers = new Headers(options.headers);
   headers.set('Content-Type', 'application/json');
@@ -36,7 +33,6 @@ export async function nextstepFetch(url: string, options: RequestInit = {}): Pro
   return response;
 }
 
-// Re-exports for convenience
 export {
   STOCKS_ENDPOINT as stocks,
   USERS_ENDPOINT as users,

@@ -1,5 +1,6 @@
 import React from 'react';
 import { useNextStep } from './hooks/useNextStep';
+import { useAuth } from '../../contexts/AuthContext';
 import { Sidebar } from './components/Sidebar';
 import { Header } from './components/Header';
 import { ExecutionView } from './components/ExecutionView';
@@ -17,6 +18,7 @@ import { DeleteConfirmModal } from './components/DeleteConfirmModal';
 import { NewSelectionModal } from './components/NewSelectionModal';
 
 const NextStepPage: React.FC = () => {
+  const { user, signOutUser } = useAuth();
   const {
     activeView, setActiveView,
     loading, error, setError,
@@ -88,6 +90,8 @@ const NextStepPage: React.FC = () => {
       <Header 
         activeView={activeView} 
         setMobileMenuOpen={setMobileMenuOpen} 
+        user={user}
+        onSignOut={signOutUser}
       />
 
       {activeView === 'execution' && (
