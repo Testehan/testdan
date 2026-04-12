@@ -5,8 +5,11 @@ export const USERS_ENDPOINT = `${API_BASE_URL}/users`;
 export const API_ENDPOINT = `${API_BASE_URL}/api`;
 
 // NextStep (Productivity) API
-export const NEXTSTEP_BASE_URL = import.meta.env.VITE_NEXTSTEP_URL || 'http://localhost:8084';
+const nextstepUrl = import.meta.env.VITE_NEXTSTEP_URL || 'http://localhost:8084';
+export const NEXTSTEP_BASE_URL = nextstepUrl;
 export const NEXTSTEP_ENDPOINT = `${NEXTSTEP_BASE_URL}`;
+
+console.log('NEXTSTEP_BASE_URL:', nextstepUrl);
 
 // NextStep API secret key
 const secretKey = import.meta.env.VITE_NEXTSTEP_API_SECRET_KEY || '';
