@@ -84,7 +84,7 @@ const StockPage: React.FC = () => {
   }>({});
 
   const [isNotesDialogOpen, setIsNotesDialogOpen] = useState(false);
-  const [tooltip, setTooltip] = useState({ visible: false, content: '', x: 0, y: 0 });
+  const [tooltip] = useState({ visible: false, content: '', x: 0, y: 0 });
 
   const statusOptions = [
     'NEW',
@@ -250,19 +250,6 @@ const StockPage: React.FC = () => {
     } catch (e: any) {
       console.error('Failed to update status:', e.message);
     }
-  };
-
-  const handleMouseOver = (e: React.MouseEvent, content: string) => {
-    setTooltip({
-      visible: true,
-      content,
-      x: e.clientX,
-      y: e.clientY,
-    });
-  };
-
-  const handleMouseOut = () => {
-    setTooltip({ visible: false, content: '', x: 0, y: 0 });
   };
 
   const showTabLoading = () => {

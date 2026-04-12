@@ -6,7 +6,6 @@ interface PeriodRangeSliderProps {
   selectedStart: string;
   selectedEnd: string;
   onRangeChange: (start: string, end: string) => void;
-  isQuarterly: boolean; // New prop to indicate if the periods are quarters
 }
 
 const PeriodRangeSlider: React.FC<PeriodRangeSliderProps> = ({
@@ -14,7 +13,6 @@ const PeriodRangeSlider: React.FC<PeriodRangeSliderProps> = ({
   selectedStart,
   selectedEnd,
   onRangeChange,
-  isQuarterly, // Destructure the new prop
 }) => {
   const [minVal, setMinVal] = useState(0);
   const [maxVal, setMaxVal] = useState(periods.length > 0 ? periods.length - 1 : 0);

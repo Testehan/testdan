@@ -129,7 +129,6 @@ const IncomeStatementTab: React.FC<{ symbol: string }> = ({ symbol }) => {
                         selectedStart={selectedStartPeriod}
                         selectedEnd={selectedEndPeriod}
                         onRangeChange={handlePeriodRangeChange}
-                        isQuarterly={reportType === 'quarterly'}
                     />
                 )}
             </div>

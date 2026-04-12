@@ -22,16 +22,13 @@ const GurusTab: React.FC<GurusTabProps> = ({ symbol }) => {
   const eventSources = useRef<Map<string, EventSource>>(new Map());
 
   const getAnswerDetails = (answerText: string | null | undefined) => {
-    if (!answerText) return { isOlder: false, dateStr: null, content: null };
+    if (!answerText) return { dateStr: null, content: null };
     
     const dateMatch = answerText.match(/(\d{4}-\d{2}-\d{2}[T ]\d{2}:\d{2}:\d{2}(?:\.\d+)?)/);
     
     if (dateMatch) {
       const dateStr = dateMatch[0];
       const genDate = new Date(dateStr);
-      const now = new Date();
-      const diffTime = Math.abs(now.getTime() - genDate.getTime());
-      const diffDays = diffTime / (1000 * 60 * 60 * 24);
       
       const dateEndIndex = answerText.indexOf(dateStr) + dateStr.length;
       const prefixMatch = answerText.substring(0, answerText.indexOf(dateStr)).match(/.*[:\s]/);
@@ -47,13 +44,12 @@ const GurusTab: React.FC<GurusTabProps> = ({ symbol }) => {
       const finalDisplayStr = prefix + displayDate;
 
       return { 
-        isOlder: diffDays > 3, 
         dateStr: finalDisplayStr, 
         content: remainingContent.trim() 
       };
     }
     
-    return { isOlder: false, dateStr: null, content: answerText };
+    return { dateStr: null, content: answerText };
   };
 
   useEffect(() => {
@@ -268,7 +264,7 @@ const GurusTab: React.FC<GurusTabProps> = ({ symbol }) => {
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
               {questions.map((question) => {
                 const currentAnswer = answers.get(question.id);
-                const { isOlder, dateStr, content } = getAnswerDetails(currentAnswer?.answer);
+                const { dateStr, content } = getAnswerDetails(currentAnswer?.answer);
                 const isAnswering = answeringQuestionIds.has(question.id);
                 const isAiLoading = aiLoadingIds.has(question.id);
                 const inProgress = currentAnswer?.status === 'IN_PROGRESS';
@@ -340,7 +336,7 @@ const GurusTab: React.FC<GurusTabProps> = ({ symbol }) => {
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
               {questions.map((question) => {
                 const currentAnswer = answers.get(question.id);
-                const { isOlder, dateStr, content } = getAnswerDetails(currentAnswer?.answer);
+                const { dateStr, content } = getAnswerDetails(currentAnswer?.answer);
                 const isAnswering = answeringQuestionIds.has(question.id);
                 const isAiLoading = aiLoadingIds.has(question.id);
                 const inProgress = currentAnswer?.status === 'IN_PROGRESS';
@@ -412,7 +408,7 @@ const GurusTab: React.FC<GurusTabProps> = ({ symbol }) => {
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
               {questions.map((question) => {
                 const currentAnswer = answers.get(question.id);
-                const { isOlder, dateStr, content } = getAnswerDetails(currentAnswer?.answer);
+                const { dateStr, content } = getAnswerDetails(currentAnswer?.answer);
                 const isAnswering = answeringQuestionIds.has(question.id);
                 const isAiLoading = aiLoadingIds.has(question.id);
                 const inProgress = currentAnswer?.status === 'IN_PROGRESS';
@@ -484,7 +480,7 @@ const GurusTab: React.FC<GurusTabProps> = ({ symbol }) => {
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
               {questions.map((question) => {
                 const currentAnswer = answers.get(question.id);
-                const { isOlder, dateStr, content } = getAnswerDetails(currentAnswer?.answer);
+                const { dateStr, content } = getAnswerDetails(currentAnswer?.answer);
                 const isAnswering = answeringQuestionIds.has(question.id);
                 const isAiLoading = aiLoadingIds.has(question.id);
                 const inProgress = currentAnswer?.status === 'IN_PROGRESS';
@@ -553,10 +549,10 @@ const GurusTab: React.FC<GurusTabProps> = ({ symbol }) => {
           {loading && <p>Loading questions...</p>}
           {error && <p className="text-red-500">Error: {error}</p>}
           {!loading && !error && questions.length > 0 && (
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-              {questions.map((question, index) => {
+<div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+{questions.map((question, index) => {
                 const currentAnswer = answers.get(question.id);
-                const { isOlder, dateStr, content } = getAnswerDetails(currentAnswer?.answer);
+                const { dateStr, content } = getAnswerDetails(currentAnswer?.answer);
                 const isAnswering = answeringQuestionIds.has(question.id);
                 const isAiLoading = aiLoadingIds.has(question.id);
                 const inProgress = currentAnswer?.status === 'IN_PROGRESS';

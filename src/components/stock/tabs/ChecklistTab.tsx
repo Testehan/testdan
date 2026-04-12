@@ -49,7 +49,23 @@ interface Tooltip {
   y: number;
 }
 
-const checklists = {
+interface ChecklistItemDef {
+  key: string;
+  label: string;
+}
+
+interface ChecklistSection {
+  title: string;
+  items: ChecklistItemDef[];
+  scoreClass?: string;
+}
+
+interface Checklist {
+  name: string;
+  items: ChecklistSection[];
+}
+
+const checklists: Record<string, Checklist> = {
   Ferol: {
     name: 'Ferol',
     items: [

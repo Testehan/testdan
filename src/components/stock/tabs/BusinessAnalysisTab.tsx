@@ -40,7 +40,6 @@ const BusinessAnalysisTab: React.FC<BusinessAnalysisTabProps> = ({ symbol }) => 
       
       const dateEndIndex = answerText.indexOf(dateStr) + dateStr.length;
       const prefixMatch = answerText.substring(0, answerText.indexOf(dateStr)).match(/.*[:\s]/);
-      const fullDatePartIndex = prefixMatch ? answerText.indexOf(prefixMatch[0]) : answerText.indexOf(dateStr);
       const remainingContent = answerText.substring(dateEndIndex);
 
       const displayDate = genDate.getFullYear() + '-' + 
@@ -122,7 +121,7 @@ const BusinessAnalysisTab: React.FC<BusinessAnalysisTabProps> = ({ symbol }) => 
       setAnswers(prevAnswers => new Map(prevAnswers).set(questionId, { status: 'IN_PROGRESS', answer: receivedAnswer }));
     };
 
-    eventSource.addEventListener('COMPLETED', (event: MessageEvent) => {
+    eventSource.addEventListener('COMPLETED', () => {
       completedReceived = true;
       setAnswers(prevAnswers => new Map(prevAnswers).set(questionId, { status: 'COMPLETED', answer: receivedAnswer }));
       

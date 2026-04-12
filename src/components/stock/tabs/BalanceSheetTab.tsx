@@ -32,7 +32,7 @@ const totalAssetKeys: (keyof BalanceSheetReport)[] = [
 
 const currentLiabilityKeys: (keyof BalanceSheetReport)[] = [
     'totalCurrentLiabilities',
-    'accountsPayables',
+    'accountPayables',
     'deferredRevenue',
     'shortTermDebt',
     'otherCurrentLiabilities',
@@ -135,7 +135,6 @@ const BalanceSheetTab: React.FC<{ symbol: string }> = ({ symbol }) => {
                         selectedStart={selectedStartPeriod}
                         selectedEnd={selectedEndPeriod}
                         onRangeChange={handlePeriodRangeChange}
-                        isQuarterly={reportType === 'quarterly'}
                     />
                 )}
             </div>

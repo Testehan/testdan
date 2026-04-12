@@ -189,7 +189,6 @@ const AdjustmentsBridgeTab: React.FC<AdjustmentsBridgeTabProps> = ({ symbol }) =
             selectedStart={selectedStartPeriod}
             selectedEnd={selectedEndPeriod}
             onRangeChange={handlePeriodRangeChange}
-            isQuarterly={false}
           />
         )}
       </div>

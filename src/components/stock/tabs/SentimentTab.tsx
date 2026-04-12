@@ -112,14 +112,6 @@ const SentimentTab: React.FC<SentimentTabProps> = ({ symbol }) => {
     return 'bg-red-100';
   };
 
-  const isOlderThan3Days = (dateStr: string) => {
-    const genDate = new Date(dateStr);
-    const now = new Date();
-    const diffTime = Math.abs(now.getTime() - genDate.getTime());
-    const diffDays = diffTime / (1000 * 60 * 60 * 24);
-    return diffDays > 3;
-  };
-
   return (
     <div className="bg-white rounded-xl shadow-sm border border-gray-100 p-6 space-y-8 animate-in fade-in duration-500 relative">
       {regenerating && (
