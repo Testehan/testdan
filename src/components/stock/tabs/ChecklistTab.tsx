@@ -107,7 +107,7 @@ const ChecklistTab: React.FC<ChecklistTabProps> = ({ symbol, activeSubTab, onSub
   const [loading, setLoading] = useState(false);
   const [elapsedTime, setElapsedTime] = useState(0);
   const hasReceivedMessages = useRef(false);
-  const hideTimeoutId = useRef<number | null>(null);
+  const hideTimeoutId = useRef<ReturnType<typeof setTimeout> | null>(null);
   const isLoadedFromDbRef = useRef(false);
 
   useEffect(() => {
